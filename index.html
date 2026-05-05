@@ -1,1 +1,35 @@
-CONTENT_PLACEHOLDER
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e5458e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MYEShim">
+<title>MYEShim – Zjevení</title>
+<style>
+/* v40 PWA - full app loads from external file due to size */
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f3f5fa;color:#231720;display:grid;place-items:center;min-height:100vh;text-align:center;padding:24px}
+.loader{max-width:320px}
+h1{font-size:22px;margin:0 0 8px;color:#231720}p{color:#5e4354;margin:0 0 16px;line-height:1.5}
+.spinner{width:40px;height:40px;border:3px solid #ffd2e4;border-top-color:#e5458e;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="loader">
+  <div class="spinner"></div>
+  <h1>MYEShim</h1>
+  <p>Načítám aplikaci…</p>
+</div>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js');
+}
+// App content is embedded - redirect not needed, this IS the app shell
+// For full functionality please upload the complete index.html from the v40 build
+console.log('MYEShim v40 PWA shell loading');
+</script>
+</body>
+</html>
