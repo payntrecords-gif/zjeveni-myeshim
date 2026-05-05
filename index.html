@@ -1197,6 +1197,20 @@ body.dark #bottomnav {
 
 /* 4. App padding aby obsah nebyl za bottom navem */
 #app { padding-bottom: 200px !important; }
+
+/* guide card and qa card dynamic content */
+.guide-card-title { padding: 4px 0 10px; color: var(--pink); font-weight: 900; }
+.guide-card-body  { color: var(--sub); font-size: .92rem; }
+.qa-card-wrap     { padding: 16px; }
+.qa-q-main        { margin-bottom: 8px; }
+.qa-ans-placeholder { color: var(--sub); font-size: .92rem; }
+.ns-sr-empty      { padding: 20px; text-align: center; color: var(--sub); }
+/* topbar brand abbreviation */
+.tb-name-abbrev   { font-size: .78rem; color: var(--sub); }
+/* nav overlay close button */
+.ns-close-btn     { border: none; background: none; padding: 4px 6px; cursor: pointer; color: var(--sub); font-size: 1.1rem; flex-shrink: 0; }
+/* bottom nav center button */
+.bn-nav           { flex: 1.4; }
 </style>
 
 </head>
@@ -1215,7 +1229,7 @@ body.dark #bottomnav {
     </button>
   </div>
   <div class="tb-brand">
-    <span class="tb-name" style="font-size:.78rem;color:var(--sub)">Zj</span>
+    <span class="tb-name tb-name-abbrev">Zj</span>
   </div>
 </header>
 
@@ -1233,7 +1247,7 @@ body.dark #bottomnav {
       <div class="ns-search-wrap">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="search" id="ns-search" placeholder="Hledat verš…" autocomplete="off" oninput="nsSearch(this.value)">
-        <button id="ns-close-btn" onclick="nsClose()" style="border:none;background:none;padding:4px 6px;cursor:pointer;color:var(--sub);font-size:1.1rem;flex-shrink:0;">✕</button>
+        <button id="ns-close-btn" class="ns-close-btn" onclick="nsClose()">✕</button>
       </div>
     </div>
     <div class="ns-scroll" id="ns-scroll">
@@ -1318,7 +1332,7 @@ body.dark #bottomnav {
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     Zpět
   </button>
-  <button onclick="nsOpen()" style="flex:1.4">
+  <button id="bn-nav" onclick="nsOpen()" class="bn-nav">
     <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
     Navigace
   </button>
@@ -1357,7 +1371,8 @@ const CHAPTERS = [
   { n:22, name:'Řeka života a závěr',       verses:21 }
 ];
 
-/* Sample verse texts (Czech, Zjevení 1:1-3) */
+/* Sample verse texts (Czech, Zjevení 1:1-3 and 22:20).
+   TODO: populate all 404 verses from a data file or API. */
 const VERSES = {
   '1-1': 'Zjevení Ježíše Krista, které mu dal Bůh, aby ukázal svým otrokům, co se musí brzy stát; naznačil to prostřednictvím svého anděla a dal to poznat svému otroku Janovi.',
   '1-2': 'Ten vydal svědectví o Božím slově a o svědectví Ježíše Krista — o všem, co viděl.',
@@ -1441,8 +1456,14 @@ function nsRenderChapterGrid() {
   CHAPTERS.forEach(ch => {
     const btn = document.createElement('button');
     btn.dataset.ch = ch.n;
-    btn.innerHTML = '<span class="ch-num">'+ch.n+'</span>'
-                  + '<span class="ch-title">'+ch.name+'</span>';
+    const numSpan = document.createElement('span');
+    numSpan.className = 'ch-num';
+    numSpan.textContent = ch.n;
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'ch-title';
+    titleSpan.textContent = ch.name;
+    btn.appendChild(numSpan);
+    btn.appendChild(titleSpan);
     btn.classList.toggle('active', ch.n === state.selCh);
     btn.addEventListener('click', () => nsSelectChapter(ch.n));
     grid.appendChild(btn);
@@ -1452,8 +1473,8 @@ function nsRenderChapterGrid() {
 /** Build verse grid buttons for a chapter */
 function nsRenderVerseGrid(ch) {
   const grid = document.getElementById('ns-v-grid');
-  grid.innerHTML = '';
   const count = CHAPTERS[ch-1].verses;
+  const buttons = [];
   for (let v = 1; v <= count; v++) {
     const btn = document.createElement('button');
     btn.textContent = v;
@@ -1461,8 +1482,9 @@ function nsRenderVerseGrid(ch) {
     if (state.notes[ch+'-'+v]) btn.classList.add('has-note');
     if (ch === state.ch && v === state.v) btn.classList.add('active');
     btn.addEventListener('click', () => nsSelectVerse(ch, v));
-    grid.appendChild(btn);
+    buttons.push(btn);
   }
+  grid.replaceChildren(...buttons);
 }
 
 /** Search inside nav overlay */
@@ -1488,16 +1510,37 @@ function nsSearch(q) {
       }
     }
   });
+  sr.replaceChildren();
   if (!results.length) {
-    sr.innerHTML = '<p style="padding:20px;text-align:center;color:var(--sub)">Nic nenalezeno.</p>';
+    const msg = document.createElement('p');
+    msg.className = 'ns-sr-empty';
+    msg.textContent = 'Nic nenalezeno.';
+    sr.appendChild(msg);
     return;
   }
-  sr.innerHTML = results.slice(0,30).map(r =>
-    '<div class="ns-sr-item" onclick="nsSelectVerse('+r.ch+','+r.v+')">'
-    +'<div><div class="ns-sr-ref">Zj '+r.ch+':'+r.v+'</div>'
-    +'<div class="ns-sr-name">'+r.name+'</div></div>'
-    +'<div class="ns-sr-text">'+r.text+'</div></div>'
-  ).join('');
+  results.slice(0, 30).forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'ns-sr-item';
+    item.addEventListener('click', () => nsSelectVerse(r.ch, r.v));
+
+    const meta = document.createElement('div');
+    const ref  = document.createElement('div');
+    ref.className = 'ns-sr-ref';
+    ref.textContent = 'Zj ' + r.ch + ':' + r.v;
+    const name = document.createElement('div');
+    name.className = 'ns-sr-name';
+    name.textContent = r.name;
+    meta.appendChild(ref);
+    meta.appendChild(name);
+
+    const txt = document.createElement('div');
+    txt.className = 'ns-sr-text';
+    txt.textContent = r.text;
+
+    item.appendChild(meta);
+    item.appendChild(txt);
+    sr.appendChild(item);
+  });
 }
 
 /* ════════════════════════════════════════════
@@ -1531,16 +1574,29 @@ function render() {
   document.getElementById('note-ta').value = state.notes[ch+'-'+v] || '';
 
   // guide card
-  document.getElementById('guide-card').innerHTML =
-    '<div style="padding:4px 0 10px"><b style="color:var(--pink)">Kapitola '+ch+' – '+chData.name+'</b></div>'
-    +'<p style="color:var(--sub);font-size:.92rem">Studijní průvodce pro tuto kapitolu bude brzy dostupný.</p>';
+  const guideCard = document.getElementById('guide-card');
+  const guideTitle = document.createElement('div');
+  guideTitle.className = 'guide-card-title';
+  const guideTitleB = document.createElement('b');
+  guideTitleB.textContent = 'Kapitola ' + ch + ' – ' + chData.name;
+  guideTitle.appendChild(guideTitleB);
+  const guideBody = document.createElement('p');
+  guideBody.className = 'guide-card-body';
+  guideBody.textContent = 'Studijní průvodce pro tuto kapitolu bude brzy dostupný.';
+  guideCard.replaceChildren(guideTitle, guideBody);
 
   // qa card
-  document.getElementById('qa-card').innerHTML =
-    '<div style="padding:16px">'
-    +'<div class="qa-q" style="margin-bottom:8px">Co nás učí Zjevení '+ch+':'+v+'?</div>'
-    +'<div class="qa-ans" style="color:var(--sub);font-size:.92rem">Otázky pro tuto kapitolu budou brzy dostupné.</div>'
-    +'</div>';
+  const qaCard = document.getElementById('qa-card');
+  const qaWrap = document.createElement('div');
+  qaWrap.className = 'qa-card-wrap';
+  const qaQ = document.createElement('div');
+  qaQ.className = 'qa-q qa-q-main';
+  qaQ.textContent = 'Co nás učí Zjevení ' + ch + ':' + v + '?';
+  const qaA = document.createElement('div');
+  qaA.className = 'qa-ans qa-ans-placeholder';
+  qaA.textContent = 'Otázky pro tuto kapitolu budou brzy dostupné.';
+  qaWrap.replaceChildren(qaQ, qaA);
+  qaCard.replaceChildren(qaWrap);
 
   // prev/next buttons
   const firstVerse = (ch===1 && v===1);
@@ -1579,8 +1635,10 @@ function saveNote() {
   const key = state.ch+'-'+state.v;
   state.notes[key] = document.getElementById('note-ta').value;
   showToast('Poznámka uložena');
-  // refresh verse grid has-note in overlay if open
-  if (document.getElementById('nav-ov').classList.contains('open')) nsRenderVerseGrid(state.selCh);
+  // refresh verse grid has-note only if overlay is open and shows the saved verse's chapter
+  if (document.getElementById('nav-ov').classList.contains('open') && state.selCh === state.ch) {
+    nsRenderVerseGrid(state.selCh);
+  }
 }
 
 function showToast(msg) {
@@ -1598,7 +1656,9 @@ function toggleDark() {
    PWA
    ════════════════════════════════════════════ */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./service-worker.js');
+  navigator.serviceWorker.register('./service-worker.js').catch(err => {
+    console.warn('Service worker registration failed:', err);
+  });
 }
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', e => {
@@ -1607,7 +1667,10 @@ window.addEventListener('beforeinstallprompt', e => {
   document.getElementById('install-card').classList.add('show');
 });
 document.getElementById('install-btn').addEventListener('click', () => {
-  if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+  if (deferredPrompt) {
+    deferredPrompt.prompt().catch(err => console.warn('Install prompt error:', err));
+    deferredPrompt = null;
+  }
   document.getElementById('install-card').classList.remove('show');
 });
 
