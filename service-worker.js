@@ -1,9 +1,16 @@
-const CACHE_NAME = 'myeshim-v40-cache';
+const CACHE_NAME = 'myeshim-v41-cache';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './favicon-16.png',
+  './favicon-32.png',
+  './apple-touch-icon.png',
+  './icon-72.png',
+  './icon-96.png',
+  './icon-128.png',
   './icon-192.png',
+  './icon-256.png',
   './icon-512.png',
   './offline.html'
 ];
