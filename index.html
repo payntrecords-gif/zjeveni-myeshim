@@ -210,19 +210,18 @@ body.dark .ns-search-wrap{background:#221b25;border-color:var(--line)}
 body.dark #nav-pill button{background:#221b25;border-color:var(--line)}
 body.dark .tabs button{color:#caa6bb}
 body.dark .cv-left .cv-name{color:#ff87bd}
-body.dark #ux35-progress-wrap{background:rgba(255,255,255,.08)}
+body.dark #ux35-progress-wrap{background:transparent}
 body.dark .ux35-dock{background:rgba(26,21,29,.88);border-color:var(--line)}
 body.dark .ux35-btn{background:#221b25;color:#f7d3e3;border-color:#3a2d39}
 body.dark .ux35-btn:hover{background:#2a2230}
 body.dark .ux35-status{color:var(--sub)}
-body.dark .tb-brand, body.dark .tb-name{filter:brightness(1.1)}
 
 #topbar{padding-top:max(11px,calc(11px + env(safe-area-inset-top)))}
 #app{max-width:760px;padding-bottom:170px}
 .verse-card,.guide-card,.qa-card,.note-ta,.note-save,.tabs,#nav-pill button{box-shadow:var(--shadow-soft)}
 .vc-text,.qa-ans,.gs-body p,.note-ta{hyphens:auto}
 #ux35-progress-wrap{
-  position:sticky;top:60px;z-index:24;max-width:760px;margin:8px auto 0;padding:0 15px;
+  position:sticky;top:60px;z-index:24;max-width:760px;margin:8px auto 0;padding:0 15px;background:transparent;
 }
 #ux35-progress-track{
   height:8px;border-radius:999px;background:rgba(229,69,142,.13);overflow:hidden;position:relative;
@@ -285,7 +284,7 @@ body{touch-action:manipulation}
 .verse-card{padding:20px 16px 18px;border-radius:22px}
 .vc-ref{font-size:clamp(1.7rem,5.4vw,2.15rem);letter-spacing:-.02em}
 .vc-text{font-size:1.03rem;line-height:1.72}
-.tabs{position:sticky;top:60px;z-index:18;padding:5px;border-radius:18px;margin-bottom:14px}
+.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top));z-index:18;padding:5px;border-radius:18px;margin-bottom:14px}
 .tabs button{min-height:46px;padding:12px 6px;font-size:.95rem}
 .guide-card,.qa-card{border-radius:22px}
 .guide-step,.qa-item{padding:15px 14px}
@@ -318,7 +317,7 @@ body.dark .ux35-dock{background:rgba(26,21,29,.92)}
   .ux35-dock{width:calc(100vw - 14px);bottom:calc(78px + env(safe-area-inset-bottom))}
   .ux35-btn{padding:10px 11px;font-size:.84rem}
   .ns-v-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
-  .tabs{top:114px}
+  .tabs{top:calc(56px + env(safe-area-inset-top))}
 }
 @media (min-width:600px){
   #app{max-width:680px}
@@ -687,8 +686,39 @@ body.dark .install-dismiss{background:#4a3341;color:#f7eaf1}
 body.dark .tb-logo img{filter:brightness(0) invert(1)}
 .tb-logo img{transition:filter .2s}
 </style>
-<style id="ux42-logo-dark">
-body.dark .tb-brand img{filter:brightness(10) drop-shadow(0 1px 3px rgba(0,0,0,.3))}
+<style id="ux42-logo-dark"></style>
+
+<style id="ux44-design">
+/* === LIGHT MODE === */
+html,body{background:linear-gradient(180deg,#f8f9fc 0%,#f0f2f7 100%)}
+#topbar{background:rgba(255,255,255,0.97);border-bottom:1px solid #e2e4ea}
+.verse-card{background:linear-gradient(160deg,#c73d7a 0%,#a82d64 100%);box-shadow:0 12px 28px rgba(167,45,100,0.22);border-radius:16px}
+.guide-card,.qa-card{background:#ffffff;box-shadow:0 2px 12px rgba(0,0,0,0.07);border:1px solid #ebebf0;border-radius:16px}
+.tabs{background:#e9eaf0;border-radius:14px}
+.tabs button{font-weight:700;border-radius:12px}
+.tabs button.active{background:#ffffff;box-shadow:0 1px 6px rgba(0,0,0,0.10)}
+#bottomnav{background:rgba(255,255,255,0.98);border-top:1px solid #e2e4ea}
+#bottomnav button{border:none;box-shadow:none}
+.ns-section-label,.qa-ans-label{font-weight:700}
+.ns-ch-grid button,.ns-v-grid button{border-radius:12px}
+.ns-back-btn{display:flex;align-items:center;gap:5px;border:none;background:none;font:inherit;font-size:.92rem;font-weight:700;color:var(--pink);cursor:pointer;padding:4px 0 14px}
+.ns-back-btn:hover{opacity:.75}
+.ns-back-btn:focus-visible{outline:2px solid var(--pink);outline-offset:3px;border-radius:4px}
+
+/* === DARK MODE === */
+body.dark{background:#0d0f14;--bg:#0d0f14;--card:#161a22;--line:#252b38;--text:#e8ecf4;--sub:#8892a4;--pink:#b06ec8}
+body.dark #topbar{background:rgba(13,15,20,0.93)}
+body.dark .verse-card{background:linear-gradient(160deg,#1e1030 0%,#2a1040 100%);box-shadow:0 12px 28px rgba(0,0,0,0.38)}
+body.dark .guide-card,body.dark .qa-card{background:#161a22;border:1px solid #252b38}
+body.dark .tabs{background:#161a22}
+body.dark .tabs button.active{background:#1e2332}
+body.dark #bottomnav{background:rgba(13,15,20,0.96)}
+body.dark .tb-logo img{filter:brightness(0) invert(1)}
+
+/* === GENERAL === */
+.verse-card::after{content:none}
+body.ready .verse-card::after{animation:none !important}
+.verse-card,.guide-card,.qa-card,.note-ta,.tabs,#nav-pill button,#bottomnav button,.ux35-dock,.ux35-btn,.ns-ch-grid button,.ns-v-grid button,.note-save{will-change:auto}
 </style>
 
 </head>
@@ -795,7 +825,8 @@ let state={
   idx: parseInt(localStorage.getItem('mye_idx')||'0'),
   tab: 'guide',
   notes: JSON.parse(localStorage.getItem('mye_notes')||'{}'),
-  navCh: 1
+  navCh: 1,
+  navView: 'chapters'
 };
 function save(){ localStorage.setItem('mye_idx',state.idx); localStorage.setItem('mye_notes',JSON.stringify(state.notes)); }
 function esc(s){ return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
@@ -886,6 +917,7 @@ function go(dir){
 /* ── NAV OVERLAY ── */
 function openNav(){
   state.navCh=VERSES[state.idx].c;
+  state.navView='chapters';
   document.getElementById('ns-input').value='';
   renderNavGrid();
   document.getElementById('nav-ov').classList.add('open');
@@ -894,6 +926,19 @@ function closeNav(){ document.getElementById('nav-ov').classList.remove('open');
 
 function renderNavGrid(){
   const cur=VERSES[state.idx];
+  if(state.navView==='verses'){
+    const vs=chVS(state.navCh);
+    let h='<button class="ns-back-btn" onclick="navBackToChapters()" aria-label="Zpět na kapitoly">← Zpět</button>';
+    h+='<div class="ns-section-label">Verš — '+esc(chName(state.navCh))+'</div><div class="ns-v-grid">';
+    vs.forEach(vv=>{
+      const a=(vv.c===cur.c&&vv.v===cur.v)?' active':'';
+      const hn=hasNote(vv.c,vv.v)?' has-note':'';
+      h+=`<button class="${a}${hn}" onclick="navGo(${vv.c},${vv.v})">${vv.v}</button>`;
+    });
+    h+='</div>';
+    document.getElementById('ns-scroll').innerHTML=h;
+    return;
+  }
   // chapters
   let h='<div class="ns-section-label">Kapitola</div><div class="ns-ch-grid">';
   for(let i=1;i<=22;i++){
@@ -902,15 +947,6 @@ function renderNavGrid(){
     h+=`<button class="${a}" onclick="navSelCh(${i})"><span class="ch-num">Zj ${i}</span><span class="ch-title">${esc(short)}</span></button>`;
   }
   h+='</div>';
-  // verses of selected chapter
-  const vs=chVS(state.navCh);
-  h+='<div class="ns-v-section"><div class="ns-section-label">Verš — '+esc(chName(state.navCh))+'</div><div class="ns-v-grid">';
-  vs.forEach(vv=>{
-    const a=(vv.c===cur.c&&vv.v===cur.v)?' active':'';
-    const hn=hasNote(vv.c,vv.v)?' has-note':'';
-    h+=`<button class="${a}${hn}" onclick="navGo(${vv.c},${vv.v})">${vv.v}</button>`;
-  });
-  h+='</div></div>';
   document.getElementById('ns-scroll').innerHTML=h;
   // scroll active chapter into view
   setTimeout(()=>{
@@ -919,7 +955,16 @@ function renderNavGrid(){
   },30);
 }
 
-function navSelCh(ch){ const vs=chVS(ch); if(vs.length>0) navGo(vs[0].c,vs[0].v); }
+function navBackToChapters(){
+  state.navView='chapters';
+  renderNavGrid();
+}
+
+function navSelCh(ch){
+  state.navCh=ch;
+  state.navView='verses';
+  renderNavGrid();
+}
 
 function navGo(c,v){
   const idx=VERSES.findIndex(x=>x.c===c&&x.v===v);
