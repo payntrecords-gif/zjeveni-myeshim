@@ -215,7 +215,6 @@ body.dark .ux35-dock{background:rgba(26,21,29,.88);border-color:var(--line)}
 body.dark .ux35-btn{background:#221b25;color:#f7d3e3;border-color:#3a2d39}
 body.dark .ux35-btn:hover{background:#2a2230}
 body.dark .ux35-status{color:var(--sub)}
-body.dark .tb-brand, body.dark .tb-name{opacity:1}
 
 #topbar{padding-top:max(11px,calc(11px + env(safe-area-inset-top)))}
 #app{max-width:760px;padding-bottom:170px}
@@ -687,8 +686,7 @@ body.dark .install-dismiss{background:#4a3341;color:#f7eaf1}
 body.dark .tb-logo img{filter:brightness(0) invert(1)}
 .tb-logo img{transition:filter .2s}
 </style>
-<style id="ux42-logo-dark">
-</style>
+<style id="ux42-logo-dark"></style>
 
 <style id="ux44-design">
 /* === LIGHT MODE === */
@@ -703,6 +701,7 @@ html,body{background:linear-gradient(180deg,#f8f9fc 0%,#f0f2f7 100%)}
 #bottomnav button{border:none;box-shadow:none}
 .ns-section-label,.qa-ans-label{font-weight:700}
 .ns-ch-grid button,.ns-v-grid button{border-radius:12px}
+.ns-back-btn{display:flex;align-items:center;gap:5px;border:none;background:none;font:inherit;font-size:.92rem;font-weight:700;color:var(--pink);cursor:pointer;padding:4px 0 14px}
 
 /* === DARK MODE === */
 body.dark{background:#0d0f14;--bg:#0d0f14;--card:#161a22;--line:#252b38;--text:#e8ecf4;--sub:#8892a4;--pink:#b06ec8}
@@ -927,7 +926,7 @@ function renderNavGrid(){
   const cur=VERSES[state.idx];
   if(state.navView==='verses'){
     const vs=chVS(state.navCh);
-    let h='<button onclick="navBackToChapters()" style="display:flex;align-items:center;gap:5px;border:none;background:none;font:inherit;font-size:.92rem;font-weight:700;color:var(--pink);cursor:pointer;padding:4px 0 14px">← Zpět</button>';
+    let h='<button class="ns-back-btn" onclick="navBackToChapters()" aria-label="Zpět na kapitoly">← Zpět</button>';
     h+='<div class="ns-section-label">Verš — '+esc(chName(state.navCh))+'</div><div class="ns-v-grid">';
     vs.forEach(vv=>{
       const a=(vv.c===cur.c&&vv.v===cur.v)?' active':'';
