@@ -691,6 +691,285 @@ body.dark .tb-logo img{filter:brightness(10) saturate(0)}
 body.dark .tb-brand img{filter:brightness(10) drop-shadow(0 1px 3px rgba(0,0,0,.3))}
 </style>
 
+<style id="ux-spirit-redesign">
+/* ═══════════════════════════════════════════
+   SPIRIT REDESIGN — sky blue, bold, italic
+   ═══════════════════════════════════════════ */
+
+/* ── Page background ── */
+html, body {
+  background: linear-gradient(180deg,#eaf5fc 0%,#cce5f5 50%,#b9d9ef 100%) fixed !important;
+  min-height: 100dvh;
+}
+body.dark {
+  background: radial-gradient(ellipse at top,#1e1030 0%,#0e1625 50%,#0a1018 100%) fixed !important;
+}
+
+/* ── Topbar: frosted glass on sky ── */
+#topbar {
+  background: rgba(255,255,255,.72) !important;
+  backdrop-filter: blur(22px) saturate(1.4) !important;
+  border-bottom: 1px solid rgba(180,215,240,.65) !important;
+}
+body.dark #topbar {
+  background: rgba(12,16,30,.88) !important;
+  border-bottom: 1px solid rgba(35,48,72,.95) !important;
+}
+
+/* ── cv-row as a glass card ── */
+.cv-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: rgba(255,255,255,.68);
+  backdrop-filter: blur(14px);
+  border-radius: 26px;
+  border: 1px solid rgba(255,255,255,.92);
+  box-shadow: 0 10px 36px rgba(80,150,210,.11);
+  padding: 22px 20px 16px;
+  gap: 0;
+  margin-bottom: 14px;
+}
+body.dark .cv-row {
+  background: rgba(18,24,42,.72);
+  border-color: rgba(50,68,105,.38);
+  box-shadow: 0 10px 36px rgba(0,0,0,.28);
+}
+
+/* ── cv-left: full width column ── */
+.cv-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* ── BIG italic "Zjevení X" heading ── */
+.cv-left .cv-chapter {
+  font-size: clamp(2.2rem, 7.5vw, 3.2rem) !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
+  color: var(--pink) !important;
+  letter-spacing: -.03em !important;
+  text-transform: none !important;
+  line-height: 1.05 !important;
+  text-align: center;
+  padding: 0 0 10px;
+}
+body.dark .cv-left .cv-chapter {
+  color: #ff7ec4 !important;
+}
+
+/* ── "Název" pill ── */
+.cv-pill {
+  display: inline-block;
+  background: var(--pink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 30px;
+  font-size: .88rem;
+  font-weight: 900;
+  letter-spacing: .01em;
+  box-shadow: 0 4px 16px rgba(229,69,142,.28);
+  margin: 0 auto 10px;
+}
+
+/* ── Chapter name (italic pink subtitle) ── */
+.cv-left .cv-name {
+  font-size: clamp(.97rem, 3.2vw, 1.18rem) !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
+  color: var(--pink) !important;
+  text-align: center;
+  line-height: 1.3 !important;
+  padding-bottom: 2px;
+}
+body.dark .cv-left .cv-name {
+  color: #ff8bc5 !important;
+}
+
+/* ── cv-right: small centered counter ── */
+.cv-right {
+  text-align: center !important;
+  font-size: .74rem;
+  color: var(--sub);
+  padding-top: 8px;
+  font-weight: 700;
+  width: 100%;
+}
+
+/* ── Tabs: frosted glass ── */
+.tabs {
+  background: rgba(255,255,255,.52) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.82) !important;
+  box-shadow: 0 4px 18px rgba(80,150,210,.09) !important;
+}
+body.dark .tabs {
+  background: rgba(18,14,28,.68) !important;
+  border-color: rgba(55,42,80,.85) !important;
+}
+
+/* ── QA + Guide cards: frosted glass ── */
+.qa-card {
+  background: rgba(255,255,255,.72) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.9) !important;
+  box-shadow: 0 8px 30px rgba(80,150,210,.10) !important;
+}
+body.dark .qa-card {
+  background: rgba(20,16,34,.75) !important;
+  border-color: rgba(55,42,80,.45) !important;
+}
+
+/* ── "Q&A" pill header ── */
+.qa-ref-header {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 14px;
+  background: var(--pink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 30px;
+  font-size: .88rem;
+  font-weight: 900;
+  box-shadow: 0 4px 16px rgba(229,69,142,.28);
+  text-align: center;
+}
+
+/* ══════════════════════════
+   GUIDE FLOW DIAGRAM
+   ══════════════════════════ */
+.guide-flow {
+  padding: 0;
+  position: relative;
+}
+
+/* "Návod na MYEShim" pill header */
+.guide-flow-title {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 20px;
+  background: var(--pink);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 30px;
+  font-size: .88rem;
+  font-weight: 900;
+  box-shadow: 0 4px 16px rgba(229,69,142,.28);
+  text-align: center;
+}
+
+/* Individual flow step */
+.gf-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 6px 4px 4px;
+}
+.gf-step:nth-child(even) {
+  flex-direction: row-reverse;
+}
+.gf-step:nth-child(even) .gf-body {
+  text-align: right;
+}
+
+/* BIG italic step number */
+.gf-num {
+  font-size: clamp(2.6rem, 9vw, 3.8rem);
+  font-weight: 900;
+  font-style: italic;
+  color: var(--pink);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 58px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(229,69,142,.18);
+}
+body.dark .gf-num {
+  color: #ff7ec4;
+}
+
+.gf-body {
+  flex: 1;
+  padding-top: 8px;
+}
+.gf-body h4 {
+  font-size: .95rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.gf-body p {
+  font-size: .88rem;
+  color: var(--sub);
+  line-height: 1.45;
+}
+
+/* Curved arrow between steps */
+.gf-arrow {
+  display: flex;
+  padding: 0 8px 4px;
+  color: var(--pink);
+  opacity: .45;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.gf-arrow.gf-right { justify-content: flex-end; }
+.gf-arrow.gf-left  { justify-content: flex-start; }
+
+/* ── Bottom padding hint ── */
+#app { padding-bottom: 190px; }
+
+/* ── Progress bar area ── */
+#ux35-progress-wrap {
+  background: rgba(255,255,255,.36);
+  border-radius: 12px;
+  padding: 5px 12px 6px;
+  backdrop-filter: blur(8px);
+}
+body.dark #ux35-progress-wrap {
+  background: rgba(8,12,22,.38);
+}
+
+/* ── Bottom nav: glass ── */
+#bottomnav {
+  background: rgba(255,255,255,.88) !important;
+  backdrop-filter: blur(20px) !important;
+  border-top: 1px solid rgba(200,225,245,.7) !important;
+}
+body.dark #bottomnav {
+  background: rgba(10,13,24,.92) !important;
+  border-top: 1px solid rgba(35,48,72,.9) !important;
+}
+
+/* ── Dock: glass ── */
+.ux35-dock {
+  background: rgba(255,255,255,.78) !important;
+  backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(200,225,245,.75) !important;
+  box-shadow: 0 12px 30px rgba(60,130,190,.11) !important;
+}
+body.dark .ux35-dock {
+  background: rgba(16,20,36,.88) !important;
+  border-color: rgba(40,55,90,.8) !important;
+}
+
+/* ── Nav overlay: glass ── */
+body.dark #nav-sheet {
+  background: linear-gradient(180deg,#121a2e 0%,#0e1420 100%) !important;
+}
+#nav-sheet {
+  background: linear-gradient(180deg,#eaf4fb 0%,#ddf0fc 100%) !important;
+}
+
+@media (max-width:420px){
+  .cv-left .cv-chapter { font-size: clamp(1.9rem,7.5vw,2.6rem) !important; }
+  .gf-num { font-size: clamp(2.2rem,9vw,3rem); width: 50px; }
+}
+</style>
+
 </head>
 <body>
 <div id="topbar">
@@ -717,6 +996,7 @@ body.dark .tb-brand img{filter:brightness(10) drop-shadow(0 1px 3px rgba(0,0,0,.
   <div class="cv-row">
     <div class="cv-left">
       <div class="cv-chapter" id="cv-ch"></div>
+      <div class="cv-pill">Název</div>
       <div class="cv-name" id="cv-name"></div>
     </div>
     <div class="cv-right" id="cv-right"></div>
@@ -817,7 +1097,7 @@ function render(){
   const vv=VERSES[state.idx];
   const cvs=chVS(vv.c);
   const pos=cvs.findIndex(x=>x.v===vv.v)+1;
-  document.getElementById('cv-ch').textContent='Kapitola '+vv.c;
+  document.getElementById('cv-ch').textContent='Zjevení '+vv.c;
   document.getElementById('cv-name').textContent=chName(vv.c);
   document.getElementById('cv-right').textContent='Verš '+pos+' z '+cvs.length;
   document.getElementById('vc-ref').textContent='Zj '+vv.c+':'+vv.v;
@@ -843,13 +1123,14 @@ function setTab(t){
   const vv=VERSES[state.idx];
   if(t==='guide'){
     document.getElementById('panel-guide').innerHTML=
-      '<div class="guide-card"><div class="guide-title">Návod na MYEShim</div>'+
-      GUIDE.map(([n,h,p])=>`<div class="guide-step"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4><p>${p}</p></div></div>`).join('')+
+      '<div class="guide-flow"><div class="guide-flow-title">Návod na MYEShim</div>'+
+      GUIDE.map(([n,h,p],i)=>`<div class="gf-step"><div class="gf-num">${n}</div><div class="gf-body"><h4>${h}</h4><p>${p}</p></div></div>${i<GUIDE.length-1?`<div class="gf-arrow ${i%2===0?'gf-right':'gf-left'}">${i%2===0?'↘':'↙'}</div>`:''}`).join('')+
       '</div>';
   } else if(t==='qa'){
     const items=getQA(vv.c,vv.v);
     if(!items.length){ document.getElementById('panel-qa').innerHTML='<p style="color:var(--sub);padding:10px 0 20px">Pro tento verš zatím není Q&A.</p>'; return; }
     document.getElementById('panel-qa').innerHTML=
+      '<div class="qa-ref-header">Q&amp;A</div>'+
       '<div class="qa-card">'+
       items.map((it,i)=>`<div class="qa-item"><div class="qa-num">${i+1}.</div><div class="qa-q">${esc(it.q)}</div><div class="qa-ans-label">Odpověď</div><div class="qa-ans">${esc(it.a)}</div></div>`).join('')+
       '</div>';
