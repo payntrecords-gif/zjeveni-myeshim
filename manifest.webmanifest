@@ -1,1 +1,15 @@
-PLACEHOLDER_MANIFEST
+{
+  "name": "MYEShim – Zjevení",
+  "short_name": "MYEShim",
+  "description": "Mobilní studijní aplikace pro knihu Zjevení s poznámkami, denním studiem a rychlým návratem.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5fa",
+  "theme_color": "#e5458e",
+  "lang": "cs",
+  "icons": [
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
