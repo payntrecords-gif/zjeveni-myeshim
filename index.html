@@ -686,7 +686,8 @@ body.dark .install-dismiss{background:#4a3341;color:#f7eaf1}
 .tb-logo img{transition:filter .2s;border-radius:6px}
 </style>
 <style id="ux42-logo-dark">
-body.dark .tb-logo img{mix-blend-mode:screen}
+body.dark .tb-logo{isolation:isolate;background:transparent}
+body.dark .tb-logo img{mix-blend-mode:screen;border-radius:8px}
 </style>
 
 <style id="ux44-design">
@@ -719,6 +720,75 @@ body.dark #bottomnav{background:rgba(13,15,20,0.96)}
 .verse-card::after{content:none}
 body.ready .verse-card::after{animation:none !important}
 .verse-card,.guide-card,.qa-card,.note-ta,.tabs,#nav-pill button,#bottomnav button,.ux35-dock,.ux35-btn,.ns-ch-grid button,.ns-v-grid button,.note-save{will-change:auto}
+</style>
+
+<style id="ux45-ios-glass">
+/* === iOS Glassmorphism === */
+#topbar{
+  background:rgba(255,255,255,0.72) !important;
+  backdrop-filter:blur(24px) saturate(1.8) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.8) !important;
+  border-bottom:1px solid rgba(255,255,255,0.3) !important;
+}
+body.dark #topbar{
+  background:rgba(18,14,20,0.72) !important;
+  backdrop-filter:blur(24px) saturate(1.4) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.4) !important;
+  border-bottom:1px solid rgba(255,255,255,0.08) !important;
+}
+#bottomnav{
+  background:rgba(255,255,255,0.75) !important;
+  backdrop-filter:blur(24px) saturate(1.8) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.8) !important;
+  border-top:1px solid rgba(255,255,255,0.4) !important;
+  box-shadow:0 -1px 0 rgba(0,0,0,0.08) !important;
+}
+body.dark #bottomnav{
+  background:rgba(18,14,20,0.78) !important;
+  backdrop-filter:blur(24px) saturate(1.4) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(1.4) !important;
+  border-top:1px solid rgba(255,255,255,0.06) !important;
+}
+#bottomnav button{
+  border:none !important;
+  background:none !important;
+  box-shadow:none !important;
+}
+#nav-sheet{
+  background:rgba(248,245,250,0.88) !important;
+  backdrop-filter:blur(28px) saturate(1.6) !important;
+  -webkit-backdrop-filter:blur(28px) saturate(1.6) !important;
+}
+body.dark #nav-sheet{
+  background:rgba(16,12,20,0.88) !important;
+  backdrop-filter:blur(28px) saturate(1.4) !important;
+  -webkit-backdrop-filter:blur(28px) saturate(1.4) !important;
+}
+.ux35-dock{
+  background:rgba(255,255,255,0.72) !important;
+  backdrop-filter:blur(20px) saturate(1.6) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.6) !important;
+  border:1px solid rgba(255,255,255,0.45) !important;
+  box-shadow:0 8px 24px rgba(0,0,0,0.10) !important;
+}
+body.dark .ux35-dock{
+  background:rgba(22,16,26,0.78) !important;
+  backdrop-filter:blur(20px) saturate(1.4) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.4) !important;
+  border:1px solid rgba(255,255,255,0.07) !important;
+}
+#nav-pill button{
+  background:rgba(255,255,255,0.68) !important;
+  backdrop-filter:blur(16px) saturate(1.5) !important;
+  -webkit-backdrop-filter:blur(16px) saturate(1.5) !important;
+  border:1px solid rgba(255,255,255,0.5) !important;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08) !important;
+}
+body.dark #nav-pill button{
+  background:rgba(40,28,44,0.78) !important;
+  border:1px solid rgba(255,255,255,0.10) !important;
+}
+#ux35-progress-wrap{display:none !important}
 </style>
 
 </head>
