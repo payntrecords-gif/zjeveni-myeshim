@@ -691,6 +691,185 @@ body.dark .tb-logo img{filter:brightness(0) invert(1)}
 body.dark .tb-brand img{filter:brightness(10) drop-shadow(0 1px 3px rgba(0,0,0,.3))}
 </style>
 
+
+<style id="ux44-design-overhaul">
+/* === BUG 3 — Progress bar: transparent background to avoid pink bar on scroll === */
+#ux35-progress-wrap { background: transparent !important; }
+
+/* === BUG 4 — Sticky tabs: correct top offset === */
+.tabs { top: calc(56px + env(safe-area-inset-top)) !important; }
+
+/* === DESIGN — Remove will-change (prevents rendering artifacts) === */
+.verse-card,.guide-card,.qa-card,.note-ta,.tabs,#nav-pill button,#bottomnav button,.ux35-dock,.ux35-btn,.ns-ch-grid button,.ns-v-grid button,.note-save { will-change: auto; }
+
+/* === DESIGN — Remove sheen animation from verse card === */
+.verse-card::after { content: none !important; }
+body.ready .verse-card::after { animation: none !important; }
+
+/* === DESIGN — Light mode variables & background === */
+:root {
+  --pink: #c73d7a;
+  --pink2: #d94c8a;
+  --bg: #f8f9fc;
+  --line: #e8e8ed;
+}
+body:not(.dark) { background: linear-gradient(180deg, #f8f9fc 0%, #f0f2f7 100%); }
+
+/* === DESIGN — Light mode: topbar clean white === */
+#topbar {
+  background: #fff !important;
+  border-bottom: 1px solid #e8e8ed !important;
+  backdrop-filter: none !important;
+}
+
+/* === DESIGN — Light mode: verse card deeper pink gradient === */
+.verse-card {
+  background: linear-gradient(160deg, #c73d7a 0%, #a82d64 100%) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07) !important;
+  border: none !important;
+  border-radius: 16px !important;
+}
+
+/* === DESIGN — Light mode: cards clean white with soft shadow === */
+.guide-card,.qa-card {
+  background: #fff !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07) !important;
+  border-radius: 16px !important;
+}
+.note-ta {
+  background: #fff !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07) !important;
+  border-radius: 16px !important;
+}
+
+/* === DESIGN — Light mode: tabs === */
+.tabs {
+  background: #eeeff4 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.tabs button.active {
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08) !important;
+}
+
+/* === DESIGN — Light mode: bottomnav clean, no boxes around buttons === */
+#bottomnav {
+  background: #fff !important;
+  border-top: 1px solid #e8e8ed !important;
+  box-shadow: none !important;
+}
+#bottomnav button {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* === DESIGN — Font weight: 600 instead of 900 for headings === */
+.vc-ref { font-weight: 600 !important; }
+.guide-title { font-weight: 600 !important; }
+.qa-q { font-weight: 600 !important; }
+.gs-body h4 { font-weight: 600 !important; }
+
+/* === DESIGN — Buttons border-radius 12px === */
+.tabs button,.ux35-btn,.ns-ch-grid button,.ns-v-grid button { border-radius: 12px !important; }
+
+/* === DESIGN — Dark mode variables & background === */
+body.dark {
+  --pink: #b06ec8;
+  --pink2: #c280d8;
+  --text: #e8ecf4;
+  --sub: #8892a4;
+  --line: #252b38;
+  --bg: #0d0f14;
+  --card: #161a22;
+  background: #0d0f14 !important;
+}
+
+/* === DESIGN — Dark mode: topbar with blur === */
+body.dark #topbar {
+  background: rgba(13,15,20,.92) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid #252b38 !important;
+}
+
+/* === DESIGN — Dark mode: verse card purple tint === */
+body.dark .verse-card {
+  background: linear-gradient(160deg, #1e1030 0%, #2a1040 100%) !important;
+  box-shadow: 0 2px 20px rgba(0,0,0,.4) !important;
+}
+
+/* === DESIGN — Dark mode: cards === */
+body.dark .guide-card,body.dark .qa-card {
+  background: #161a22 !important;
+  border: 1px solid #252b38 !important;
+  box-shadow: none !important;
+}
+body.dark .note-ta {
+  background: #161a22 !important;
+  border: 1px solid #252b38 !important;
+  box-shadow: none !important;
+}
+
+/* === DESIGN — Dark mode: tabs === */
+body.dark .tabs {
+  background: #161a22 !important;
+  border: none !important;
+}
+body.dark .tabs button.active {
+  background: #1e2332 !important;
+}
+
+/* === DESIGN — Dark mode: bottomnav clean === */
+body.dark #bottomnav {
+  background: rgba(13,15,20,.95) !important;
+  border-top: 1px solid #252b38 !important;
+  box-shadow: none !important;
+}
+body.dark #bottomnav button {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* === DESIGN — Dark mode: nav sheet background === */
+body.dark #nav-sheet {
+  background: #0d0f14 !important;
+  border-top: 1px solid #252b38 !important;
+}
+
+/* === BUG 1 — Nav overlay: back button row styles === */
+.ns-back-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.ns-back-btn {
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--sub);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  transition: background .12s;
+}
+.ns-back-btn:hover { opacity: .85; }
+.ns-back-title {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+</style>
+
 </head>
 <body>
 <div id="topbar">
@@ -795,7 +974,8 @@ let state={
   idx: parseInt(localStorage.getItem('mye_idx')||'0'),
   tab: 'guide',
   notes: JSON.parse(localStorage.getItem('mye_notes')||'{}'),
-  navCh: 1
+  navCh: 1,
+  navMode: 'chapters'
 };
 function save(){ localStorage.setItem('mye_idx',state.idx); localStorage.setItem('mye_notes',JSON.stringify(state.notes)); }
 function esc(s){ return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
@@ -886,6 +1066,7 @@ function go(dir){
 /* ── NAV OVERLAY ── */
 function openNav(){
   state.navCh=VERSES[state.idx].c;
+  state.navMode='chapters';
   document.getElementById('ns-input').value='';
   renderNavGrid();
   document.getElementById('nav-ov').classList.add('open');
@@ -893,24 +1074,16 @@ function openNav(){
 function closeNav(){ document.getElementById('nav-ov').classList.remove('open'); }
 
 function renderNavGrid(){
+  if(state.navMode==='verses'){ renderVerseGrid(); return; }
   const cur=VERSES[state.idx];
-  // chapters
+  // chapters only
   let h='<div class="ns-section-label">Kapitola</div><div class="ns-ch-grid">';
   for(let i=1;i<=22;i++){
-    const a=i===state.navCh?' active':'';
+    const a=i===cur.c?' active':'';
     const short=chName(i).length>18?chName(i).slice(0,17)+'…':chName(i);
     h+=`<button class="${a}" onclick="navSelCh(${i})"><span class="ch-num">Zj ${i}</span><span class="ch-title">${esc(short)}</span></button>`;
   }
   h+='</div>';
-  // verses of selected chapter
-  const vs=chVS(state.navCh);
-  h+='<div class="ns-v-section"><div class="ns-section-label">Verš — '+esc(chName(state.navCh))+'</div><div class="ns-v-grid">';
-  vs.forEach(vv=>{
-    const a=(vv.c===cur.c&&vv.v===cur.v)?' active':'';
-    const hn=hasNote(vv.c,vv.v)?' has-note':'';
-    h+=`<button class="${a}${hn}" onclick="navGo(${vv.c},${vv.v})">${vv.v}</button>`;
-  });
-  h+='</div></div>';
   document.getElementById('ns-scroll').innerHTML=h;
   // scroll active chapter into view
   setTimeout(()=>{
@@ -919,7 +1092,28 @@ function renderNavGrid(){
   },30);
 }
 
-function navSelCh(ch){ const vs=chVS(ch); if(vs.length>0) navGo(vs[0].c,vs[0].v); }
+function renderVerseGrid(){
+  const cur=VERSES[state.idx];
+  const vs=chVS(state.navCh);
+  let h='<div class="ns-back-row"><button class="ns-back-btn" onclick="navSelBack()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>Kapitoly</button><span class="ns-back-title">'+esc(chName(state.navCh))+'</span></div>';
+  h+='<div class="ns-section-label">Verš — '+esc(chName(state.navCh))+'</div>';
+  h+='<div class="ns-v-grid">';
+  vs.forEach(vv=>{
+    const a=(vv.c===cur.c&&vv.v===cur.v)?' active':'';
+    const hn=hasNote(vv.c,vv.v)?' has-note':'';
+    h+=`<button class="${a}${hn}" onclick="navGo(${vv.c},${vv.v})">${vv.v}</button>`;
+  });
+  h+='</div>';
+  document.getElementById('ns-scroll').innerHTML=h;
+  // scroll active verse into view
+  setTimeout(()=>{
+    const a=document.querySelector('.ns-v-grid button.active');
+    if(a) a.scrollIntoView({block:'nearest',inline:'center'});
+  },30);
+}
+
+function navSelCh(ch){ state.navCh=ch; state.navMode='verses'; renderNavGrid(); }
+function navSelBack(){ state.navMode='chapters'; renderNavGrid(); }
 
 function navGo(c,v){
   const idx=VERSES.findIndex(x=>x.c===c&&x.v===v);
