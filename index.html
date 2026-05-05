@@ -308,7 +308,7 @@ body{touch-action:manipulation}
 .ns-ch-grid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .ns-ch-grid button,.ns-v-grid button{min-height:48px;border-radius:16px}
 .ns-v-grid{grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:8px}
-.ns-section-label{position:sticky;top:72px;background:linear-gradient(180deg,var(--bg) 75%,transparent);padding:8px 2px 10px;z-index:2}
+.ns-section-label{position:relative;top:auto;background:transparent;padding:8px 2px 6px;z-index:auto}
 body.dark #bottomnav{background:rgba(23,18,25,.96)}
 body.dark .verse-card{box-shadow:0 14px 32px rgba(229,69,142,.18)}
 body.dark .ux35-dock{background:rgba(26,21,29,.92)}
@@ -683,9 +683,11 @@ body.dark .install-dismiss{background:#4a3341;color:#f7eaf1}
 
 
 <style id="ux43-logo-left">
-.tb-logo img{transition:filter .2s}
+.tb-logo img{transition:filter .2s;border-radius:6px}
 </style>
-<style id="ux42-logo-dark"></style>
+<style id="ux42-logo-dark">
+body.dark .tb-logo img{mix-blend-mode:screen}
+</style>
 
 <style id="ux44-design">
 /* === LIGHT MODE === */
