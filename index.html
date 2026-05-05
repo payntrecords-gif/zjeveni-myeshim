@@ -1197,6 +1197,487 @@ body.dark #bottomnav {
 
 /* 4. App padding aby obsah nebyl za bottom navem */
 #app { padding-bottom: 200px !important; }
+
+/* guide card and qa card dynamic content */
+.guide-card-title { padding: 4px 0 10px; color: var(--pink); font-weight: 900; }
+.guide-card-body  { color: var(--sub); font-size: .92rem; }
+.qa-card-wrap     { padding: 16px; }
+.qa-q-main        { margin-bottom: 8px; }
+.qa-ans-placeholder { color: var(--sub); font-size: .92rem; }
+.ns-sr-empty      { padding: 20px; text-align: center; color: var(--sub); }
+/* topbar brand abbreviation */
+.tb-name-abbrev   { font-size: .78rem; color: var(--sub); }
+/* nav overlay close button */
+.ns-close-btn     { border: none; background: none; padding: 4px 6px; cursor: pointer; color: var(--sub); font-size: 1.1rem; flex-shrink: 0; }
+/* bottom nav center button */
+.bn-nav           { flex: 1.4; }
 </style>
 
 </head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<header id="topbar">
+  <div class="tb-logo">
+    <div class="tb-mark"><span></span><span></span><span></span><span></span></div>
+    <span class="tb-name">MYEShim</span>
+  </div>
+  <div id="nav-pill">
+    <button id="nav-pill-btn" onclick="nsOpen()">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <span id="nav-pill-label">Zjevení 1</span>
+    </button>
+  </div>
+  <div class="tb-brand">
+    <span class="tb-name tb-name-abbrev">Zj</span>
+  </div>
+</header>
+
+<!-- ── PROGRESS ── -->
+<div id="ux35-progress-wrap">
+  <div id="ux35-progress-track"><div id="ux35-progress"></div></div>
+  <div id="ux35-progress-label"></div>
+</div>
+
+<!-- ── NAV OVERLAY ── -->
+<div id="nav-ov" onclick="nsOvClick(event)">
+  <div id="nav-sheet">
+    <div class="ns-handle"></div>
+    <div class="ns-head">
+      <div class="ns-search-wrap">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="ns-search" placeholder="Hledat verš…" autocomplete="off" oninput="nsSearch(this.value)">
+        <button id="ns-close-btn" class="ns-close-btn" onclick="nsClose()">✕</button>
+      </div>
+    </div>
+    <div class="ns-scroll" id="ns-scroll">
+      <p class="ns-section-label">Kapitoly</p>
+      <div class="ns-ch-grid" id="ns-ch-grid"></div>
+      <div class="ns-v-section" id="ns-v-section" style="display:none">
+        <p class="ns-section-label" id="ns-v-label">Verše</p>
+        <div class="ns-v-grid" id="ns-v-grid"></div>
+      </div>
+      <div class="ns-sr" id="ns-sr" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+  <div class="cv-row">
+    <div class="cv-left">
+      <span class="cv-pill" id="cv-pill">Zjevení</span>
+      <div class="cv-chapter" id="cv-chapter">1</div>
+      <div class="cv-name" id="cv-name"></div>
+    </div>
+    <div class="cv-right" id="cv-right"></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button onclick="setTab(0)" id="tab-0" class="active">Verš</button>
+    <button onclick="setTab(1)" id="tab-1">Průvodce</button>
+    <button onclick="setTab(2)" id="tab-2">Otázky</button>
+    <button onclick="setTab(3)" id="tab-3">Poznámky</button>
+  </div>
+
+  <div class="panel active" id="panel-0">
+    <div class="verse-card" id="verse-card">
+      <div class="vc-ref" id="vc-ref"></div>
+      <div class="vc-text" id="vc-text"></div>
+    </div>
+  </div>
+  <div class="panel" id="panel-1">
+    <div class="guide-card" id="guide-card"></div>
+  </div>
+  <div class="panel" id="panel-2">
+    <div class="qa-card" id="qa-card"></div>
+  </div>
+  <div class="panel" id="panel-3">
+    <textarea class="note-ta" id="note-ta" placeholder="Poznámky k tomuto verši…"></textarea>
+    <button class="note-save" onclick="saveNote()">Uložit poznámku</button>
+  </div>
+</div>
+
+<!-- ── DOCK ── -->
+<div class="ux35-dock" id="ux35-dock">
+  <button class="ux35-btn" onclick="nsOpen()">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Přehled
+  </button>
+  <button class="ux35-btn" onclick="toggleDark()">
+    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    Tmavý
+  </button>
+  <span class="ux35-status" id="ux35-status"></span>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="ux35-toast"></div>
+
+<!-- ── INSTALL CARD ── -->
+<div class="install-card" id="install-card">
+  <div class="install-copy">
+    <p class="install-title">Přidat na plochu</p>
+    <p class="install-sub">Nainstalujte aplikaci pro rychlý přístup offline.</p>
+  </div>
+  <div class="install-actions">
+    <button class="install-btn" id="install-btn">Instalovat</button>
+    <button class="install-dismiss" onclick="document.getElementById('install-card').classList.remove('show')">Ne</button>
+  </div>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<nav id="bottomnav">
+  <button id="bn-prev" onclick="navVerse(-1)">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    Zpět
+  </button>
+  <button id="bn-nav" onclick="nsOpen()" class="bn-nav">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    Navigace
+  </button>
+  <button id="bn-next" onclick="navVerse(1)">
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    Dál
+  </button>
+</nav>
+
+<script>
+/* ════════════════════════════════════════════
+   DATA – Book of Revelation (Zjevení), 22 chapters
+   ════════════════════════════════════════════ */
+const CHAPTERS = [
+  { n:1,  name:'Vidění Syna člověka',       verses:20 },
+  { n:2,  name:'Listy čtyřem sborům',       verses:29 },
+  { n:3,  name:'Listy třem sborům',         verses:22 },
+  { n:4,  name:'Trůn v nebesích',           verses:11 },
+  { n:5,  name:'Zapečetěná kniha',          verses:14 },
+  { n:6,  name:'Otevírání šesti pečetí',    verses:17 },
+  { n:7,  name:'144 000 zapečetěných',      verses:17 },
+  { n:8,  name:'Sedmá pečeť a polnice',     verses:13 },
+  { n:9,  name:'Pátá a šestá polnice',      verses:21 },
+  { n:10, name:'Anděl s otevřenou knihou',  verses:11 },
+  { n:11, name:'Dva svědkové',              verses:19 },
+  { n:12, name:'Žena a drak',               verses:17 },
+  { n:13, name:'Šelmy ze země a moře',      verses:18 },
+  { n:14, name:'Beránek na hoře Sion',      verses:20 },
+  { n:15, name:'Sedm andělů s miskami',     verses:8  },
+  { n:16, name:'Sedm misek hněvu',          verses:21 },
+  { n:17, name:'Velká nevěstka',            verses:18 },
+  { n:18, name:'Pád Babylona',              verses:24 },
+  { n:19, name:'Slavnostní chválopěv',      verses:21 },
+  { n:20, name:'Tisíciletá vláda',          verses:15 },
+  { n:21, name:'Nové nebe a nová země',     verses:27 },
+  { n:22, name:'Řeka života a závěr',       verses:21 }
+];
+
+/* Sample verse texts (Czech, Zjevení 1:1-3 and 22:20).
+   TODO: populate all 404 verses from a data file or API. */
+const VERSES = {
+  '1-1': 'Zjevení Ježíše Krista, které mu dal Bůh, aby ukázal svým otrokům, co se musí brzy stát; naznačil to prostřednictvím svého anděla a dal to poznat svému otroku Janovi.',
+  '1-2': 'Ten vydal svědectví o Božím slově a o svědectví Ježíše Krista — o všem, co viděl.',
+  '1-3': 'Blahoslavený, kdo čte, i ti, kteří slyší slova tohoto proroctví a zachovávají, co je v něm napsáno; neboť čas je blízko.',
+  '22-20':'Ten, který dosvědčuje tato slova, říká: „Ano, přijdu brzy." Amen, přijď, Pane Ježíši!'
+};
+
+function verseText(ch, v) {
+  return VERSES[ch+'-'+v] || 'Zjevení '+ch+':'+v+' — text připravujeme…';
+}
+
+/* ════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════ */
+const state = { ch:1, v:1, selCh:1, tab:0, notes:{} };
+
+/* ════════════════════════════════════════════
+   NAV OVERLAY
+   ════════════════════════════════════════════ */
+
+/** Open nav overlay and pre-select current chapter */
+function nsOpen() {
+  state.selCh = state.ch;
+  nsRenderChapterGrid();
+  nsRenderVerseGrid(state.selCh);
+  document.getElementById('ns-v-section').style.display = '';
+  document.getElementById('ns-search').value = '';
+  document.getElementById('ns-sr').style.display = 'none';
+  document.getElementById('nav-ov').classList.add('open');
+  // scroll to active chapter button
+  requestAnimationFrame(() => {
+    const active = document.querySelector('.ns-ch-grid button.active');
+    if (active) active.scrollIntoView({ block:'nearest' });
+  });
+}
+
+/** Close nav overlay */
+function nsClose() {
+  document.getElementById('nav-ov').classList.remove('open');
+}
+
+/** Click on overlay background → close */
+function nsOvClick(e) {
+  if (e.target === document.getElementById('nav-ov')) nsClose();
+}
+
+/** Select a chapter inside the overlay: mark active, render verse grid */
+function nsSelectChapter(ch) {
+  state.selCh = ch;
+  // update active class on chapter buttons
+  document.querySelectorAll('#ns-ch-grid button').forEach(btn => {
+    btn.classList.toggle('active', +btn.dataset.ch === ch);
+  });
+  // show verse grid for chosen chapter
+  nsRenderVerseGrid(ch);
+  document.getElementById('ns-v-section').style.display = '';
+  document.getElementById('ns-v-label').textContent =
+    'Verše – ' + CHAPTERS[ch-1].name;
+  // scroll verse section into view
+  document.getElementById('ns-v-section').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+/** Click a verse → close overlay, navigate */
+function nsSelectVerse(ch, v) {
+  nsClose();
+  state.ch = ch;
+  state.v  = v;
+  render();
+}
+
+/** Build chapter grid buttons */
+function nsRenderChapterGrid() {
+  const grid = document.getElementById('ns-ch-grid');
+  if (grid.children.length > 0) {
+    // already built; just update active state
+    grid.querySelectorAll('button').forEach(btn => {
+      btn.classList.toggle('active', +btn.dataset.ch === state.selCh);
+    });
+    return;
+  }
+  CHAPTERS.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.dataset.ch = ch.n;
+    const numSpan = document.createElement('span');
+    numSpan.className = 'ch-num';
+    numSpan.textContent = ch.n;
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'ch-title';
+    titleSpan.textContent = ch.name;
+    btn.appendChild(numSpan);
+    btn.appendChild(titleSpan);
+    btn.classList.toggle('active', ch.n === state.selCh);
+    btn.addEventListener('click', () => nsSelectChapter(ch.n));
+    grid.appendChild(btn);
+  });
+}
+
+/** Build verse grid buttons for a chapter */
+function nsRenderVerseGrid(ch) {
+  const grid = document.getElementById('ns-v-grid');
+  const count = CHAPTERS[ch-1].verses;
+  const buttons = [];
+  for (let v = 1; v <= count; v++) {
+    const btn = document.createElement('button');
+    btn.textContent = v;
+    btn.dataset.v = v;
+    if (state.notes[ch+'-'+v]) btn.classList.add('has-note');
+    if (ch === state.ch && v === state.v) btn.classList.add('active');
+    btn.addEventListener('click', () => nsSelectVerse(ch, v));
+    buttons.push(btn);
+  }
+  grid.replaceChildren(...buttons);
+}
+
+/** Search inside nav overlay */
+function nsSearch(q) {
+  const sr = document.getElementById('ns-sr');
+  const chGrid = document.getElementById('ns-ch-grid');
+  const vSec   = document.getElementById('ns-v-section');
+  if (!q.trim()) {
+    sr.style.display = 'none';
+    chGrid.style.display = '';
+    vSec.style.display = '';
+    return;
+  }
+  chGrid.style.display = 'none';
+  vSec.style.display   = 'none';
+  sr.style.display = '';
+  const results = [];
+  CHAPTERS.forEach(ch => {
+    for (let v = 1; v <= ch.verses; v++) {
+      const text = verseText(ch.n, v);
+      if (text.toLowerCase().includes(q.toLowerCase())) {
+        results.push({ ch:ch.n, v, name:ch.name, text });
+      }
+    }
+  });
+  sr.replaceChildren();
+  if (!results.length) {
+    const msg = document.createElement('p');
+    msg.className = 'ns-sr-empty';
+    msg.textContent = 'Nic nenalezeno.';
+    sr.appendChild(msg);
+    return;
+  }
+  results.slice(0, 30).forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'ns-sr-item';
+    item.addEventListener('click', () => nsSelectVerse(r.ch, r.v));
+
+    const meta = document.createElement('div');
+    const ref  = document.createElement('div');
+    ref.className = 'ns-sr-ref';
+    ref.textContent = 'Zj ' + r.ch + ':' + r.v;
+    const name = document.createElement('div');
+    name.className = 'ns-sr-name';
+    name.textContent = r.name;
+    meta.appendChild(ref);
+    meta.appendChild(name);
+
+    const txt = document.createElement('div');
+    txt.className = 'ns-sr-text';
+    txt.textContent = r.text;
+
+    item.appendChild(meta);
+    item.appendChild(txt);
+    sr.appendChild(item);
+  });
+}
+
+/* ════════════════════════════════════════════
+   MAIN RENDER
+   ════════════════════════════════════════════ */
+function render() {
+  const ch = state.ch, v = state.v;
+  const chData = CHAPTERS[ch-1];
+
+  // topbar / nav pill
+  document.getElementById('nav-pill-label').textContent = 'Zjevení '+ch;
+
+  // chapter header
+  document.getElementById('cv-chapter').textContent = ch;
+  document.getElementById('cv-name').textContent    = chData.name;
+  document.getElementById('cv-right').textContent   = 'Verš '+v+' / '+chData.verses;
+
+  // progress
+  const total = CHAPTERS.reduce((s,c)=>s+c.verses,0);
+  const done  = CHAPTERS.slice(0,ch-1).reduce((s,c)=>s+c.verses,0) + v;
+  const pct   = Math.round(done/total*100);
+  document.getElementById('ux35-progress').style.width = pct+'%';
+  document.getElementById('ux35-progress-label').textContent = 'Přečteno '+pct+' %';
+  document.getElementById('ux35-status').textContent = 'Zj '+ch+':'+v;
+
+  // verse card
+  document.getElementById('vc-ref').textContent  = 'Zjevení '+ch+':'+v;
+  document.getElementById('vc-text').textContent = verseText(ch, v);
+
+  // note textarea
+  document.getElementById('note-ta').value = state.notes[ch+'-'+v] || '';
+
+  // guide card
+  const guideCard = document.getElementById('guide-card');
+  const guideTitle = document.createElement('div');
+  guideTitle.className = 'guide-card-title';
+  const guideTitleB = document.createElement('b');
+  guideTitleB.textContent = 'Kapitola ' + ch + ' – ' + chData.name;
+  guideTitle.appendChild(guideTitleB);
+  const guideBody = document.createElement('p');
+  guideBody.className = 'guide-card-body';
+  guideBody.textContent = 'Studijní průvodce pro tuto kapitolu bude brzy dostupný.';
+  guideCard.replaceChildren(guideTitle, guideBody);
+
+  // qa card
+  const qaCard = document.getElementById('qa-card');
+  const qaWrap = document.createElement('div');
+  qaWrap.className = 'qa-card-wrap';
+  const qaQ = document.createElement('div');
+  qaQ.className = 'qa-q qa-q-main';
+  qaQ.textContent = 'Co nás učí Zjevení ' + ch + ':' + v + '?';
+  const qaA = document.createElement('div');
+  qaA.className = 'qa-ans qa-ans-placeholder';
+  qaA.textContent = 'Otázky pro tuto kapitolu budou brzy dostupné.';
+  qaWrap.replaceChildren(qaQ, qaA);
+  qaCard.replaceChildren(qaWrap);
+
+  // prev/next buttons
+  const firstVerse = (ch===1 && v===1);
+  const lastVerse  = (ch===CHAPTERS.length && v===CHAPTERS[ch-1].verses);
+  document.getElementById('bn-prev').disabled = firstVerse;
+  document.getElementById('bn-next').disabled = lastVerse;
+
+  // scroll to top
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════ */
+function navVerse(dir) {
+  let {ch, v} = state;
+  v += dir;
+  if (v < 1) {
+    if (ch > 1) { ch--; v = CHAPTERS[ch-1].verses; }
+    else return;
+  } else if (v > CHAPTERS[ch-1].verses) {
+    if (ch < CHAPTERS.length) { ch++; v = 1; }
+    else return;
+  }
+  state.ch = ch; state.v = v;
+  render();
+}
+
+function setTab(n) {
+  state.tab = n;
+  document.querySelectorAll('.tabs button').forEach((b,i) => b.classList.toggle('active', i===n));
+  document.querySelectorAll('.panel').forEach((p,i) => p.classList.toggle('active', i===n));
+}
+
+function saveNote() {
+  const key = state.ch+'-'+state.v;
+  state.notes[key] = document.getElementById('note-ta').value;
+  showToast('Poznámka uložena');
+  // refresh verse grid has-note only if overlay is open and shows the saved verse's chapter
+  if (document.getElementById('nav-ov').classList.contains('open') && state.selCh === state.ch) {
+    nsRenderVerseGrid(state.selCh);
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('ux35-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function toggleDark() {
+  document.body.classList.toggle('dark');
+}
+
+/* ════════════════════════════════════════════
+   PWA
+   ════════════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(err => {
+    console.warn('Service worker registration failed:', err);
+  });
+}
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-card').classList.add('show');
+});
+document.getElementById('install-btn').addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt().catch(err => console.warn('Install prompt error:', err));
+    deferredPrompt = null;
+  }
+  document.getElementById('install-card').classList.remove('show');
+});
+
+/* ════════════════════════════════════════════
+   BOOT
+   ════════════════════════════════════════════ */
+render();
+document.body.classList.add('ready');
+</script>
+</body>
