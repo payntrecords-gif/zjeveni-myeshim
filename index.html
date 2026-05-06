@@ -1841,7 +1841,10 @@ const FCM_SENDER_ID = '360259005980';
   });
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') window.closeStreakDetail();
+    if (e.key === 'Escape') {
+      const overlay = document.getElementById('streak-detail-overlay');
+      if (overlay && overlay.classList.contains('open')) window.closeStreakDetail();
+    }
   });
 
   // Wire keyboard activation on streak badge (Enter / Space)
