@@ -38,7 +38,11 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('push', event => {
   let data = {};
-  try { data = event.data ? event.data.json() : {}; } catch(e) { data = { body: event.data ? event.data.text() : '' }; }
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch(e) {
+    data = { body: event.data ? event.data.text() : '' };
+  }
   const title = data.title || 'MYEShim – dnešní verš 📖';
   const body = data.body || data.verse || 'Otevři appku a přečti si dnešní verš.';
   const ref = data.ref || '';

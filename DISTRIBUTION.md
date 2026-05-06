@@ -71,7 +71,7 @@ Firebase App Distribution umožňuje pozvat konkrétní uživatele e-mailem a di
 
 1. Klikni na **Testers & Groups**.
 2. Klikni na **Add testers** a zadej e-mailové adresy členů komunity.
-3. Nebo vytvoř skupinu (např. `komunita`) a přidej do ní testy.
+3. Nebo vytvoř skupinu (např. `komunita`) a přidej do ní testery.
 4. Po nahrání APK zvol skupinu/testery a klikni na **Distribute**.
 
 ### Co obdrží uživatelé

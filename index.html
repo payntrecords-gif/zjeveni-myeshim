@@ -1555,6 +1555,7 @@ const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';
     'Boží slovo svítí na každý krok tvé cesty.',
   ];
   const MILESTONES = {7:'Týden v řadě! 🎉',14:'Dva týdny studia! 🏆',30:'Celý měsíc! 🌟',60:'60 dní! Neuvěřitelné! 👑'};
+  const CONFETTI_PIECE_COUNT = 38;
 
   function safeLS(key, fallback) {
     try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch(e) { return fallback; }
@@ -1565,7 +1566,10 @@ const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';
 
   function pickDailyVerse() {
     if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
-    const day = Math.floor(Date.now() / 86400000);
+    // Use local midnight-based day index to avoid UTC timezone mismatch
+    const localMidnight = new Date();
+    localMidnight.setHours(0, 0, 0, 0);
+    const day = Math.floor(localMidnight.getTime() / 86400000);
     return window.VERSES[day % window.VERSES.length];
   }
 
@@ -1595,7 +1599,7 @@ const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';
     container.hidden = false;
     container.innerHTML = '';
     const colors = ['#e5458e','#7b3ef4','#f0b429','#2ecc71','#3498db','#ff6b6b'];
-    for (let i = 0; i < 38; i++) {
+    for (let i = 0; i < CONFETTI_PIECE_COUNT; i++) {
       const p = document.createElement('div');
       p.className = 'confetti-piece';
       p.style.cssText = [
@@ -1736,18 +1740,10 @@ const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';
     if (Array.isArray(window.VERSES) && window.VERSES.length) {
       initStreak();
     } else {
-      // VERSES may not be defined yet; defer until they are
-      const observer = new MutationObserver(() => {
-        if (Array.isArray(window.VERSES) && window.VERSES.length) {
-          observer.disconnect();
-          initStreak();
-        }
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-      // Also try after a timeout
+      // VERSES defined in the same script block; retry once after short delay
       setTimeout(() => {
         if (Array.isArray(window.VERSES) && window.VERSES.length) initStreak();
-      }, 500);
+      }, 200);
     }
     // Request push permission after a delay
     setTimeout(requestPushPermission, 4000);
