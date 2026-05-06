@@ -1363,7 +1363,7 @@ render();
       }
     }
     if(btn){
-      btn.hidden=noPromptSupport || !canPrompt;
+      btn.hidden=!canPrompt;
       if(!noPromptSupport) btn.textContent='Instalovat';
     }
     const card=$('installCard');
