@@ -65,7 +65,7 @@ Zkopíruj SHA-256 fingerprint pro app signing key a použij ho v `assetlinks.jso
 Soubor musí být veřejně dostupný přes přesnou URL:
 
 ```
-https://TVA-DOMENA/.well-known/assetlinks.json
+https://TVE-DOMENA/.well-known/assetlinks.json
 ```
 
 Po nasazení ověř:
