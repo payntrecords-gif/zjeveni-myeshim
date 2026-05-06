@@ -32,6 +32,18 @@ Tento dokument popisuje, jak nastavit Firebase Cloud Messaging (FCM) pro odesíl
 
 ## 4. Nastavení klíčů v aplikaci
 
+> ⚠️ **DŮLEŽITÉ: Bez správných klíčů push notifikace NEFUNGUJÍ**
+>
+> Otevři `index.html` a najdi blok `<script id="push-config">` (hledej text `push-config`).
+> Nahraď obě hodnoty skutečnými klíči ze své Firebase Console:
+> ```js
+> const VAPID_PUBLIC_KEY = 'PLACEHOLDER_VAPID_KEY';  // ← MUSÍŠ nahradit
+> const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';      // ← MUSÍŠ nahradit
+> ```
+> Pokud tyto hodnoty zůstanou jako placeholder, push subscripce se tiše přeskočí a
+> notifikace uživatelé nedostanou. Chyba se zobrazí v DevTools konzoli pod
+> `Push sub selhal:`.
+
 Otevři soubor `index.html` a najdi blok `<script id="push-config">`:
 
 ```js
