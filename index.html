@@ -1340,25 +1340,35 @@ render();
     if(card) card.classList.remove('show');
   }
   function syncInstallUI(){
-    const title=$('installTitle'), sub=$('installSub'), btn=$('installBtn');
-    if(title && sub && btn){
-      title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
-      sub.textContent=isDesktop()
-        ? 'Přidej si MYEShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
-        : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
-      btn.textContent='Instalovat';
-    }
     if(isStandalone()){
       hideInstallCard();
       setTip('');
       return;
     }
     const canPrompt=!!deferredPrompt;
-    const showCard=canPrompt && !installDismissed;
-    const showHint=!canPrompt && isDesktop() && !SUPPORTS_BEFOREINSTALLPROMPT;
+    const noPromptSupport=!SUPPORTS_BEFOREINSTALLPROMPT;
+    const showCard=(canPrompt || noPromptSupport) && !installDismissed;
+    const title=$('installTitle'), sub=$('installSub'), btn=$('installBtn');
+    if(title && sub){
+      if(noPromptSupport){
+        title.textContent='Přidat MYEShim na plochu';
+        sub.textContent=isDesktop()
+          ? 'V Chrome nebo Edge otevři menu (⋮) a zvol „Instalovat aplikaci“ nebo „Přidat na plochu“.'
+          : 'V Safari otevři sdílení (□↑) a zvol „Přidat na plochu“. V Chrome otevři menu (⋮) a zvol „Přidat na plochu“.';
+      } else {
+        title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
+        sub.textContent=isDesktop()
+          ? 'Přidej si MYEShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
+          : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
+      }
+    }
+    if(btn){
+      btn.hidden=noPromptSupport || !canPrompt;
+      if(!noPromptSupport) btn.textContent='Instalovat';
+    }
     const card=$('installCard');
     if(card) card.classList.toggle('show', showCard);
-    setTip(showHint ? 'Desktop testování: pokud prohlížeč nenabízí událost „beforeinstallprompt“, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.' : '');
+    setTip('');
   }
   function saveProgress(){
     try{
