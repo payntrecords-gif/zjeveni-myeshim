@@ -1308,7 +1308,6 @@ render();
   const LAST_ROUTE_KEY='myeshim-last-route';
   let deferredPrompt=null;
   function $(id){return document.getElementById(id)}
-  function storageGet(key){ try{return localStorage.getItem(key);}catch(e){ return null; } }
   function storageSet(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
   function isMobile(){
     return window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
@@ -1316,7 +1315,6 @@ render();
   function isStandalone(){
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
-  function isDismissed(){ return storageGet(STORAGE_KEY) === '1'; }
   function showManualTip(){
     const tip=$('pwaTip');
     if(!tip) return;
@@ -1341,7 +1339,7 @@ render();
   }
   function showInstallCard(){
     const card=$('installCard');
-    if(!card || !isMobile() || isStandalone() || isDismissed()) return;
+    if(!card || !isMobile() || isStandalone()) return;
     syncInstallCard();
     card.classList.add('show');
   }
@@ -1365,7 +1363,6 @@ render();
     const btn=$('installBtn'), dismiss=$('installDismiss');
     if(dismiss){
       dismiss.addEventListener('click', function(){
-        storageSet(STORAGE_KEY,'1');
         hideInstallCard();
         const tip=$('pwaTip');
         if(tip) tip.hidden=true;
@@ -1396,7 +1393,7 @@ render();
       const tip=$('pwaTip');
       if(tip) tip.hidden=true;
     });
-    if(isMobile() && !isStandalone() && !isDismissed()){
+    if(isMobile() && !isStandalone()){
       setTimeout(showInstallCard, 700);
     }
   }
