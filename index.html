@@ -1188,6 +1188,8 @@ render();
     clearTimeout(window.__ux35toast);
     window.__ux35toast = setTimeout(()=>el.classList.remove('show'), 1350);
   };
+  const MOON_ICON_SVG = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>';
+  const SUN_ICON_SVG = '<circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"></line>';
   function preferredTheme(){
     const saved = store.get('ux35-theme','');
     if(saved) return saved;
@@ -1198,13 +1200,12 @@ render();
     store.set('ux35-theme', theme);
     const btn = $('#ux35-theme');
     if(btn){
-      const nextTheme = theme === 'dark' ? 'light' : 'dark';
-      btn.title = `${nextTheme === 'dark' ? 'Tmavý' : 'Světlý'} režim (D)`;
-      btn.setAttribute('aria-label', `Přepnout na ${nextTheme === 'dark' ? 'tmavý' : 'světlý'} režim`);
+      const nextThemeLabel = theme === 'dark' ? 'světlý' : 'tmavý';
+      const titleLabel = `${nextThemeLabel.charAt(0).toUpperCase()}${nextThemeLabel.slice(1)}`;
+      btn.title = `${titleLabel} režim (D)`;
+      btn.setAttribute('aria-label', `Přepnout na ${nextThemeLabel} režim`);
       const icon = btn.querySelector('svg');
-      if(icon) icon.innerHTML = theme === 'dark'
-        ? '<circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"></line>'
-        : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>';
+      if(icon) icon.innerHTML = theme === 'dark' ? SUN_ICON_SVG : MOON_ICON_SVG;
     }
   }
   function clamp(n,min,max){ return Math.min(max,Math.max(min,n)); }
