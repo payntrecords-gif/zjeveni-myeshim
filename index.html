@@ -969,15 +969,6 @@ body.dark .sd-count{color:#f8eef5}
 body.dark .sd-best{color:#cab5c3}
 .sd-motto{font-size:.92rem;color:#7a6a76;text-align:center;margin-bottom:20px;line-height:1.5;font-style:italic}
 body.dark .sd-motto{color:#cab5c3}
-.sd-bible-link{
-  display:block;text-align:center;
-  padding:13px;border-radius:18px;
-  border:1.5px solid rgba(229,69,142,.3);
-  color:#e5458e;font-size:.97rem;font-weight:900;
-  text-decoration:none;margin-bottom:10px;
-}
-body.dark .sd-bible-link{border-color:rgba(255,140,194,.3);color:#ff8cc2;background:rgba(255,140,194,.05)}
-.sd-bible-link:active{transform:scale(.98)}
 .sd-close{
   width:100%;border:none;border-radius:18px;padding:14px;
   background:linear-gradient(135deg,#f05ca2,#de4089);
@@ -1661,8 +1652,7 @@ render();
     <div class="sd-title">Tvůj streak 🔥</div>
     <div class="sd-count" id="sd-count">0 dní v řadě</div>
     <div class="sd-best" id="sd-best">Nejvíce: 0 dní</div>
-    <div class="sd-motto">Čteš Bibli každý den — tak dál!</div>
-    <a class="sd-bible-link" href="https://www.bible21.cz" target="_blank" rel="noopener noreferrer">📖 Číst v online Bibli</a>
+    <div class="sd-motto">Dělej MYEShim každý den!</div>
     <button class="sd-close" onclick="closeStreakDetail()">Hotovo</button>
   </div>
 </div>
@@ -1777,7 +1767,7 @@ const FCM_SENDER_ID = '360259005980';
       if (streak >= 30) streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' dní v řadě!';
       else if (streak >= 7) streakLabel.textContent = 'Úžasné! 🔥 ' + streak + ' dní v řadě!';
       else if (streak > 1) streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' dní v řadě!';
-      else streakLabel.textContent = 'Vítej! Začínáš svůj studijní streak 🔥';
+      else streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' den v řadě!';
     }
     if (streakEmoji) {
       streakEmoji.textContent = streak >= 30 ? '👑' : streak >= 14 ? '🏆' : streak >= 7 ? '🎉' : '🔥';
@@ -1930,6 +1920,7 @@ const FCM_SENDER_ID = '360259005980';
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
     if (Notification.permission === 'granted') {
       navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+      scheduleWelcomeNotification();
       return;
     }
     if (Notification.permission === 'denied') return;
@@ -1937,7 +1928,26 @@ const FCM_SENDER_ID = '360259005980';
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+      scheduleWelcomeNotification();
     }
+  }
+
+  // Send a welcome notification within 5 minutes on first permission grant
+  function scheduleWelcomeNotification() {
+    if (safeLS('myeshim-notif-welcomed', '')) return; // already sent
+    safeLSSet('myeshim-notif-welcomed', '1');
+    // Show welcome notification after ~3 minutes (within the 5-minute first-launch requirement)
+    setTimeout(() => {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification('Vítej v MYEShim! 🎉', {
+          body: 'Dělej MYEShim každý den! Jsme rádi, že jsi tady 🙏',
+          icon: './icon-192.png',
+          badge: './icon-96.png',
+          tag: 'myeshim-welcome',
+          data: { url: reg.scope }
+        });
+      }).catch(() => {});
+    }, 180000); // 3 minutes
   }
 
   // Listen for messages from SW (navigate to verse)
@@ -1960,6 +1970,7 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   function init() {
+    const isFirstLaunch = !safeLS('streak_last_date', '');
     if (Array.isArray(window.VERSES) && window.VERSES.length) {
       initStreak();
     } else {
@@ -1968,8 +1979,8 @@ const FCM_SENDER_ID = '360259005980';
         if (Array.isArray(window.VERSES) && window.VERSES.length) initStreak();
       }, 200);
     }
-    // Request push permission after a delay
-    setTimeout(requestPushPermission, 4000);
+    // On first launch request permission sooner so the welcome notification arrives within 5 min
+    setTimeout(requestPushPermission, isFirstLaunch ? 1500 : 4000);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
