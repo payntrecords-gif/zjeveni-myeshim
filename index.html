@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>MYEShim – Zjevení</title>
 <style>
@@ -244,6 +245,7 @@ body.dark .ux35-status{color:var(--sub)}
 }
 .ux35-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2}
 .ux35-btn:hover{background:#fbf6f9}
+.ux35-btn.icon-only{justify-content:center;gap:0;min-width:44px;padding-left:11px;padding-right:11px}
 .ux35-status{font-size:.8rem;font-weight:800;color:var(--sub);padding:0 4px;white-space:nowrap}
 #ux35-toast{
   position:fixed;left:50%;transform:translateX(-50%);bottom:calc(136px + env(safe-area-inset-bottom));z-index:40;
@@ -940,13 +942,11 @@ body.dark #nav-pill button{
 
 
 <div class="ux35-dock" id="ux35-dock">
-  <button class="ux35-btn" id="ux35-search" type="button" title="Hledat (/)">
+  <button class="ux35-btn icon-only" id="ux35-search" type="button" title="Hledat (/)" aria-label="Hledat">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="16" y1="16" x2="22" y2="22"></line></svg>
-    Hledat
   </button>
-  <button class="ux35-btn" id="ux35-theme" type="button" title="Téma (D)">
+  <button class="ux35-btn icon-only" id="ux35-theme" type="button" title="Tmavý režim (D)" aria-label="Přepnout na tmavý režim">
     <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3c0 0 0 0 0 0A7 7 0 0 0 21 12.79Z"></path></svg>
-    Téma
   </button>
   <button class="ux35-btn" id="ux35-font-minus" type="button" title="Menší písmo (-)">
     <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -1197,7 +1197,15 @@ render();
     document.body.classList.toggle('dark', theme === 'dark');
     store.set('ux35-theme', theme);
     const btn = $('#ux35-theme');
-    if(btn) btn.lastChild.textContent = theme === 'dark' ? ' Světlé' : ' Téma';
+    if(btn){
+      const nextTheme = theme === 'dark' ? 'light' : 'dark';
+      btn.title = `${nextTheme === 'dark' ? 'Tmavý' : 'Světlý'} režim (D)`;
+      btn.setAttribute('aria-label', `Přepnout na ${nextTheme === 'dark' ? 'tmavý' : 'světlý'} režim`);
+      const icon = btn.querySelector('svg');
+      if(icon) icon.innerHTML = theme === 'dark'
+        ? '<circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"></line>'
+        : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>';
+    }
   }
   function clamp(n,min,max){ return Math.min(max,Math.max(min,n)); }
   function applyFont(scale){
