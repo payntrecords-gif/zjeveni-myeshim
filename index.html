@@ -1734,7 +1734,11 @@ const FCM_SENDER_ID = '360259005980';
     if (!('Notification' in window)) return;
     if (Notification.permission === 'denied') {
       const t = document.getElementById('ux35-toast');
-      if (t) { t.textContent = 'Notifikace jsou blokovány — povolte je v nastavení prohlížeče'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3200); }
+      if (t) {
+        t.textContent = 'Notifikace jsou blokovány — povolte je v nastavení prohlížeče';
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3200);
+      }
       return;
     }
     await requestPushPermission();
