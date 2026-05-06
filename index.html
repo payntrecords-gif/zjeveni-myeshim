@@ -977,6 +977,114 @@ body.dark .sd-motto{color:#cab5c3}
 .sd-close:active{transform:scale(.98)}
 </style>
 
+
+<style id="new-features-style">
+/* ── NOTIFICATION PROMPT CARD ── */
+#notif-prompt-card{
+  position:fixed;left:14px;right:14px;
+  bottom:calc(84px + env(safe-area-inset-bottom));
+  z-index:68;
+  display:none;align-items:center;gap:12px;
+  padding:14px 14px 14px 16px;border-radius:20px;
+  background:#15181f;
+  border:1px solid rgba(229,69,142,.3);
+  box-shadow:0 14px 34px rgba(0,0,0,.5);
+}
+#notif-prompt-card.show{display:flex;animation:npc-in .3s cubic-bezier(.22,1,.36,1)}
+@keyframes npc-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.npc-icon{font-size:1.5rem;flex-shrink:0}
+.npc-body{flex:1;min-width:0}
+.npc-title{font-size:.95rem;font-weight:900;color:#f8eef5;margin:0 0 3px}
+.npc-sub{font-size:.8rem;color:#a09bb0;margin:0;line-height:1.35}
+.npc-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.npc-btn{
+  border:0;border-radius:12px;padding:10px 14px;
+  font:inherit;font-size:.86rem;font-weight:900;cursor:pointer;
+  background:linear-gradient(135deg,#e5458e,#f05ca2);color:#fff;
+  box-shadow:0 6px 16px rgba(229,69,142,.32);white-space:nowrap;
+}
+.npc-dismiss{
+  border:0;border-radius:12px;padding:10px 12px;
+  font:inherit;font-size:.86rem;font-weight:900;cursor:pointer;
+  background:#252a35;color:#a09bb0;line-height:1;
+}
+@media(max-width:480px){
+  #notif-prompt-card{flex-direction:column;align-items:stretch;gap:8px}
+  .npc-actions{justify-content:stretch}
+  .npc-btn,.npc-dismiss{flex:1}
+}
+/* ── BELL BUTTON (topbar) ── */
+#notif-bell-btn{
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(229,69,142,.18);
+  border-radius:999px;padding:5px 9px;
+  font-size:1rem;line-height:1;color:#c53580;
+  cursor:pointer;flex-shrink:0;
+  backdrop-filter:blur(10px);
+  transition:transform .14s;
+}
+#notif-bell-btn:hover{transform:scale(1.08)}
+body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,150,200,.18);color:#ff8cc2}
+@media (max-width:340px){ #notif-bell-btn { display:none } }
+/* ── NOTIFICATION SETTINGS MODAL ── */
+#notif-settings-overlay{
+  position:fixed;inset:0;z-index:85;
+  background:rgba(0,0,0,.55);
+  display:none;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#notif-settings-overlay.open{display:flex;animation:wov-in .22s ease}
+#notif-settings-sheet{
+  width:100%;max-width:480px;
+  background:#15181f;
+  border-radius:28px 28px 0 0;
+  padding:28px 20px 32px;
+  animation:wsh-up .28s cubic-bezier(.22,1,.36,1);
+}
+.nss-handle{width:40px;height:4px;border-radius:999px;background:rgba(255,255,255,.15);margin:0 auto 20px}
+.nss-title{font-size:1.08rem;font-weight:900;color:#e5458e;margin-bottom:20px}
+.nss-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px}
+.nss-label{font-size:.97rem;font-weight:800;color:#f8eef5}
+.nss-label-sub{font-size:.82rem;color:#a09bb0;margin-top:2px}
+.nss-toggle{position:relative;width:48px;height:26px;flex-shrink:0}
+.nss-toggle input{opacity:0;width:0;height:0;position:absolute}
+.nss-slider{
+  position:absolute;inset:0;border-radius:999px;
+  background:#252a35;cursor:pointer;transition:background .18s;
+}
+.nss-toggle input:checked + .nss-slider{background:#e5458e}
+.nss-slider::before{
+  content:'';position:absolute;
+  width:20px;height:20px;border-radius:50%;
+  background:#fff;left:3px;top:3px;
+  transition:transform .18s;
+  box-shadow:0 1px 4px rgba(0,0,0,.28);
+}
+.nss-toggle input:checked + .nss-slider::before{transform:translateX(22px)}
+.nss-section-label{font-size:.82rem;font-weight:800;color:#a09bb0;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+.nss-hour-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.nss-hour-btn{
+  border:1.5px solid #252a35;background:#252a35;color:#a09bb0;
+  border-radius:12px;padding:10px 14px;font:inherit;font-size:.9rem;font-weight:900;cursor:pointer;
+  transition:all .14s;min-width:52px;text-align:center;
+}
+.nss-hour-btn.active{background:#e5458e;border-color:#e5458e;color:#fff;box-shadow:0 4px 12px rgba(229,69,142,.28)}
+.nss-status{
+  font-size:.82rem;color:#8892a4;margin-bottom:20px;
+  padding:10px 14px;background:#0d0f14;border-radius:12px;line-height:1.5;
+}
+.nss-close-btn{
+  width:100%;border:none;border-radius:18px;padding:14px;
+  background:linear-gradient(135deg,#e5458e,#f05ca2);
+  color:#fff;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;
+}
+.nss-close-btn:active{transform:scale(.98)}
+/* ── VERSE CARD SWIPE ANIMATION ── */
+.verse-card{transition:transform .1s ease}
+.verse-card.swipe-left{transform:translateX(-5px) scale(.982)}
+.verse-card.swipe-right{transform:translateX(5px) scale(.982)}
+</style>
 </head>
 <body>
 <div id="topbar">
@@ -991,6 +1099,7 @@ body.dark .sd-motto{color:#cab5c3}
     </button>
   </div>
   <div class="tb-brand">MYEShim</div>
+  <button id="notif-bell-btn" onclick="openNotifSettings()" title="Nastavení notifikací" aria-label="Nastavení notifikací">🔔</button>
   <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
     <span class="sb-fire">🔥</span>
     <span class="sb-num" id="streak-num">0</span>
@@ -1981,6 +2090,330 @@ const FCM_SENDER_ID = '360259005980';
     }
     // On first launch request permission sooner so the welcome notification arrives within 5 min
     setTimeout(requestPushPermission, isFirstLaunch ? 1500 : 4000);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
+<!-- NOTIFICATION PROMPT CARD -->
+<div id="notif-prompt-card" aria-live="polite">
+  <div class="npc-icon">🔔</div>
+  <div class="npc-body">
+    <p class="npc-title">Chceš denní připomenutí?</p>
+    <p class="npc-sub">Připomene ti každý den přečíst dnešní verš.</p>
+  </div>
+  <div class="npc-actions">
+    <button class="npc-btn" id="npc-enable-btn" type="button">Zapnout notifikace</button>
+    <button class="npc-dismiss" id="npc-dismiss-btn" type="button" aria-label="Zavřít">✕</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION SETTINGS MODAL -->
+<div id="notif-settings-overlay" role="dialog" aria-modal="true" aria-label="Nastavení notifikací">
+  <div id="notif-settings-sheet">
+    <div class="nss-handle"></div>
+    <div class="nss-title">🔔 Nastavení notifikací</div>
+    <div class="nss-row">
+      <div>
+        <div class="nss-label">Denní připomínky</div>
+        <div class="nss-label-sub">Připomenutí přečíst verš každý den</div>
+      </div>
+      <label class="nss-toggle" aria-label="Zapnout notifikace">
+        <input type="checkbox" id="nss-toggle-input">
+        <span class="nss-slider"></span>
+      </label>
+    </div>
+    <div class="nss-section-label">Preferovaný čas</div>
+    <div class="nss-hour-grid" id="nss-hour-grid">
+      <button class="nss-hour-btn" data-hour="6" type="button">6:00</button>
+      <button class="nss-hour-btn" data-hour="7" type="button">7:00</button>
+      <button class="nss-hour-btn" data-hour="8" type="button">8:00</button>
+      <button class="nss-hour-btn" data-hour="9" type="button">9:00</button>
+      <button class="nss-hour-btn" data-hour="10" type="button">10:00</button>
+    </div>
+    <div class="nss-status" id="nss-status">Stav: načítám…</div>
+    <button class="nss-close-btn" id="nss-close-btn" type="button">Hotovo</button>
+  </div>
+</div>
+
+<script id="new-features-script">
+(function(){
+  function safeLS(k, d) {
+    try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; }
+  }
+  function safeLSSet(k, v) {
+    try { localStorage.setItem(k, v); } catch(e) {}
+  }
+  function showToast(msg, ms) {
+    const el = document.getElementById('ux35-toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.__nfToastT);
+    window.__nfToastT = setTimeout(() => el.classList.remove('show'), ms || 2400);
+  }
+
+  // ── DAILY NOTIFICATION CHECK ──
+  function checkDailyNotif() {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    if (Notification.permission !== 'granted') return;
+    if (safeLS('notif_enabled', 'true') === 'false') return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (safeLS('notif_last_shown', '') === today) return;
+    const hour = parseInt(safeLS('notif_hour', '8'), 10);
+    if (new Date().getHours() < hour) return;
+    safeLSSet('notif_last_shown', today);
+    navigator.serviceWorker.ready.then(reg => {
+      reg.showNotification('MYEShim 📖', {
+        body: 'Dnešní verš tě čeká — otevři a přečti si ho!',
+        icon: './icon-192.png',
+        badge: './icon-96.png',
+        tag: 'myeshim-daily',
+        data: { url: reg.scope }
+      });
+    }).catch(() => {});
+  }
+
+  // ── NOTIFICATION PROMPT CARD ──
+  function shouldShowPromptCard() {
+    if (!('Notification' in window)) return false;
+    if (Notification.permission !== 'default') return false;
+    if (safeLS('notif_card_dismissed', '') === '1') return false;
+    return true;
+  }
+  function showNotifPromptCard() {
+    if (!shouldShowPromptCard()) return;
+    const card = document.getElementById('notif-prompt-card');
+    if (!card) return;
+    setTimeout(() => card.classList.add('show'), 500);
+  }
+  function hideNotifPromptCard() {
+    const card = document.getElementById('notif-prompt-card');
+    if (card) card.classList.remove('show');
+  }
+
+  // Hook into closeWelcome so prompt appears after welcome modal closes
+  if (typeof window.closeWelcome === 'function') {
+    const _origCW = window.closeWelcome;
+    window.closeWelcome = function() {
+      _origCW();
+      showNotifPromptCard();
+    };
+  }
+
+  document.getElementById('npc-enable-btn')?.addEventListener('click', async function() {
+    hideNotifPromptCard();
+    safeLSSet('notif_card_dismissed', '1');
+    if (!('Notification' in window)) return;
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      safeLSSet('notif_enabled', 'true');
+      showToast('🔔 Notifikace zapnuty!', 2000);
+      checkDailyNotif();
+    }
+  });
+
+  document.getElementById('npc-dismiss-btn')?.addEventListener('click', function() {
+    hideNotifPromptCard();
+    safeLSSet('notif_card_dismissed', '1');
+  });
+
+  // ── NOTIFICATION SETTINGS MODAL ──
+  function getPermStatus() {
+    if (!('Notification' in window)) return 'Notifikace nejsou podporovány v tomto prohlížeči.';
+    if (Notification.permission === 'denied') return 'Blokovány prohlížečem — povolte je v nastavení prohlížeče.';
+    if (Notification.permission === 'default') return 'Zatím nebyly povoleny.';
+    const on = safeLS('notif_enabled', 'true') !== 'false';
+    const h = safeLS('notif_hour', '8');
+    return on
+      ? 'Aktivní · připomenutí při otevření po ' + h + ':00'
+      : 'Povoleny, ale aktuálně vypnuty.';
+  }
+  function syncNotifSettings() {
+    const toggle = document.getElementById('nss-toggle-input');
+    const status = document.getElementById('nss-status');
+    const hour = safeLS('notif_hour', '8');
+    if (toggle) {
+      const granted = ('Notification' in window) && Notification.permission === 'granted';
+      toggle.checked = granted && safeLS('notif_enabled', 'true') !== 'false';
+      toggle.disabled = !('Notification' in window) || Notification.permission === 'denied';
+    }
+    document.querySelectorAll('.nss-hour-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.hour === hour);
+    });
+    if (status) status.textContent = 'Stav: ' + getPermStatus();
+  }
+  window.openNotifSettings = function() {
+    const ov = document.getElementById('notif-settings-overlay');
+    if (!ov) return;
+    syncNotifSettings();
+    ov.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeNotifSettings = function() {
+    const ov = document.getElementById('notif-settings-overlay');
+    if (ov) ov.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  document.getElementById('notif-settings-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) window.closeNotifSettings();
+  });
+  document.getElementById('nss-close-btn')?.addEventListener('click', window.closeNotifSettings);
+  document.getElementById('nss-toggle-input')?.addEventListener('change', async function() {
+    if (this.checked) {
+      if (!('Notification' in window)) { this.checked = false; return; }
+      if (Notification.permission === 'denied') { this.checked = false; syncNotifSettings(); return; }
+      if (Notification.permission === 'default') {
+        const p = await Notification.requestPermission();
+        if (p !== 'granted') { this.checked = false; syncNotifSettings(); return; }
+      }
+      safeLSSet('notif_enabled', 'true');
+    } else {
+      safeLSSet('notif_enabled', 'false');
+    }
+    syncNotifSettings();
+  });
+  document.querySelectorAll('.nss-hour-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      safeLSSet('notif_hour', this.dataset.hour);
+      syncNotifSettings();
+    });
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const ov = document.getElementById('notif-settings-overlay');
+      if (ov && ov.classList.contains('open')) window.closeNotifSettings();
+    }
+  });
+
+  // ── SWIPE: VERSE CARD SCALE ANIMATION + ENHANCED THRESHOLDS ──
+  (function() {
+    const MIN_SWIPE_PX = 50;
+    const MAX_VERTICAL_PX = 80;
+    const H_RATIO = 1.5;
+    const SWIPE_DEBOUNCE_MS = 350;
+
+    // Debounce window.go to prevent double-firing with existing ux35 swipe handler
+    if (typeof window.go === 'function' && !window._goIsDebounced) {
+      window._goIsDebounced = true;
+      const _origGo = window.go;
+      let _last = 0;
+      window.go = function(dir) {
+        const now = Date.now();
+        if (now - _last < SWIPE_DEBOUNCE_MS) return;
+        _last = now;
+        _origGo(dir);
+      };
+    }
+    const card = document.querySelector('.verse-card');
+    if (!card) return;
+    let sx = 0, sy = 0, tracking = false;
+    card.addEventListener('touchstart', e => {
+      const t = e.changedTouches[0];
+      if (!t) return;
+      sx = t.clientX; sy = t.clientY; tracking = true;
+      card.classList.remove('swipe-left', 'swipe-right');
+    }, {passive: true});
+    card.addEventListener('touchmove', e => {
+      if (!tracking) return;
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+        card.classList.toggle('swipe-left', dx < 0);
+        card.classList.toggle('swipe-right', dx > 0);
+      } else {
+        card.classList.remove('swipe-left', 'swipe-right');
+      }
+    }, {passive: true});
+    card.addEventListener('touchend', e => {
+      if (!tracking) return;
+      tracking = false;
+      card.classList.remove('swipe-left', 'swipe-right');
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      // Handle range ux35 misses: dy between 37–80px (ux35 only handles dy < 36)
+      if (Math.abs(dx) >= MIN_SWIPE_PX && Math.abs(dy) > 36 && Math.abs(dy) <= MAX_VERTICAL_PX && Math.abs(dx) > Math.abs(dy) * H_RATIO) {
+        if (typeof window.go === 'function') window.go(dx < 0 ? 1 : -1);
+      }
+    }, {passive: true});
+    card.addEventListener('touchcancel', () => {
+      tracking = false;
+      card.classList.remove('swipe-left', 'swipe-right');
+    }, {passive: true});
+  })();
+
+  // ── SWIPE: TAB NAVIGATION ON #app-panels ──
+  (function() {
+    const MIN_SWIPE_PX = 50;
+    const MAX_VERTICAL_PX = 80;
+    const H_RATIO = 1.5;
+    const MIN_H_MOVE = 10;
+    const panels = document.getElementById('app-panels');
+    if (!panels) return;
+    const TABS = ['guide', 'qa', 'note'];
+    function getCurTab() {
+      return TABS.find(t => {
+        const p = document.getElementById('panel-' + t);
+        return p && p.classList.contains('active');
+      }) || TABS[0];
+    }
+    let sx = 0, sy = 0, tracking = false, prevented = false;
+    panels.addEventListener('touchstart', e => {
+      const t = e.changedTouches[0];
+      if (!t) return;
+      sx = t.clientX; sy = t.clientY;
+      tracking = true; prevented = false;
+    }, {passive: true});
+    panels.addEventListener('touchmove', e => {
+      if (!tracking) return;
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      if (!prevented && Math.abs(dx) > Math.abs(dy) * H_RATIO && Math.abs(dx) > MIN_H_MOVE) {
+        prevented = true;
+        e.preventDefault();
+      }
+    }, {passive: false});
+    panels.addEventListener('touchend', e => {
+      if (!tracking) return;
+      tracking = false;
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) >= MIN_SWIPE_PX && Math.abs(dy) <= MAX_VERTICAL_PX && Math.abs(dx) > Math.abs(dy) * H_RATIO) {
+        const cur = getCurTab();
+        const idx = TABS.indexOf(cur);
+        const next = idx + (dx < 0 ? 1 : -1);
+        if (next >= 0 && next < TABS.length && typeof window.setTab === 'function') {
+          window.setTab(TABS[next]);
+        }
+      }
+    }, {passive: true});
+    panels.addEventListener('touchcancel', () => { tracking = false; }, {passive: true});
+  })();
+
+  // ── FIRST-TIME SWIPE HINT TOAST ──
+  function showSwipeHint() {
+    if (safeLS('swipe_hint_shown', '') === '1') return;
+    safeLSSet('swipe_hint_shown', '1');
+    setTimeout(() => showToast('← Přejeď pro navigaci →', 3200), 2800);
+  }
+
+  // ── INIT ──
+  function init() {
+    checkDailyNotif();
+    showSwipeHint();
+    // Default notif_enabled=true if permission already granted
+    if (('Notification' in window) && Notification.permission === 'granted') {
+      if (safeLS('notif_enabled', null) === null) safeLSSet('notif_enabled', 'true');
+    }
+    // Show prompt card if welcome modal is not already showing (same-day returning user)
+    const welcomeOpen = document.getElementById('welcome-overlay')?.classList.contains('open');
+    if (!welcomeOpen) setTimeout(showNotifPromptCard, 2500);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
