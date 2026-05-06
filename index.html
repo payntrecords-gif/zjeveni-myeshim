@@ -1315,7 +1315,7 @@ render();
 <script id="ux40-pwa-script">
 (function(){
   const LAST_ROUTE_KEY='myeshim-last-route';
-  const SUPPORTS_INSTALL_PROMPT='onbeforeinstallprompt' in window;
+  const SUPPORTS_BEFOREINSTALLPROMPT='onbeforeinstallprompt' in window;
   const standaloneMedia=window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
   let deferredPrompt=null;
   let installDismissed=false;
@@ -1355,7 +1355,7 @@ render();
     }
     const canPrompt=!!deferredPrompt;
     const showCard=canPrompt && !installDismissed;
-    const showHint=!canPrompt && isDesktop() && !SUPPORTS_INSTALL_PROMPT;
+    const showHint=!canPrompt && isDesktop() && !SUPPORTS_BEFOREINSTALLPROMPT;
     const card=$('installCard');
     if(card) card.classList.toggle('show', showCard);
     setTip(showHint ? 'Desktop testování: pokud prohlížeč nenabízí beforeinstallprompt, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.' : '');
