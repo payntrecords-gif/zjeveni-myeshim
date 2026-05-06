@@ -3,7 +3,7 @@
   "name": "MYEShim – Zjevení",
   "short_name": "MYEShim",
   "description": "Mobilní studijní aplikace pro knihu Zjevení s poznámkami, denním studiem a rychlým návratem.",
-  "start_url": "./?source=pwa",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "theme_color": "#e5458e",
