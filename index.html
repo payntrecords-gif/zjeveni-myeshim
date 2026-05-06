@@ -656,6 +656,84 @@ body.dark #bottomnav{box-shadow:0 -8px 30px rgba(0,0,0,.28)}
 
 
 <link rel="manifest" href="manifest.webmanifest">
+
+<style id="streak-style">
+/* ── STREAK BADGE ── */
+#streak-badge{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(229,69,142,.18);
+  border-radius:999px;padding:4px 10px 4px 7px;
+  font-size:.82rem;font-weight:900;color:#c53580;
+  backdrop-filter:blur(10px);
+  cursor:default;flex-shrink:0;
+  transition:transform .14s ease;
+}
+#streak-badge:hover{transform:scale(1.06)}
+#streak-badge .sb-fire{font-size:1rem;line-height:1}
+#streak-badge .sb-num{font-size:.88rem;font-weight:900}
+body.dark #streak-badge{background:rgba(40,24,36,.72);border-color:rgba(255,150,200,.18);color:#ff8cc2}
+
+/* ── WELCOME MODAL ── */
+#welcome-overlay{
+  position:fixed;inset:0;z-index:80;
+  background:rgba(0,0,0,.45);
+  display:none;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#welcome-overlay.open{display:flex;animation:wov-in .22s ease}
+@keyframes wov-in{from{opacity:0}to{opacity:1}}
+#welcome-sheet{
+  width:100%;max-width:480px;
+  background:#fff;border-radius:28px 28px 0 0;
+  padding:28px 20px 32px;
+  animation:wsh-up .28s cubic-bezier(.22,1,.36,1);
+  position:relative;
+}
+body.dark #welcome-sheet{background:#1c161d}
+@keyframes wsh-up{from{transform:translateY(60px);opacity:.4}to{transform:translateY(0);opacity:1}}
+.ws-handle{width:40px;height:4px;border-radius:999px;background:rgba(0,0,0,.12);margin:0 auto 18px}
+body.dark .ws-handle{background:rgba(255,255,255,.15)}
+.ws-streak{font-size:2rem;text-align:center;margin-bottom:4px}
+.ws-streak-label{text-align:center;font-size:1.02rem;font-weight:900;color:var(--pink,#e5458e);margin-bottom:14px}
+.ws-verse-ref{font-size:.78rem;font-weight:800;color:var(--sub,#7a6a76);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.ws-verse{
+  background:linear-gradient(160deg,#f05ca2 0%,#de4089 100%);
+  border-radius:18px;padding:16px 16px;margin-bottom:14px;
+  font-size:1rem;line-height:1.6;color:#fff;font-weight:500;
+}
+body.dark .ws-verse{background:linear-gradient(160deg,#7b1c47 0%,#5a1034 100%)}
+.ws-motto{font-size:.92rem;color:var(--sub,#7a6a76);text-align:center;margin-bottom:18px;line-height:1.5;font-style:italic}
+body.dark .ws-motto{color:#cab5c3}
+.ws-close{
+  width:100%;border:none;border-radius:18px;padding:14px;
+  background:linear-gradient(135deg,#f05ca2,#de4089);
+  color:#fff;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;
+}
+.ws-close:active{transform:scale(.98)}
+
+/* ── MILESTONE ANIMATION ── */
+@keyframes milestone-pulse{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.18)}
+  70%{transform:scale(.94)}
+  100%{transform:scale(1)}
+}
+.milestone-fire{animation:milestone-pulse .55s cubic-bezier(.22,1,.36,1)}
+#milestone-confetti{
+  position:fixed;inset:0;z-index:90;pointer-events:none;overflow:hidden;
+}
+.confetti-piece{
+  position:absolute;width:10px;height:10px;border-radius:2px;
+  animation:confetti-fall 1.1s ease-in forwards;
+  opacity:0;
+}
+@keyframes confetti-fall{
+  0%{opacity:1;transform:translateY(-20px) rotate(0deg)}
+  80%{opacity:1}
+  100%{opacity:0;transform:translateY(80vh) rotate(540deg)}
+}
+</style>
 <meta name="theme-color" content="#e5458e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -815,6 +893,10 @@ body.dark #nav-pill button{
     </button>
   </div>
   <div class="tb-brand">MYEShim</div>
+  <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak">
+    <span class="sb-fire">🔥</span>
+    <span class="sb-num" id="streak-num">0</span>
+  </div>
 </div>
 
 
@@ -1435,6 +1517,240 @@ render();
   } else {
     setupInstall(); attachProgressTracking(); registerSW();
   }
+})();
+</script>
+
+<!-- WELCOME MODAL -->
+<div id="welcome-overlay" role="dialog" aria-modal="true" aria-label="Vítej zpět">
+  <div id="welcome-sheet">
+    <div class="ws-handle"></div>
+    <div class="ws-streak" id="ws-streak-emoji">🔥</div>
+    <div class="ws-streak-label" id="ws-streak-label">Jsi tady 1 den v řadě!</div>
+    <div class="ws-verse-ref" id="ws-verse-ref">Dnešní verš</div>
+    <div class="ws-verse" id="ws-verse-text"></div>
+    <div class="ws-motto" id="ws-motto"></div>
+    <button class="ws-close" id="ws-close-btn" onclick="closeWelcome()">Začít studovat 📖</button>
+  </div>
+</div>
+
+<!-- CONFETTI CONTAINER (milestone) -->
+<div id="milestone-confetti" hidden></div>
+
+<script id="push-config">
+const VAPID_PUBLIC_KEY = 'PLACEHOLDER_VAPID_KEY';
+const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';
+</script>
+
+<script id="streak-push-script">
+(function(){
+  // ── STREAK LOGIC ──
+  const MOTTOS = [
+    'Slovo Boží je živé a mocné. Pokračuj dál! 💪',
+    'Každý den se dostáváš blíže k hlubšímu porozumění.',
+    'Věrnost v malých věcech otevírá velké dveře.',
+    'Dnešní verš je tvůj průvodce na dnešní den.',
+    'Vytrvalost v studiu Písma přináší ovoce.',
+    'Jsi na správné cestě – MYEShim tě podporuje! 🙏',
+    'Malé kroky denně vedou k velkým proměnám.',
+    'Boží slovo svítí na každý krok tvé cesty.',
+  ];
+  const MILESTONES = {7:'Týden v řadě! 🎉',14:'Dva týdny studia! 🏆',30:'Celý měsíc! 🌟',60:'60 dní! Neuvěřitelné! 👑'};
+  const CONFETTI_PIECE_COUNT = 38;
+
+  function safeLS(key, fallback) {
+    try { const v = localStorage.getItem(key); return v === null ? fallback : v; } catch(e) { return fallback; }
+  }
+  function safeLSSet(key, value) {
+    try { localStorage.setItem(key, value); } catch(e) {}
+  }
+
+  function pickDailyVerse() {
+    if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
+    // Use local midnight-based day index to avoid UTC timezone mismatch
+    const localMidnight = new Date();
+    localMidnight.setHours(0, 0, 0, 0);
+    const day = Math.floor(localMidnight.getTime() / 86400000);
+    return window.VERSES[day % window.VERSES.length];
+  }
+
+  function updateStreakBadge(streak) {
+    const el = document.getElementById('streak-num');
+    if (el) el.textContent = streak;
+    const badge = document.getElementById('streak-badge');
+    if (badge) badge.title = streak === 1 ? '1 den studia' : streak + ' dní v řadě';
+  }
+
+  function showMilestone(streak) {
+    const msg = MILESTONES[streak];
+    if (!msg) return;
+    const fire = document.querySelector('#streak-badge .sb-fire');
+    if (fire) { fire.classList.remove('milestone-fire'); void fire.offsetWidth; fire.classList.add('milestone-fire'); }
+    launchConfetti();
+    if (typeof window.toast === 'function') window.toast(msg);
+    else {
+      const el = document.getElementById('ux35-toast');
+      if (el) { el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2600); }
+    }
+  }
+
+  function launchConfetti() {
+    const container = document.getElementById('milestone-confetti');
+    if (!container) return;
+    container.hidden = false;
+    container.innerHTML = '';
+    const colors = ['#e5458e','#7b3ef4','#f0b429','#2ecc71','#3498db','#ff6b6b'];
+    for (let i = 0; i < CONFETTI_PIECE_COUNT; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      p.style.cssText = [
+        'left:' + (Math.random() * 100) + 'vw',
+        'background:' + colors[Math.floor(Math.random() * colors.length)],
+        'animation-delay:' + (Math.random() * 0.55) + 's',
+        'animation-duration:' + (0.8 + Math.random() * 0.6) + 's',
+        'width:' + (7 + Math.random() * 8) + 'px',
+        'height:' + (7 + Math.random() * 8) + 'px',
+        'border-radius:' + (Math.random() > 0.5 ? '50%' : '2px'),
+      ].join(';');
+      container.appendChild(p);
+    }
+    setTimeout(() => { container.hidden = true; container.innerHTML = ''; }, 2000);
+  }
+
+  function showWelcomeModal(streak, isNewDay) {
+    if (!isNewDay) return;
+    const verse = pickDailyVerse();
+    const overlay = document.getElementById('welcome-overlay');
+    const streakLabel = document.getElementById('ws-streak-label');
+    const verseText = document.getElementById('ws-verse-text');
+    const verseRef = document.getElementById('ws-verse-ref');
+    const motto = document.getElementById('ws-motto');
+    const streakEmoji = document.getElementById('ws-streak-emoji');
+    if (!overlay) return;
+    if (streakLabel) {
+      if (streak >= 30) streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' dní v řadě!';
+      else if (streak >= 7) streakLabel.textContent = 'Úžasné! 🔥 ' + streak + ' dní v řadě!';
+      else if (streak > 1) streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' dní v řadě!';
+      else streakLabel.textContent = 'Vítej! Začínáš svůj studijní streak 🔥';
+    }
+    if (streakEmoji) {
+      streakEmoji.textContent = streak >= 30 ? '👑' : streak >= 14 ? '🏆' : streak >= 7 ? '🎉' : '🔥';
+    }
+    if (verse) {
+      if (verseRef) verseRef.textContent = 'Dnešní verš — Zj ' + verse.c + ':' + verse.v;
+      if (verseText) verseText.textContent = verse.t;
+    } else {
+      if (verseRef) verseRef.textContent = 'Dnešní verš';
+      if (verseText) verseText.textContent = 'Otevři libovolný verš a začni studovat.';
+    }
+    if (motto) motto.textContent = MOTTOS[Math.floor(Math.random() * MOTTOS.length)];
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (MILESTONES[streak]) setTimeout(() => showMilestone(streak), 600);
+  }
+
+  window.closeWelcome = function() {
+    const overlay = document.getElementById('welcome-overlay');
+    if (overlay) overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  document.getElementById('welcome-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) window.closeWelcome();
+  });
+
+  function initStreak() {
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    const lastOpen = safeLS('myeshim-lastOpen', '');
+    let streak = parseInt(safeLS('myeshim-streak', '0'), 10) || 0;
+    let isNewDay = false;
+
+    if (lastOpen === today) {
+      // already opened today – no change
+    } else if (lastOpen === yesterday) {
+      streak += 1;
+      isNewDay = true;
+    } else {
+      streak = 1;
+      isNewDay = true;
+    }
+    safeLSSet('myeshim-streak', streak);
+    safeLSSet('myeshim-lastOpen', today);
+    updateStreakBadge(streak);
+    // Show welcome modal on first open of day
+    showWelcomeModal(streak, isNewDay);
+  }
+
+  // ── PUSH NOTIFICATIONS ──
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+  }
+
+  async function subscribeToPush(registration) {
+    if (!('PushManager' in window)) return;
+    const vapidKey = (typeof VAPID_PUBLIC_KEY !== 'undefined') ? VAPID_PUBLIC_KEY : '';
+    if (!vapidKey || vapidKey === 'PLACEHOLDER_VAPID_KEY') return; // not configured yet
+    try {
+      const existing = await registration.pushManager.getSubscription();
+      if (existing) { safeLSSet('myeshim-push-sub', JSON.stringify(existing)); return; }
+      const sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey)
+      });
+      safeLSSet('myeshim-push-sub', JSON.stringify(sub));
+    } catch(e) {}
+  }
+
+  async function requestPushPermission() {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    if (Notification.permission === 'granted') {
+      navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+      return;
+    }
+    if (Notification.permission === 'denied') return;
+    // Ask after a short delay so as not to interrupt first visit UX
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+    }
+  }
+
+  // Listen for messages from SW (navigate to verse)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'NAVIGATE_TO_REF') {
+        const ref = event.data.ref;
+        if (ref && Array.isArray(window.VERSES)) {
+          const m = ref.match(/(\d+):(\d+)/);
+          if (m) {
+            const idx = window.VERSES.findIndex(v => v.c == m[1] && v.v == m[2]);
+            if (idx >= 0 && typeof window.go === 'function') {
+              const cur = typeof window.state !== 'undefined' ? window.state.idx : 0;
+              window.go(idx - cur);
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function init() {
+    if (Array.isArray(window.VERSES) && window.VERSES.length) {
+      initStreak();
+    } else {
+      // VERSES defined in the same script block; retry once after short delay
+      setTimeout(() => {
+        if (Array.isArray(window.VERSES) && window.VERSES.length) initStreak();
+      }, 200);
+    }
+    // Request push permission after a delay
+    setTimeout(requestPushPermission, 4000);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
