@@ -1767,7 +1767,7 @@ const FCM_SENDER_ID = '360259005980';
       if (streak >= 30) streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' dní v řadě!';
       else if (streak >= 7) streakLabel.textContent = 'Úžasné! 🔥 ' + streak + ' dní v řadě!';
       else if (streak > 1) streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' dní v řadě!';
-      else streakLabel.textContent = 'Jsi tady 🔥 1 den v řadě!';
+      else streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' den v řadě!';
     }
     if (streakEmoji) {
       streakEmoji.textContent = streak >= 30 ? '👑' : streak >= 14 ? '🏆' : streak >= 7 ? '🎉' : '🔥';
@@ -1936,7 +1936,7 @@ const FCM_SENDER_ID = '360259005980';
   function scheduleWelcomeNotification() {
     if (safeLS('myeshim-notif-welcomed', '')) return; // already sent
     safeLSSet('myeshim-notif-welcomed', '1');
-    // Show welcome notification after ~3 minutes (within 5 min as required)
+    // Show welcome notification after ~3 minutes (within the 5-minute first-launch requirement)
     setTimeout(() => {
       navigator.serviceWorker.ready.then(reg => {
         reg.showNotification('Vítej v MYEShim! 🎉', {
