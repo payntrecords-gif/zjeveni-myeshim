@@ -22,6 +22,7 @@
       "src": "screenshots/home-mobile.png",
       "sizes": "540x1200",
       "type": "image/png",
+      "form_factor": "narrow",
       "label": "Mobilní čtení a poznámky v aplikaci MYEShim"
     },
     {
