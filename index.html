@@ -264,9 +264,9 @@ body.dark .ux35-status{color:var(--sub)}
   #ux35-progress-wrap{max-width:820px}
 }
 @media print{
-  #topbar,#bottomnav,#nav-ov,.tabs,.note-save,.ux35-dock,#ux35-toast,#ux35-progress-wrap{display:none !important}
+  #topbar,#bottomnav,#nav-ov,.tabs,#app-tabs-outer,.note-save,.ux35-dock,#ux35-toast,#ux35-progress-wrap{display:none !important}
   html,body{background:#fff !important;color:#000 !important}
-  #app{max-width:none;padding:0 0 0 0}
+  #app,#app-panels{max-width:none;padding:0 0 0 0}
   .panel{display:block !important}
   .guide-card,.qa-card,.verse-card,.note-ta{box-shadow:none !important;border:1px solid #ddd !important}
   .verse-card{background:#fff !important;color:#000 !important}
@@ -669,7 +669,7 @@ body.dark #bottomnav{box-shadow:0 -8px 30px rgba(0,0,0,.28)}
   border-radius:999px;padding:4px 8px;
   font-size:clamp(0.7rem,2.5vw,0.88rem);font-weight:900;color:#c53580;
   backdrop-filter:blur(10px);
-  cursor:default;flex-shrink:0;
+  cursor:pointer;flex-shrink:0;
   max-width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
   transition:transform .14s ease;
 }
@@ -892,6 +892,100 @@ body.dark #nav-pill button{
 #ux35-progress-wrap{display:none !important}
 </style>
 
+
+<style id="feature-improvements-style">
+/* ── TAB BAR RESTRUCTURE (Fix #3) ── */
+/* App div now only holds verse header; remove bottom padding for panels */
+#app{padding-bottom:0 !important}
+
+/* Sticky outer wrapper for tab bar */
+#app-tabs-outer{
+  position:sticky;
+  top:calc(56px + env(safe-area-inset-top));
+  z-index:18;
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+  padding:8px 12px 0;
+}
+body.dark #app-tabs-outer{background:#0d0f14}
+
+/* Tabs inside the outer – override internal sticky, remove card look */
+#app-tabs-outer .tabs{
+  position:static !important;
+  top:auto !important;
+  z-index:auto !important;
+  margin-bottom:0 !important;
+  max-width:720px;
+  margin-left:auto;
+  margin-right:auto;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+}
+
+/* Content panels wrapper */
+#app-panels{
+  max-width:720px;
+  margin:0 auto;
+  padding:14px 12px 182px;
+}
+@media (max-width:420px){
+  #app-panels{padding:12px 10px 176px}
+  #app-tabs-outer .tabs{max-width:none}
+}
+@media (min-width:600px){
+  #app-panels{max-width:680px}
+  #app-tabs-outer .tabs{max-width:680px}
+}
+@media (min-width:900px){
+  #app-panels{max-width:820px}
+  #app-tabs-outer .tabs{max-width:820px}
+}
+
+/* ── STREAK DETAIL MODAL (Fix #2) ── */
+#streak-detail-overlay{
+  position:fixed;inset:0;z-index:80;
+  background:rgba(0,0,0,.55);
+  display:none;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#streak-detail-overlay.open{display:flex;animation:wov-in .22s ease}
+#streak-detail-sheet{
+  width:100%;max-width:480px;
+  background:#fff;
+  border-radius:28px 28px 0 0;
+  padding:28px 20px 32px;
+  animation:wsh-up .28s cubic-bezier(.22,1,.36,1);
+  position:relative;
+}
+body.dark #streak-detail-sheet{background:#1c161d;color:#f8eef5}
+.sd-handle{width:40px;height:4px;border-radius:999px;background:rgba(0,0,0,.12);margin:0 auto 18px}
+body.dark .sd-handle{background:rgba(255,255,255,.15)}
+.sd-title{font-size:1.15rem;font-weight:900;color:#e5458e;text-align:center;margin-bottom:16px}
+body.dark .sd-title{color:#ff8cc2}
+.sd-count{font-size:2rem;font-weight:900;color:#1c1820;text-align:center;margin-bottom:8px}
+body.dark .sd-count{color:#f8eef5}
+.sd-best{font-size:.92rem;font-weight:700;color:#7a6a76;text-align:center;margin-bottom:14px}
+body.dark .sd-best{color:#cab5c3}
+.sd-motto{font-size:.92rem;color:#7a6a76;text-align:center;margin-bottom:20px;line-height:1.5;font-style:italic}
+body.dark .sd-motto{color:#cab5c3}
+.sd-bible-link{
+  display:block;text-align:center;
+  padding:13px;border-radius:18px;
+  border:1.5px solid rgba(229,69,142,.3);
+  color:#e5458e;font-size:.97rem;font-weight:900;
+  text-decoration:none;margin-bottom:10px;
+}
+body.dark .sd-bible-link{border-color:rgba(255,140,194,.3);color:#ff8cc2;background:rgba(255,140,194,.05)}
+.sd-bible-link:active{transform:scale(.98)}
+.sd-close{
+  width:100%;border:none;border-radius:18px;padding:14px;
+  background:linear-gradient(135deg,#f05ca2,#de4089);
+  color:#fff;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;
+}
+.sd-close:active{transform:scale(.98)}
+</style>
+
 </head>
 <body>
 <div id="topbar">
@@ -906,7 +1000,7 @@ body.dark #nav-pill button{
     </button>
   </div>
   <div class="tb-brand">MYEShim</div>
-  <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak">
+  <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
     <span class="sb-fire">🔥</span>
     <span class="sb-num" id="streak-num">0</span>
   </div>
@@ -930,11 +1024,15 @@ body.dark #nav-pill button{
     <div class="vc-ref" id="vc-ref"></div>
     <div class="vc-text" id="vc-text"></div>
   </div>
+</div>
+<div id="app-tabs-outer">
   <div class="tabs">
     <button id="tab-guide" onclick="setTab('guide')">Návod</button>
     <button id="tab-qa" onclick="setTab('qa')">Q&amp;A</button>
     <button id="tab-note" onclick="setTab('note')">Poznámky</button>
   </div>
+</div>
+<div id="app-panels">
   <div id="panel-guide" class="panel"></div>
   <div id="panel-qa" class="panel"></div>
   <div id="panel-note" class="panel"></div>
@@ -1556,6 +1654,19 @@ render();
 </script>
 
 <!-- WELCOME MODAL -->
+<!-- STREAK DETAIL MODAL -->
+<div id="streak-detail-overlay" role="dialog" aria-modal="true" aria-label="Tvůj streak">
+  <div id="streak-detail-sheet">
+    <div class="sd-handle"></div>
+    <div class="sd-title">Tvůj streak 🔥</div>
+    <div class="sd-count" id="sd-count">0 dní v řadě</div>
+    <div class="sd-best" id="sd-best">Nejvíce: 0 dní</div>
+    <div class="sd-motto">Čteš Bibli každý den — tak dál!</div>
+    <a class="sd-bible-link" href="https://www.bible21.cz" target="_blank" rel="noopener noreferrer">📖 Číst v online Bibli</a>
+    <button class="sd-close" onclick="closeStreakDetail()">Hotovo</button>
+  </div>
+</div>
+
 <div id="welcome-overlay" role="dialog" aria-modal="true" aria-label="Vítej zpět">
   <div id="welcome-sheet">
     <div class="ws-handle"></div>
@@ -1694,24 +1805,71 @@ const FCM_SENDER_ID = '360259005980';
     if (e.target === this) window.closeWelcome();
   });
 
+  // ── STREAK DETAIL MODAL ──
+  function pluralDays(n) {
+    if (n === 1) return n + ' den v řadě';
+    if (n >= 2 && n <= 4) return n + ' dny v řadě';
+    return n + ' dní v řadě';
+  }
+  function pluralBest(n) {
+    if (n === 1) return n + ' den';
+    if (n >= 2 && n <= 4) return n + ' dny';
+    return n + ' dní';
+  }
+
+  window.openStreakDetail = function() {
+    const overlay = document.getElementById('streak-detail-overlay');
+    if (!overlay) return;
+    const count = parseInt(safeLS('streak_count', '0'), 10) || 0;
+    const best = parseInt(safeLS('streak_best', '0'), 10) || 0;
+    const countEl = document.getElementById('sd-count');
+    const bestEl = document.getElementById('sd-best');
+    if (countEl) countEl.textContent = pluralDays(count);
+    if (bestEl) bestEl.textContent = 'Nejvíce: ' + pluralBest(best);
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeStreakDetail = function() {
+    const overlay = document.getElementById('streak-detail-overlay');
+    if (overlay) overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  document.getElementById('streak-detail-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) window.closeStreakDetail();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') window.closeStreakDetail();
+  });
+
+  // Wire keyboard activation on streak badge (Enter / Space)
+  document.getElementById('streak-badge')?.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.openStreakDetail(); }
+  });
+
   function initStreak() {
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    const lastOpen = safeLS('myeshim-lastOpen', '');
-    let streak = parseInt(safeLS('myeshim-streak', '0'), 10) || 0;
+    const today = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const lastDate = safeLS('streak_last_date', '');
+    let streak = parseInt(safeLS('streak_count', '0'), 10) || 0;
+    let best = parseInt(safeLS('streak_best', '0'), 10) || 0;
     let isNewDay = false;
 
-    if (lastOpen === today) {
+    if (lastDate === today) {
       // already opened today – no change
-    } else if (lastOpen === yesterday) {
+    } else if (lastDate === yesterday) {
       streak += 1;
       isNewDay = true;
     } else {
       streak = 1;
       isNewDay = true;
     }
-    safeLSSet('myeshim-streak', streak);
-    safeLSSet('myeshim-lastOpen', today);
+    if (streak > best) best = streak;
+    safeLSSet('streak_count', streak);
+    safeLSSet('streak_last_date', today);
+    safeLSSet('streak_best', best);
     updateStreakBadge(streak);
     // Show welcome modal on first open of day
     showWelcomeModal(streak, isNewDay);
