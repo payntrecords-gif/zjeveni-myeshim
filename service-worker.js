@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myeshim-v41-cache';
+const CACHE_NAME = 'myeshim-v42-cache';
 const APP_SHELL = [
   './',
   './index.html',
