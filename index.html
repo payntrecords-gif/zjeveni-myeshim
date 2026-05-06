@@ -1310,7 +1310,7 @@ render();
     <button id="installBtn" class="install-btn" type="button">Instalovat</button>
   </div>
 </div>
-<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabídne systémové instalační tlačítko, otevři PWA v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
+<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabídne systémové instalační tlačítko, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
 
 <script id="ux40-pwa-script">
 (function(){
@@ -1358,7 +1358,7 @@ render();
     const showHint=!canPrompt && isDesktop() && !SUPPORTS_INSTALL_PROMPT;
     const card=$('installCard');
     if(card) card.classList.toggle('show', showCard);
-    setTip(showHint ? 'Desktop testování: pokud prohlížeč nenabízí beforeinstallprompt, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“. Bez platného Digital Asset Links bude Android TWA stejně padat do Custom Tab režimu.' : '');
+    setTip(showHint ? 'Desktop testování: pokud prohlížeč nenabízí beforeinstallprompt, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.' : '');
   }
   function saveProgress(){
     try{
