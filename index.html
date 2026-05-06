@@ -216,7 +216,7 @@ body.dark .ux35-btn{background:#221b25;color:#f7d3e3;border-color:#3a2d39}
 body.dark .ux35-btn:hover{background:#2a2230}
 body.dark .ux35-status{color:var(--sub)}
 
-#topbar{padding-top:max(11px,calc(11px + env(safe-area-inset-top)))}
+#topbar{padding-top:max(11px,calc(11px + env(safe-area-inset-top)));overflow:hidden}
 #app{max-width:760px;padding-bottom:170px}
 .verse-card,.guide-card,.qa-card,.note-ta,.note-save,.tabs,#nav-pill button{box-shadow:var(--shadow-soft)}
 .vc-text,.qa-ans,.gs-body p,.note-ta{hyphens:auto}
@@ -667,7 +667,12 @@ body.dark #bottomnav{box-shadow:0 -8px 30px rgba(0,0,0,.28)}
   font-size:.82rem;font-weight:900;color:#c53580;
   backdrop-filter:blur(10px);
   cursor:default;flex-shrink:0;
+  max-width:fit-content;overflow:hidden;
+  margin-right:env(safe-area-inset-right,8px);
   transition:transform .14s ease;
+}
+@media (max-width:380px){
+  .tb-brand{display:none}
 }
 #streak-badge:hover{transform:scale(1.06)}
 #streak-badge .sb-fire{font-size:1rem;line-height:1}
@@ -711,6 +716,12 @@ body.dark .ws-motto{color:#cab5c3}
   color:#fff;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;
 }
 .ws-close:active{transform:scale(.98)}
+.ws-notif-btn{
+  width:100%;border:1.5px solid rgba(229,69,142,.3);border-radius:18px;padding:13px;
+  background:transparent;color:var(--pink,#e5458e);font:inherit;font-size:.97rem;font-weight:900;cursor:pointer;margin-top:8px;
+}
+.ws-notif-btn:active{transform:scale(.98);background:rgba(229,69,142,.06)}
+body.dark .ws-notif-btn{border-color:rgba(255,140,194,.3);color:#ff8cc2}
 
 /* ── MILESTONE ANIMATION ── */
 @keyframes milestone-pulse{
@@ -1512,6 +1523,10 @@ render();
       navigator.serviceWorker.register('service-worker.js').catch(function(){});
     });
   }
+  // TWA / standalone mode detection
+  if(!isStandalone()){
+    console.warn('App neběží ve standalone módu — zkontroluj assetlinks.json a Digital Asset Links na produkční doméně.');
+  }
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded', function(){ setupInstall(); attachProgressTracking(); registerSW(); });
   } else {
@@ -1530,6 +1545,7 @@ render();
     <div class="ws-verse" id="ws-verse-text"></div>
     <div class="ws-motto" id="ws-motto"></div>
     <button class="ws-close" id="ws-close-btn" onclick="closeWelcome()">Začít studovat 📖</button>
+    <button id="ws-notif-btn" class="ws-notif-btn" onclick="handleNotifRequest()" style="display:none">🔔 Povolit denní připomínky</button>
   </div>
 </div>
 
@@ -1645,6 +1661,7 @@ const FCM_SENDER_ID = '360259005980';
     if (motto) motto.textContent = MOTTOS[Math.floor(Math.random() * MOTTOS.length)];
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    updateNotifBtn();
     if (MILESTONES[streak]) setTimeout(() => showMilestone(streak), 600);
   }
 
@@ -1691,7 +1708,7 @@ const FCM_SENDER_ID = '360259005980';
   async function subscribeToPush(registration) {
     if (!('PushManager' in window)) return;
     const vapidKey = (typeof VAPID_PUBLIC_KEY !== 'undefined') ? VAPID_PUBLIC_KEY : '';
-    if (!vapidKey || vapidKey === 'BNkpx_SJASrkt48mXCZQBoDRJt_CUlDNXiM4MfJO6aO0Qc1dc84pYcNLXCVQj23EPJKCuLm15QOMJLCleeol_fk') return; // not configured yet
+    if (!vapidKey) return;
     try {
       const existing = await registration.pushManager.getSubscription();
       if (existing) { safeLSSet('myeshim-push-sub', JSON.stringify(existing)); return; }
@@ -1699,9 +1716,30 @@ const FCM_SENDER_ID = '360259005980';
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidKey)
       });
+      console.log('Push sub OK:', sub);
       safeLSSet('myeshim-push-sub', JSON.stringify(sub));
-    } catch(e) {}
+    } catch(e) {
+      console.error('Push sub selhal:', e);
+    }
   }
+
+  function updateNotifBtn() {
+    const btn = document.getElementById('ws-notif-btn');
+    if (!btn) return;
+    const perm = ('Notification' in window) ? Notification.permission : 'denied';
+    btn.style.display = (perm === 'default') ? '' : 'none';
+  }
+
+  window.handleNotifRequest = async function() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'denied') {
+      const t = document.getElementById('ux35-toast');
+      if (t) { t.textContent = 'Notifikace jsou blokovány — povolte je v nastavení prohlížeče'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3200); }
+      return;
+    }
+    await requestPushPermission();
+    updateNotifBtn();
+  };
 
   async function requestPushPermission() {
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return;

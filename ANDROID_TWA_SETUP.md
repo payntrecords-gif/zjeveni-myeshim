@@ -105,7 +105,49 @@ Pokud se zobrazí browser UI nebo adresní řádek, obvykle je problém v někte
 - fingerprint signing key neodpovídá buildu nasazenému v zařízení,
 - uživatel byl přesměrovaný mimo deklarovaný scope PWA.
 
-## 9. Doporučený release checklist
+## 9. Proč vidím adresní lištu (browser UI)?
+
+Pokud se po instalaci APK zobrazuje adresní lišta Chrome nebo browser UI namísto fullscreen aplikace, jde vždy o problém s **Digital Asset Links** ověřením.
+
+### Jak TWA fullscreen funguje
+
+TWA (Trusted Web Activity) se otevírá jako fullscreen aplikace **pouze** tehdy, když Android úspěšně ověří vlastnictví domény přes soubor `/.well-known/assetlinks.json`. Pokud ověření selže, Chrome pád zpět do **Custom Tab** režimu — viz adresní lišta.
+
+### Nejčastější příčiny
+
+1. **Soubor `assetlinks.json` není nasazený na produkční doméně**
+   - Musí být dostupný na přesné URL: `https://TVOJE-DOMENA/.well-known/assetlinks.json`
+   - Musí vracet HTTP 200 (žádné přesměrování)
+
+2. **Nesprávný SHA-256 fingerprint**
+   - Fingerprint v `assetlinks.json` musí přesně odpovídat signing key použitého při buildu APK.
+   - Testovací debug build má jiný fingerprint než release build.
+   - Pokud používáš Google Play App Signing, musíš použít fingerprint z Play Console (nikoliv lokální keystore).
+
+3. **Nesprávný `package_name`**
+   - Hodnota `package_name` v `assetlinks.json` musí být identická s Android application ID.
+
+### Jak ověřit assetlinks.json
+
+```bash
+# Zkontroluj dostupnost
+curl -I https://TVOJE-DOMENA/.well-known/assetlinks.json
+
+# Zkontroluj obsah
+curl https://TVOJE-DOMENA/.well-known/assetlinks.json
+```
+
+Alternativně použij [Digital Asset Links tester](https://developers.google.com/digital-asset-links/tools/generator) od Google.
+
+### Šablona `assetlinks.json`
+
+Soubor `/.well-known/assetlinks.json` v tomto repozitáři je šablona. Před finálním buildem **musíš** nahradit:
+- `cz.payntrecords.myeshim` — skutečným Android `package_name` tvé aplikace
+- `REPLACE_WITH_RELEASE_OR_PLAY_APP_SIGNING_SHA256` — skutečným SHA-256 fingerprint release signing key
+
+> **Bez správného SHA-256 fingerprintu APK nebude běžet fullscreen** a místo toho se zobrazí Chrome Custom Tab s adresní lištou.
+
+## 10. Doporučený release checklist
 
 - [ ] PWA je nasazená přes HTTPS
 - [ ] Manifest a service worker jsou bez chyb
