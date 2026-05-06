@@ -56,7 +56,7 @@ Hledej hodnotu `SHA256:`. Tu vlož do `sha256_cert_fingerprints` v `/.well-known
 ### Varianta B – Play App Signing
 Pokud používáš Google Play App Signing, po založení aplikace otevři v Play Console sekci:
 
-**Setup / App integrity**
+**Setup / App integrity:**
 
 Zkopíruj SHA-256 fingerprint pro app signing key a použij ho v `assetlinks.json`.
 
@@ -65,7 +65,7 @@ Zkopíruj SHA-256 fingerprint pro app signing key a použij ho v `assetlinks.jso
 Soubor musí být veřejně dostupný přes přesnou URL:
 
 ```
-https://TVE-DOMENA/.well-known/assetlinks.json
+https://TVOJE-DOMENA/.well-known/assetlinks.json
 ```
 
 Po nasazení ověř:
