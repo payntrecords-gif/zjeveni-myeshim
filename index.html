@@ -673,11 +673,21 @@ body.dark #bottomnav{box-shadow:0 -8px 30px rgba(0,0,0,.28)}
 .install-btn,.install-dismiss{border:0;border-radius:14px;padding:11px 14px;font-weight:900;font-size:13px;cursor:pointer}
 .install-btn{background:linear-gradient(135deg,#e5458e,#ef6ca7);color:#fff;box-shadow:0 10px 20px rgba(229,69,142,.24)}
 .install-dismiss{background:#f5e8ef;color:#5e4354}
-.pwa-tip{font-size:12px;color:#7b6673;text-align:center;padding:10px 18px 0}
+.pwa-tip{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:71;max-width:min(92vw,540px);padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.86);border:1px solid rgba(229,69,142,.12);box-shadow:0 10px 28px rgba(32,17,29,.10);backdrop-filter:blur(14px);font-size:12px;line-height:1.35;color:#7b6673;text-align:center}
 body.dark .install-card{background:rgba(34,24,31,.96);border-color:rgba(255,255,255,.08);box-shadow:0 14px 34px rgba(0,0,0,.35)}
 body.dark .install-title{color:#fff3f8}
 body.dark .install-sub,body.dark .pwa-tip{color:#d6bfcc}
 body.dark .install-dismiss{background:#4a3341;color:#f7eaf1}
+body.dark .pwa-tip{background:rgba(34,24,31,.9);border-color:rgba(255,255,255,.08);box-shadow:0 10px 28px rgba(0,0,0,.25)}
+@media (min-width:721px){
+  .install-card{left:auto;right:24px;bottom:24px;max-width:430px}
+  .install-actions{flex-shrink:0}
+}
+@media (max-width:640px){
+  .install-card{flex-direction:column;align-items:stretch}
+  .install-actions{justify-content:stretch}
+  .install-btn,.install-dismiss{flex:1}
+}
 </style>
 
 
@@ -1300,50 +1310,56 @@ render();
     <button id="installBtn" class="install-btn" type="button">Instalovat</button>
   </div>
 </div>
-<div id="pwaTip" class="pwa-tip" hidden>Otevři nabídku prohlížeče a zvol „Přidat na plochu“.</div>
+<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabízí instalační nabídku, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
 
 <script id="ux40-pwa-script">
 (function(){
-  const STORAGE_KEY='myeshim-pwa-install-dismissed';
   const LAST_ROUTE_KEY='myeshim-last-route';
+  const SUPPORTS_BEFOREINSTALLPROMPT='onbeforeinstallprompt' in window;
+  const standaloneMedia=window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
   let deferredPrompt=null;
+  let installDismissed=false;
   function $(id){return document.getElementById(id)}
-  function storageSet(key,val){ try{ localStorage.setItem(key,val); }catch(e){} }
   function isMobile(){
     return window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
   }
-  function isStandalone(){
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  function isDesktop(){
+    return !isMobile();
   }
-  function showManualTip(){
+  function isStandalone(){
+    return (standaloneMedia && standaloneMedia.matches) || window.navigator.standalone === true || document.referrer.startsWith('android-app://');
+  }
+  function setTip(text){
     const tip=$('pwaTip');
     if(!tip) return;
-    tip.textContent='Otevři nabídku prohlížeče a zvol „Přidat na plochu“. Potom potvrď instalaci.';
-    tip.hidden=false;
+    tip.hidden=!text;
+    if(text) tip.textContent=text;
   }
-  function syncInstallCard(){
-    const title=$('installTitle'), sub=$('installSub'), btn=$('installBtn'), tip=$('pwaTip');
-    if(!title || !sub || !btn || !tip) return;
-    if(deferredPrompt){
-      title.textContent='Nainstalovat aplikaci';
-      sub.textContent='Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
-      btn.textContent='Instalovat';
-      tip.hidden=true;
-    } else {
-      title.textContent='Přidat na plochu';
-      sub.textContent='Pokud se systémová nabídka neukáže, přidej si aplikaci ručně přes nabídku prohlížeče.';
-      btn.textContent='Jak na to';
-      tip.hidden=false;
-      tip.textContent='Otevři nabídku prohlížeče a zvol „Přidat na plochu“. Potom potvrď instalaci.';
-    }
-  }
-  function showInstallCard(){
+  function hideInstallCard(){
     const card=$('installCard');
-    if(!card || !isMobile() || isStandalone()) return;
-    syncInstallCard();
-    card.classList.add('show');
+    if(card) card.classList.remove('show');
   }
-  function hideInstallCard(){ const card=$('installCard'); if(card) card.classList.remove('show'); }
+  function syncInstallUI(){
+    const title=$('installTitle'), sub=$('installSub'), btn=$('installBtn');
+    if(title && sub && btn){
+      title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
+      sub.textContent=isDesktop()
+        ? 'Přidej si MYEShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
+        : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
+      btn.textContent='Instalovat';
+    }
+    if(isStandalone()){
+      hideInstallCard();
+      setTip('');
+      return;
+    }
+    const canPrompt=!!deferredPrompt;
+    const showCard=canPrompt && !installDismissed;
+    const showHint=!canPrompt && isDesktop() && !SUPPORTS_BEFOREINSTALLPROMPT;
+    const card=$('installCard');
+    if(card) card.classList.toggle('show', showCard);
+    setTip(showHint ? 'Desktop testování: pokud prohlížeč nenabízí událost „beforeinstallprompt“, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.' : '');
+  }
   function saveProgress(){
     try{
       const ref=$('vc-ref')?.textContent?.trim() || '';
@@ -1363,39 +1379,40 @@ render();
     const btn=$('installBtn'), dismiss=$('installDismiss');
     if(dismiss){
       dismiss.addEventListener('click', function(){
-        hideInstallCard();
-        const tip=$('pwaTip');
-        if(tip) tip.hidden=true;
+        installDismissed=true;
+        syncInstallUI();
       });
     }
     if(btn){
       btn.addEventListener('click', async function(){
-        if(deferredPrompt){
-          deferredPrompt.prompt();
-          try{ await deferredPrompt.userChoice; }catch(e){}
-          deferredPrompt=null;
-          syncInstallCard();
-          hideInstallCard();
-          return;
-        }
-        showManualTip();
-        showInstallCard();
+        if(!deferredPrompt || isStandalone()) return;
+        const promptEvent=deferredPrompt;
+        deferredPrompt=null;
+        hideInstallCard();
+        promptEvent.prompt();
+        let choice=null;
+        try{ choice=await promptEvent.userChoice; }catch(e){}
+        installDismissed=!choice || choice.outcome !== 'accepted';
+        syncInstallUI();
       });
     }
     window.addEventListener('beforeinstallprompt', function(e){
       e.preventDefault();
       deferredPrompt=e;
-      showInstallCard();
+      installDismissed=false;
+      syncInstallUI();
     });
     window.addEventListener('appinstalled', function(){
-      storageSet(STORAGE_KEY,'1');
-      hideInstallCard();
-      const tip=$('pwaTip');
-      if(tip) tip.hidden=true;
+      deferredPrompt=null;
+      installDismissed=true;
+      syncInstallUI();
     });
-    if(isMobile() && !isStandalone()){
-      setTimeout(showInstallCard, 700);
+    window.addEventListener('resize', syncInstallUI);
+    window.addEventListener('pageshow', syncInstallUI);
+    if(standaloneMedia && standaloneMedia.addEventListener){
+      standaloneMedia.addEventListener('change', syncInstallUI);
     }
+    syncInstallUI();
   }
   function registerSW(){
     if(!('serviceWorker' in navigator)) return;

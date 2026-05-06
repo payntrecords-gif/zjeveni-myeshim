@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myeshim-v42-cache';
+const CACHE_NAME = 'myeshim-v43-cache';
 const APP_SHELL = [
   './',
   './index.html',
@@ -13,7 +13,9 @@ const APP_SHELL = [
   './icon-256.png',
   './icon-512.png',
   './logo.png',
-  './offline.html'
+  './offline.html',
+  './screenshots/home-mobile.png',
+  './screenshots/home-desktop-wide.png'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
