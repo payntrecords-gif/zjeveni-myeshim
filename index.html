@@ -1537,8 +1537,8 @@ render();
 <div id="milestone-confetti" hidden></div>
 
 <script id="push-config">
-const VAPID_PUBLIC_KEY = 'PLACEHOLDER_VAPID_KEY';
-const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';
+const VAPID_PUBLIC_KEY = 'BNkpx_SJASrkt48mXCZQBoDRJt_CUlDNXiM4MfJO6aO0Qc1dc84pYcNLXCVQj23EPJKCuLm15QOMJLCleeol_fk';
+const FCM_SENDER_ID = '360259005980';
 </script>
 
 <script id="streak-push-script">
@@ -1691,7 +1691,7 @@ const FCM_SENDER_ID = 'PLACEHOLDER_SENDER_ID';
   async function subscribeToPush(registration) {
     if (!('PushManager' in window)) return;
     const vapidKey = (typeof VAPID_PUBLIC_KEY !== 'undefined') ? VAPID_PUBLIC_KEY : '';
-    if (!vapidKey || vapidKey === 'PLACEHOLDER_VAPID_KEY') return; // not configured yet
+    if (!vapidKey || vapidKey === 'BNkpx_SJASrkt48mXCZQBoDRJt_CUlDNXiM4MfJO6aO0Qc1dc84pYcNLXCVQj23EPJKCuLm15QOMJLCleeol_fk') return; // not configured yet
     try {
       const existing = await registration.pushManager.getSubscription();
       if (existing) { safeLSSet('myeshim-push-sub', JSON.stringify(existing)); return; }
