@@ -77,7 +77,7 @@ Po nasazení ověř:
 
 Repo obsahuje placeholder template. Před finálním buildem nahraď:
 
-- `com.example.myeshim`
+- `cz.payntrecords.myeshim`
 - `REPLACE_WITH_RELEASE_OR_PLAY_APP_SIGNING_SHA256`
 
 ## 7. Jak vytvořit finální AAB
