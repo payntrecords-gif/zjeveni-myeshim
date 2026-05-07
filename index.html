@@ -1727,35 +1727,145 @@ body.dark #panel-guide .guide-step-card{
   #panel-guide .gs-num{width:44px;height:44px;font-size:1.05rem}
 }
 </style>
+<style id="ux50-bottomnav-redesign">
+/* === TOPBAR: only logo + iginjaSlovo === */
+#topbar{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:0 !important;
+}
+/* Hide leftover topbar elements that moved to bottom */
+#tb-search-btn,#streak-badge,.tb-right-actions,#nav-pill{display:none !important}
+
+/* === BOTTOM NAV: 5-item grid === */
+#bottomnav{
+  display:grid !important;
+  grid-template-columns:1fr 1fr 1.7fr 1fr 1fr !important;
+  align-items:center !important;
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom)) !important;
+  gap:3px !important;
+  max-width:480px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+/* All bottom-nav buttons: icon + label column */
+#bottomnav>button{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:3px !important;
+  border:none !important;
+  background:none !important;
+  border-radius:14px !important;
+  padding:7px 3px !important;
+  font:inherit !important;
+  font-size:.67rem !important;
+  font-weight:800 !important;
+  color:var(--sub) !important;
+  cursor:pointer !important;
+  min-height:52px !important;
+  min-width:0 !important;
+  width:100% !important;
+  overflow:visible !important;
+  box-shadow:none !important;
+  transform:none !important;
+  transition:opacity .14s !important;
+  letter-spacing:.01em !important;
+}
+#bottomnav>button svg{
+  width:20px !important;
+  height:20px !important;
+  fill:none !important;
+  stroke:currentColor !important;
+  stroke-width:2.2 !important;
+  flex-shrink:0 !important;
+}
+/* Prev & Next: accent colour */
+#bn-prev,#bn-next{color:var(--pink,#e5458e) !important}
+body.dark #bn-prev,body.dark #bn-next{color:#ff8cc2 !important}
+/* Search button */
+#bn-search{color:var(--sub) !important}
+/* Centre navigation pill */
+#bn-nav{
+  background:rgba(229,69,142,.10) !important;
+  border:1.5px solid rgba(229,69,142,.25) !important;
+  border-radius:20px !important;
+  color:var(--pink,#e5458e) !important;
+  padding:6px 6px !important;
+  gap:1px !important;
+}
+#bn-nav #nav-label{
+  font-size:.9rem;font-weight:900;line-height:1.25;display:block;
+}
+#bn-nav svg{width:12px !important;height:12px !important;opacity:.75 !important}
+body.dark #bn-nav{
+  background:rgba(255,140,194,.10) !important;
+  border-color:rgba(255,140,194,.25) !important;
+  color:#ff8cc2 !important;
+}
+/* Avatar / profile button */
+#tb-avatar-btn{
+  width:100% !important;
+  height:auto !important;
+  border-radius:14px !important;
+  border:none !important;
+  background:none !important;
+  box-shadow:none !important;
+  flex-direction:column !important;
+  gap:3px !important;
+  overflow:visible !important;
+  padding:7px 3px !important;
+  min-height:52px !important;
+  transform:none !important;
+  color:var(--sub) !important;
+}
+#tb-avatar-btn:hover,#tb-avatar-btn:focus{
+  transform:none !important;
+  box-shadow:none !important;
+}
+.bn-avatar-wrap{
+  width:26px;height:26px;border-radius:50%;
+  border:2px solid rgba(229,69,142,.45);
+  background:linear-gradient(135deg,#7b3ef4,#e5458e);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-shrink:0;
+}
+.bn-avatar-wrap #tb-avatar-img{
+  width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;
+}
+.bn-avatar-wrap #tb-avatar-initials{
+  font-size:.72rem;font-weight:900;color:#fff;line-height:1;pointer-events:none;
+}
+.bn-avatar-label{
+  font-size:.67rem;font-weight:800;color:var(--sub);line-height:1;
+}
+body.dark #tb-avatar-btn{color:var(--sub) !important}
+body.dark .bn-avatar-wrap{border-color:rgba(255,140,194,.45)}
+body.dark .bn-avatar-label{color:var(--sub) !important}
+/* Fix content bottom padding for taller nav */
+#app-panels{padding-bottom:calc(88px + env(safe-area-inset-bottom)) !important}
+@media (max-width:420px){
+  #app-panels{padding-bottom:calc(84px + env(safe-area-inset-bottom)) !important}
+}
+/* Print: hide bottomnav */
+@media print{#bottomnav{display:none !important}}
+</style>
+
 </head>
 <body>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
 <div id="topbar">
-  <!-- Left: logo + brand name -->
+  <!-- Only logo + brand name remain at the top -->
   <div class="tb-left">
     <div class="tb-logo"><img src="logo.png" alt="MYEShim"></div>
     <span class="tb-iginja">iginjaSlovo</span>
   </div>
-  <!-- Center: verse reference pill -->
-  <div id="nav-pill">
-    <button onclick="openNav()" id="nav-pill-btn">
-      <span id="nav-label">Zj 1:1</span>
-      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-  </div>
-    <!-- Right: streak + avatar -->
-  <div class="tb-right-actions">
-    <button id="tb-search-btn" onclick="openSearch()" aria-label="Hledat v bibli" title="Hledat">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
-    </button>
-    <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
-      <span class="sb-fire">🔥</span>
-      <span class="sb-num" id="streak-num">0</span>
-    </div>
-    <button id="tb-avatar-btn" onclick="openProfile()" aria-label="Profil uživatele" title="Profil">
-      <img id="tb-avatar-img" alt="">
-      <span id="tb-avatar-initials">👤</span>
-    </button>
+  <!-- streak-badge kept hidden in DOM so JS streak script still works -->
+  <div id="streak-badge" style="display:none !important" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="-1" onclick="openStreakDetail()">
+    <span class="sb-fire">🔥</span>
+    <span class="sb-num" id="streak-num">0</span>
   </div>
 </div>
 
@@ -1833,16 +1943,31 @@ body.dark #panel-guide .guide-step-card{
 <div id="ux35-toast" aria-live="polite"></div>
 <div id="sw-update-toast" role="status" aria-live="polite"></div>
 
-<div id="bottomnav">
-  <button id="bn-prev" onclick="go(-1)">
+<nav id="bottomnav" role="navigation" aria-label="Hlavní navigace">
+  <button id="bn-search" onclick="window.openSearch()" aria-label="Hledat verš">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
+    <span>Hledat</span>
+  </button>
+  <button id="bn-prev" onclick="go(-1)" aria-label="Předchozí verš">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    Předchozí
+    <span>Předchozí</span>
   </button>
-  <button id="bn-next" onclick="go(1)">
+  <button id="bn-nav" onclick="openNav()" aria-label="Přejít na verš">
+    <span id="nav-label">Zj 1:1</span>
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <button id="bn-next" onclick="go(1)" aria-label="Další verš">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    Další
+    <span>Další</span>
   </button>
-</div>
+  <button id="tb-avatar-btn" onclick="openProfile()" aria-label="Profil uživatele" title="Profil">
+    <div class="bn-avatar-wrap">
+      <img id="tb-avatar-img" alt="">
+      <span id="tb-avatar-initials">👤</span>
+    </div>
+    <span class="bn-avatar-label">Profil</span>
+  </button>
+</nav>
 
 <!-- NAV OVERLAY -->
 <div id="nav-ov" onclick="if(event.target===this)closeNav()">
@@ -2063,8 +2188,8 @@ function nsSearch(){
   const rawQ=document.getElementById('ns-input').value.trim();
   const q=rawQ.toLowerCase();
   if(q.length<1){ renderNavGrid(); return; }
-  // try to parse "6:9" style
-  const refM=q.match(/^(\d{1,2}):(\d{1,3})$/);
+  // try to parse "6:9", "Zj 6:9", "Zjevení 6:9", "zj6:9" etc.
+  const refM=q.match(/^(?:zj(?:ev(?:en[íi])?)?\.?\s*)?(\d{1,2})\s*:\s*(\d{1,3})$/);
   let res;
   if(refM){
     const c=parseInt(refM[1]),v=parseInt(refM[2]);
