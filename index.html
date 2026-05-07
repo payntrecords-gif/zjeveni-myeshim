@@ -1167,15 +1167,35 @@ body.dark #display-settings-sheet{background:#1c161d}
 body.dark .dss-handle{background:rgba(255,255,255,.15)}
 .dss-title{font-size:1.05rem;font-weight:900;color:var(--pink,#e5458e);margin-bottom:20px}
 body.dark .dss-title{color:#ff8cc2}
-.dss-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-.dss-label{font-size:.97rem;font-weight:800;color:var(--text,#1c1820)}
-body.dark .dss-label{color:#f8eef5}
 .dss-section-label{font-size:.82rem;font-weight:800;color:var(--sub,#5e4f5b);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
 body.dark .dss-section-label{color:#c4a8b8}
-.dss-font-row{display:flex;align-items:center;gap:10px;margin-bottom:22px}
-.dss-font-row .ux35-btn{flex:1;justify-content:center;min-height:48px;font-size:1rem}
-#dss-font-status{flex-shrink:0;font-size:.9rem;font-weight:900;color:var(--sub,#5e4f5b);min-width:48px;text-align:center}
+/* Font size slider */
+.dss-slider-row{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.dss-font-a{font-weight:900;color:var(--sub,#5e4f5b);flex-shrink:0;line-height:1}
+.dss-font-a--small{font-size:.85rem}
+.dss-font-a--large{font-size:1.3rem}
+body.dark .dss-font-a{color:#c4a8b8}
+.dss-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:999px;background:linear-gradient(90deg,var(--pink,#e5458e) var(--pct,50%),rgba(0,0,0,.12) var(--pct,50%));outline:none;cursor:pointer}
+body.dark .dss-slider{background:linear-gradient(90deg,#ff8cc2 var(--pct,50%),rgba(255,255,255,.15) var(--pct,50%))}
+.dss-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--pink,#e5458e);box-shadow:0 2px 8px rgba(229,69,142,.28);cursor:pointer}
+.dss-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--pink,#e5458e);box-shadow:0 2px 8px rgba(229,69,142,.28);cursor:pointer}
+body.dark .dss-slider::-webkit-slider-thumb{background:#2a1c2e;border-color:#ff8cc2}
+body.dark .dss-slider::-moz-range-thumb{background:#2a1c2e;border-color:#ff8cc2}
+#dss-font-status{flex-shrink:0;font-size:.86rem;font-weight:900;color:var(--sub,#5e4f5b);min-width:38px;text-align:right}
 body.dark #dss-font-status{color:#c4a8b8}
+/* Theme picker */
+.dss-theme-row{display:flex;gap:8px;margin-bottom:24px}
+.dss-theme-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:10px 6px;border:1.5px solid rgba(229,69,142,.18);border-radius:16px;
+  background:rgba(255,255,255,.6);font:inherit;font-size:.78rem;font-weight:800;
+  color:var(--sub,#5e4f5b);cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.dss-theme-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.dss-theme-btn.active{background:linear-gradient(135deg,#fde8f3,#f9d0e8);border-color:var(--pink,#e5458e);color:var(--pink,#e5458e)}
+body.dark .dss-theme-btn{background:rgba(40,24,36,.6);border-color:rgba(255,150,200,.18);color:#c4a8b8}
+body.dark .dss-theme-btn.active{background:rgba(255,140,194,.15);border-color:#ff8cc2;color:#ff8cc2}
 .dss-close-btn{
   width:100%;border:none;border-radius:18px;padding:14px;
   background:linear-gradient(135deg,#f05ca2,#de4089);
@@ -1275,22 +1295,27 @@ body.dark #bottomnav{
   <div id="display-settings-sheet">
     <div class="dss-handle" onclick="closeDisplaySettings()"></div>
     <div class="dss-title">Nastavení zobrazení</div>
-    <div class="dss-row">
-      <span class="dss-label">Tmavý / světlý režim</span>
-      <button class="ux35-btn icon-only" id="ux35-theme" type="button" title="Tmavý režim (D)" aria-label="Přepnout na tmavý režim">
-        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>
-      </button>
-    </div>
     <div class="dss-section-label">Velikost písma</div>
-    <div class="dss-font-row">
-      <button class="ux35-btn" id="ux35-font-minus" type="button" title="Menší písmo (-)">
-        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        A-
+    <div class="dss-slider-row">
+      <span class="dss-font-a dss-font-a--small">A</span>
+      <!-- min/max are font-scale × 100 (92 = 0.92, 118 = 1.18); step=2 for smooth snapping -->
+      <input type="range" id="dss-font-slider" min="92" max="118" step="2" value="100" class="dss-slider" aria-label="Velikost písma">
+      <span class="dss-font-a dss-font-a--large">A</span>
+      <span id="dss-font-status">100%</span>
+    </div>
+    <div class="dss-section-label">Motiv</div>
+    <div class="dss-theme-row">
+      <button class="dss-theme-btn" id="dss-theme-light" data-theme="light" type="button" aria-label="Světlý motiv">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        Světlý
       </button>
-      <div id="dss-font-status" class="ux35-status">100%</div>
-      <button class="ux35-btn" id="ux35-font-plus" type="button" title="Větší písmo (+)">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        A+
+      <button class="dss-theme-btn" id="dss-theme-system" data-theme="system" type="button" aria-label="Motiv podle systému">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Systém
+      </button>
+      <button class="dss-theme-btn" id="dss-theme-dark" data-theme="dark" type="button" aria-label="Tmavý motiv">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+        Tmavý
       </button>
     </div>
     <button class="dss-close-btn" type="button" onclick="closeDisplaySettings()">Hotovo</button>
@@ -1527,36 +1552,17 @@ render();
     clearTimeout(window.__ux35toast);
     window.__ux35toast = setTimeout(()=>el.classList.remove('show'), 1350);
   };
-  const moonIconSvg = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>';
-  const sunIconSvg = [
-    '<circle cx="12" cy="12" r="4"></circle>',
-    '<line x1="12" y1="2" x2="12" y2="5"></line>',
-    '<line x1="12" y1="19" x2="12" y2="22"></line>',
-    '<line x1="2" y1="12" x2="5" y2="12"></line>',
-    '<line x1="19" y1="12" x2="22" y2="12"></line>',
-    '<line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line>',
-    '<line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line>',
-    '<line x1="16.95" y1="7.05" x2="19.07" y2="4.93"></line>',
-    '<line x1="4.93" y1="19.07" x2="7.05" y2="16.95"></line>'
-  ].join('');
   function preferredTheme(){
     const saved = store.get('ux35-theme','');
-    if(saved) return saved;
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return saved || 'system';
   }
   function applyTheme(theme){
-    document.body.classList.toggle('dark', theme === 'dark');
+    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.body.classList.toggle('dark', isDark);
     store.set('ux35-theme', theme);
-    const btn = $('#ux35-theme');
-    if(btn){
-      const nextThemeMeta = theme === 'dark'
-        ? { title: 'Světlý' }
-        : { title: 'Tmavý' };
-      btn.title = `${nextThemeMeta.title} režim (D)`;
-      btn.setAttribute('aria-label', `Přepnout na ${nextThemeMeta.title.toLowerCase()} režim`);
-      const icon = btn.querySelector('svg');
-      if(icon) icon.innerHTML = theme === 'dark' ? sunIconSvg : moonIconSvg;
-    }
+    ['light','system','dark'].forEach(function(t){
+      document.getElementById('dss-theme-' + t)?.classList.toggle('active', t === theme);
+    });
   }
   function clamp(n,min,max){ return Math.min(max,Math.max(min,n)); }
   function applyFont(scale){
@@ -1565,6 +1571,7 @@ render();
     store.set('ux35-font', s.toFixed(2));
     return s;
   }
+  window.applyFont = applyFont;
   function currentVerseIndex(){
     const ref = $('#vc-ref')?.textContent || $('#nav-label')?.textContent || '';
     const m = ref.match(/(\d+)\s*:\s*(\d+)/);
@@ -1613,9 +1620,9 @@ render();
   }
   function bind(){
     $('#ux35-search')?.addEventListener('click', openSearch);
-    $('#ux35-theme')?.addEventListener('click', ()=>{ const dark = document.body.classList.contains('dark'); applyTheme(dark ? 'light' : 'dark'); toast(dark ? 'Světlý režim' : 'Tmavý režim'); });
-    $('#ux35-font-minus')?.addEventListener('click', ()=>{ const s = applyFont((parseFloat(store.get('ux35-font','1')) || 1) - 0.04); toast(`Písmo ${Math.round(s*100)} %`); });
-    $('#ux35-font-plus')?.addEventListener('click', ()=>{ const s = applyFont((parseFloat(store.get('ux35-font','1')) || 1) + 0.04); toast(`Písmo ${Math.round(s*100)} %`); });
+    ['light','system','dark'].forEach(function(t){
+      document.getElementById('dss-theme-' + t)?.addEventListener('click', function(){ applyTheme(t); });
+    });
     document.addEventListener('keydown', (e)=>{
       const tag = (e.target?.tagName || '').toLowerCase();
       const typing = ['input','textarea','select'].includes(tag) || e.target?.isContentEditable;
@@ -1669,6 +1676,12 @@ render();
     wireNotes();
     wireAutoSave();
     wireSwipe();
+    // Re-apply when OS colour scheme changes and user is in 'system' mode
+    if(window.matchMedia){
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){
+        if(store.get('ux35-theme','') === 'system') applyTheme('system');
+      });
+    }
     const target = $('#vc-ref') || $('#app');
     if(target){
       new MutationObserver(()=>{ updateProgress(); wireNotes(); wireAutoSave(); wireSwipe(); }).observe(target, {childList:true,subtree:true,characterData:true});
@@ -2634,41 +2647,77 @@ const FCM_SENDER_ID = '360259005980';
 
 <script id="display-settings-script">
 (function(){
-  function updateFontStatus(){
-    const s = parseFloat(localStorage.getItem('ux35-font') || '1');
-    const el = document.getElementById('dss-font-status');
-    if(el) el.textContent = Math.round(s*100)+'%';
+  /* Font scale range: 0.92 (min readable) – 1.18 (max comfortable); slider values are scale×100 */
+  var FONT_MIN = 0.92, FONT_MAX = 1.18;
+
+  function sliderPct(s){ return ((s - FONT_MIN) / (FONT_MAX - FONT_MIN) * 100).toFixed(1) + '%'; }
+
+  function syncFontUI(){
+    var s = parseFloat(localStorage.getItem('ux35-font') || '1');
+    var slider = document.getElementById('dss-font-slider');
+    var status = document.getElementById('dss-font-status');
+    if(slider) {
+      slider.value = Math.round(s * 100);
+      slider.style.setProperty('--pct', sliderPct(s));
+    }
+    if(status) status.textContent = Math.round(s * 100) + '%';
   }
+
+  function syncThemeUI(){
+    var saved = localStorage.getItem('ux35-theme') || 'system';
+    ['light','system','dark'].forEach(function(t){
+      var btn = document.getElementById('dss-theme-' + t);
+      if(btn) btn.classList.toggle('active', t === saved);
+    });
+  }
+
   window.openDisplaySettings = function(){
-    const ov = document.getElementById('display-settings-overlay');
+    var ov = document.getElementById('display-settings-overlay');
     if(!ov) return;
-    updateFontStatus();
+    syncFontUI();
+    syncThemeUI();
     ov.classList.add('open');
     document.body.style.overflow = 'hidden';
   };
   window.closeDisplaySettings = function(){
-    const ov = document.getElementById('display-settings-overlay');
+    var ov = document.getElementById('display-settings-overlay');
     if(ov) ov.classList.remove('open');
     document.body.style.overflow = '';
   };
-  // Update font status when font buttons are clicked.
-  // Short delay lets ux35-script write the new value to localStorage first.
-  const FONT_UPDATE_DELAY = 60;
-  ['ux35-font-minus','ux35-font-plus'].forEach(function(id){
-    document.getElementById(id)?.addEventListener('click', function(){
-      setTimeout(updateFontStatus, FONT_UPDATE_DELAY);
-    });
-  });
+
+  // Wire slider
+  function wireSlider(){
+    var slider = document.getElementById('dss-font-slider');
+    if(!slider || slider.dataset.wired) return;
+    slider.dataset.wired = '1';
+    function onSlider(){
+      var scale = parseInt(slider.value, 10) / 100;
+      if(typeof window.applyFont === 'function'){
+        var s = window.applyFont(scale);
+        var status = document.getElementById('dss-font-status');
+        if(status) status.textContent = Math.round(s * 100) + '%';
+        slider.style.setProperty('--pct', sliderPct(s));
+      }
+    }
+    slider.addEventListener('input', onSlider);
+  }
+
   // Close on Escape
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape'){
-      const ov = document.getElementById('display-settings-overlay');
+      var ov = document.getElementById('display-settings-overlay');
       if(ov && ov.classList.contains('open')) window.closeDisplaySettings();
     }
   });
-  // Initialize status on load
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateFontStatus);
-  else updateFontStatus();
+
+  // Initialize on load
+  function init(){
+    syncFontUI();
+    syncThemeUI();
+    wireSlider();
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 </body>
