@@ -3992,8 +3992,8 @@ const FCM_SENDER_ID = '360259005980';
 
   window.forceAppUpdate = async function() {
     var btn = document.getElementById('ps-update-btn');
-    if (btn && btn.disabled) return;
     if (btn) {
+      if (btn.disabled) return;
       btn.disabled = true;
       btn.textContent = 'Aktualizuji…';
     }
@@ -4002,7 +4002,7 @@ const FCM_SENDER_ID = '360259005980';
         var regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(function(reg) {
           return reg.unregister().catch(function(err) {
-            reportNonCriticalError('Odregistrace SW selhala:', err);
+            reportNonCriticalError('Odregistrace service workeru selhala:', err);
           });
         }));
       }
