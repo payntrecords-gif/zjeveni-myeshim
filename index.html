@@ -931,7 +931,7 @@ body.dark #nav-pill button{
   z-index:18;
   background:var(--bg);
   border-bottom:1px solid var(--line);
-  padding:8px 12px 0;
+  padding:2px 12px 0;
 }
 body.dark #app-tabs-outer{background:#0d0f14}
 
@@ -1281,7 +1281,7 @@ body.dark #bottomnav{
 
 /* ── MOBILE TOPBAR CLEANUP ── */
 @media (max-width:720px){
-  #tb-search-btn,#streak-badge,#tb-avatar-btn{display:none !important}
+  #tb-search-btn,#streak-badge{display:none !important}
 }
 </style>
 
@@ -1600,7 +1600,7 @@ body.dark .ps-note-item.ps-note-item-clickable:hover{background:rgba(255,140,194
 #panel-guide .guide-step-card{
   display:flex;
   gap:12px;
-  align-items:start;
+  align-items:center;
   width:100%;
   min-width:0;
   background:linear-gradient(180deg,#fff 0%,#fff8fc 100%);
@@ -1631,7 +1631,8 @@ body.dark #panel-guide .guide-step-card{
 }
 #panel-guide .gs-body ul{
   margin:8px 0 0;
-  padding-left:19px;
+  padding-left:0;
+  list-style:none;
   color:var(--sub);
   line-height:1.45;
 }
