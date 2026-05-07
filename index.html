@@ -1246,6 +1246,260 @@ body.dark #bottomnav{
 /* ── FIX: reduce #app-panels padding-bottom to match actual bottomnav height ── */
 #app-panels{padding-bottom:calc(80px + env(safe-area-inset-bottom)) !important}
 </style>
+
+<style id="auth-profile-style">
+/* ── LOGIN OVERLAY ── */
+#auth-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(229,69,142,.22) 0%,transparent 70%),
+             radial-gradient(ellipse 60% 40% at 80% 100%,rgba(123,62,244,.14) 0%,transparent 60%),
+             #0d0f14;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px 56px;
+  overflow-y:auto;
+}
+#auth-overlay.visible{display:flex}
+.auth-logo-wrap{
+  position:relative;margin-bottom:28px;flex-shrink:0;
+}
+.auth-logo-wrap::before{
+  content:'';position:absolute;inset:-20px;
+  background:radial-gradient(circle,rgba(229,69,142,.22) 0%,transparent 70%);
+  border-radius:50%;animation:auth-pulse 3s ease-in-out infinite;
+}
+@keyframes auth-pulse{
+  0%,100%{transform:scale(1);opacity:.8}
+  50%{transform:scale(1.1);opacity:1}
+}
+.auth-logo-wrap img{
+  width:88px;height:88px;border-radius:24px;
+  box-shadow:0 18px 44px rgba(229,69,142,.35);
+  position:relative;display:block;
+}
+.auth-app-name{
+  font-size:2.4rem;font-weight:900;letter-spacing:-.02em;
+  background:linear-gradient(135deg,#fff 0%,#f05ca2 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:8px;text-align:center;
+}
+.auth-tagline{
+  font-size:1rem;color:#9088a0;text-align:center;
+  line-height:1.5;margin-bottom:36px;max-width:260px;
+}
+.auth-card{
+  background:#15181f;border:1px solid #2a2d37;
+  border-radius:24px;padding:26px 22px;
+  width:100%;max-width:368px;
+  box-shadow:0 24px 56px rgba(0,0,0,.5);
+  animation:auth-slide-up .45s cubic-bezier(.22,1,.36,1) both;
+  flex-shrink:0;
+}
+@keyframes auth-slide-up{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.auth-card-title{
+  font-size:1.05rem;font-weight:800;margin-bottom:5px;color:#f0eaf4;
+}
+.auth-card-sub{
+  font-size:.88rem;color:#9088a0;margin-bottom:22px;line-height:1.45;
+}
+.auth-btn-google{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:14px 20px;
+  background:#fff;border:none;border-radius:14px;
+  font:inherit;font-size:.97rem;font-weight:700;color:#1f1f1f;
+  cursor:pointer;
+  box-shadow:0 4px 18px rgba(0,0,0,.28);
+  transition:transform .14s,box-shadow .14s;
+}
+.auth-btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+.auth-btn-google:active{transform:translateY(0)}
+.auth-btn-google svg{width:22px;height:22px;flex-shrink:0}
+.auth-privacy{
+  font-size:.77rem;color:#9088a0;margin-top:14px;line-height:1.4;text-align:center;
+}
+#auth-overlay-error{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#2d1520;border:1px solid #5a2033;border-radius:12px;
+  padding:12px 20px;font-size:.88rem;color:#ffb0c8;max-width:90vw;
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+  z-index:210;
+}
+#auth-overlay-error.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── AVATAR BUTTON IN TOPBAR ── */
+#tb-avatar-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:50%;
+  border:2px solid rgba(229,69,142,.45);
+  background:linear-gradient(135deg,#7b3ef4,#e5458e);
+  cursor:pointer;flex-shrink:0;
+  padding:0;overflow:hidden;
+  transition:transform .14s,box-shadow .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+#tb-avatar-btn:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(229,69,142,.32)}
+#tb-avatar-img{
+  width:100%;height:100%;object-fit:cover;border-radius:50%;
+  display:none;
+}
+#tb-avatar-initials{
+  font-size:.88rem;font-weight:900;color:#fff;
+  line-height:1;pointer-events:none;
+}
+body.dark #tb-avatar-btn{border-color:rgba(255,140,194,.4)}
+
+/* ── PROFILE PANEL ── */
+#profile-overlay{
+  position:fixed;inset:0;z-index:90;
+  background:rgba(0,0,0,.52);
+  display:none;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#profile-overlay.open{display:flex;animation:wov-in .22s ease}
+#profile-sheet{
+  width:100%;max-width:480px;
+  background:#fff;border-radius:28px 28px 0 0;
+  padding:24px 20px 32px;
+  animation:wsh-up .28s cubic-bezier(.22,1,.36,1);
+  max-height:90dvh;overflow-y:auto;
+  position:relative;
+}
+body.dark #profile-sheet{background:#1c161d;color:#f8eef5}
+.ps-handle{width:40px;height:4px;border-radius:999px;background:rgba(0,0,0,.12);margin:0 auto 20px;cursor:pointer}
+body.dark .ps-handle{background:rgba(255,255,255,.15)}
+
+/* Profile header */
+.ps-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--line,#ede4ea)}
+body.dark .ps-header{border-color:#3b2c37}
+.ps-avatar{
+  width:62px;height:62px;border-radius:50%;flex-shrink:0;
+  border:2.5px solid rgba(229,69,142,.5);
+  object-fit:cover;background:linear-gradient(135deg,#7b3ef4,#e5458e);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.35rem;font-weight:900;color:#fff;overflow:hidden;
+}
+.ps-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:none}
+.ps-user-info{flex:1;min-width:0}
+.ps-name{font-size:1.06rem;font-weight:900;color:#1c1820;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.dark .ps-name{color:#f8eef5}
+.ps-email{font-size:.84rem;color:#7a6a76;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.dark .ps-email{color:#cab5c3}
+
+/* Sections */
+.ps-section{margin-bottom:18px}
+.ps-section-title{
+  font-size:.77rem;font-weight:800;color:#7a6a76;
+  text-transform:uppercase;letter-spacing:.06em;
+  margin-bottom:10px;
+}
+body.dark .ps-section-title{color:#cab5c3}
+.ps-activity-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+}
+.ps-activity-cell{
+  background:linear-gradient(160deg,#fff7fb,#f9f1f6);
+  border:1px solid rgba(229,69,142,.14);
+  border-radius:16px;padding:12px 8px;text-align:center;
+}
+body.dark .ps-activity-cell{background:rgba(229,69,142,.08);border-color:rgba(229,69,142,.2)}
+.ps-activity-num{font-size:1.25rem;font-weight:900;color:#e5458e;margin-bottom:2px;line-height:1}
+.ps-activity-label{font-size:.72rem;font-weight:700;color:#7a6a76;line-height:1.2}
+body.dark .ps-activity-label{color:#cab5c3}
+
+/* Settings rows */
+.ps-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:12px 0;border-bottom:1px solid var(--line,#ede4ea);
+}
+body.dark .ps-row{border-color:#3b2c37}
+.ps-row:last-child{border-bottom:none}
+.ps-row-left{flex:1;min-width:0}
+.ps-row-label{font-size:.96rem;font-weight:800;color:#1c1820}
+body.dark .ps-row-label{color:#f8eef5}
+.ps-row-sub{font-size:.8rem;color:#7a6a76;margin-top:2px;line-height:1.3}
+body.dark .ps-row-sub{color:#cab5c3}
+
+/* Toggle switch */
+.ps-toggle{position:relative;width:48px;height:26px;flex-shrink:0}
+.ps-toggle input{opacity:0;width:0;height:0;position:absolute}
+.ps-toggle-slider{
+  position:absolute;inset:0;border-radius:999px;
+  background:#e0d8e4;cursor:pointer;transition:background .18s;
+}
+body.dark .ps-toggle-slider{background:#3b2c37}
+.ps-toggle input:checked + .ps-toggle-slider{background:#e5458e}
+.ps-toggle-slider::before{
+  content:'';position:absolute;
+  width:20px;height:20px;border-radius:50%;
+  background:#fff;left:3px;top:3px;
+  transition:transform .18s;
+  box-shadow:0 1px 4px rgba(0,0,0,.22);
+}
+.ps-toggle input:checked + .ps-toggle-slider::before{transform:translateX(22px)}
+
+/* Font size selector */
+.ps-font-row{display:flex;align-items:center;gap:8px;flex:1}
+.ps-font-label-sm{font-size:.82rem;font-weight:900;color:#7a6a76;flex-shrink:0}
+.ps-font-label-lg{font-size:1.18rem;font-weight:900;color:#7a6a76;flex-shrink:0}
+body.dark .ps-font-label-sm,body.dark .ps-font-label-lg{color:#cab5c3}
+.ps-font-slider{
+  flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:999px;
+  background:linear-gradient(90deg,#e5458e var(--pct,50%),rgba(0,0,0,.12) var(--pct,50%));
+  outline:none;cursor:pointer;
+}
+body.dark .ps-font-slider{background:linear-gradient(90deg,#ff8cc2 var(--pct,50%),rgba(255,255,255,.15) var(--pct,50%))}
+.ps-font-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #e5458e;box-shadow:0 2px 8px rgba(229,69,142,.28);cursor:pointer}
+.ps-font-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #e5458e;cursor:pointer}
+body.dark .ps-font-slider::-webkit-slider-thumb{background:#2a1c2e;border-color:#ff8cc2}
+
+/* Notif status */
+.ps-notif-status{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.82rem;font-weight:700;
+  padding:4px 10px;border-radius:999px;
+}
+.ps-notif-status.granted{background:rgba(46,204,113,.12);color:#1e8c4d}
+.ps-notif-status.denied{background:rgba(235,87,87,.1);color:#c0392b}
+.ps-notif-status.default{background:rgba(229,69,142,.1);color:#c53580}
+body.dark .ps-notif-status.granted{background:rgba(46,204,113,.18);color:#6ee89e}
+body.dark .ps-notif-status.denied{background:rgba(235,87,87,.15);color:#ff8a8a}
+body.dark .ps-notif-status.default{background:rgba(229,69,142,.15);color:#ff8cc2}
+
+/* Buttons */
+.ps-btn-notif{
+  border:1.5px solid rgba(229,69,142,.35);border-radius:12px;
+  padding:9px 14px;font:inherit;font-size:.86rem;font-weight:900;
+  color:#e5458e;background:transparent;cursor:pointer;
+  transition:background .14s;white-space:nowrap;
+}
+.ps-btn-notif:hover{background:rgba(229,69,142,.07)}
+body.dark .ps-btn-notif{color:#ff8cc2;border-color:rgba(255,140,194,.35)}
+
+.ps-btn-signout{
+  width:100%;margin-top:14px;
+  border:none;border-radius:18px;padding:14px;
+  background:linear-gradient(135deg,#c73d5a,#e5458e);
+  color:#fff;font:inherit;font-size:1rem;font-weight:900;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(199,61,90,.22);
+  transition:transform .14s,box-shadow .14s;
+}
+.ps-btn-signout:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(199,61,90,.30)}
+.ps-btn-signout:active{transform:scale(.98)}
+
+/* Encourage verse at top of profile */
+.ps-verse-chip{
+  display:flex;align-items:flex-start;gap:10px;
+  background:linear-gradient(135deg,rgba(229,69,142,.1),rgba(123,62,244,.08));
+  border:1px solid rgba(229,69,142,.18);
+  border-radius:16px;padding:12px 14px;margin-bottom:18px;
+  font-size:.88rem;color:#5e4f5b;line-height:1.45;font-style:italic;
+}
+body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69,142,.2);color:#cab5c3}
+.ps-verse-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+</style>
 </head>
 <body>
 <div id="topbar">
@@ -1263,13 +1517,17 @@ body.dark #bottomnav{
       <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
   </div>
-  <!-- Right: Aa + streak -->
+  <!-- Right: Aa + streak + avatar -->
   <div class="tb-right-actions">
     <button id="display-settings-btn" onclick="openDisplaySettings()" aria-label="Nastavení zobrazení" title="Nastavení zobrazení">Aa</button>
     <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
       <span class="sb-fire">🔥</span>
       <span class="sb-num" id="streak-num">0</span>
     </div>
+    <button id="tb-avatar-btn" onclick="openProfile()" aria-label="Profil uživatele" title="Profil">
+      <img id="tb-avatar-img" alt="">
+      <span id="tb-avatar-initials">👤</span>
+    </button>
   </div>
 </div>
 
@@ -2737,6 +2995,452 @@ const FCM_SENDER_ID = '360259005980';
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+})();
+</script>
+
+<!-- ── LOGIN OVERLAY ── -->
+<div id="auth-overlay" role="dialog" aria-modal="true" aria-label="Přihlásit se">
+  <div class="auth-logo-wrap">
+    <img src="logo.png" alt="MYEShim logo">
+  </div>
+  <div class="auth-app-name">MYEShim</div>
+  <div class="auth-tagline">„Studuj Zjevení každý den."</div>
+  <div class="auth-card">
+    <div class="auth-card-title">Vítej v MYEShim 👋</div>
+    <div class="auth-card-sub">Přihlas se svým Google účtem a okamžitě začni studovat.</div>
+    <button class="auth-btn-google" id="auth-google-btn">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Přihlásit se přes Google
+    </button>
+    <p class="auth-privacy">Přihlášení slouží pouze k ověření členů komunity. Vaše data nejsou sdílena.</p>
+  </div>
+</div>
+<div id="auth-overlay-error" role="alert"></div>
+
+<!-- ── PROFILE PANEL ── -->
+<div id="profile-overlay" role="dialog" aria-modal="true" aria-label="Profil uživatele" onclick="if(event.target===this)closeProfile()">
+  <div id="profile-sheet">
+    <div class="ps-handle" onclick="closeProfile()"></div>
+
+    <!-- Header: avatar + name + email -->
+    <div class="ps-header">
+      <div class="ps-avatar" id="ps-avatar-wrap">
+        <img id="ps-avatar-img" alt="">
+        <span id="ps-avatar-initials"></span>
+      </div>
+      <div class="ps-user-info">
+        <div class="ps-name" id="ps-name">Uživatel</div>
+        <div class="ps-email" id="ps-email"></div>
+      </div>
+    </div>
+
+    <!-- Verse chip -->
+    <div class="ps-verse-chip">
+      <span class="ps-verse-icon">✨</span>
+      <span id="ps-verse-quote">„Blahoslavený, kdo předčítá, i ti, kdo slyší slova tohoto proroctví…" — Zj 1:3</span>
+    </div>
+
+    <!-- Activity section -->
+    <div class="ps-section">
+      <div class="ps-section-title">Moje aktivita</div>
+      <div class="ps-activity-grid">
+        <div class="ps-activity-cell">
+          <div class="ps-activity-num" id="ps-streak">0</div>
+          <div class="ps-activity-label">Streak (dní)</div>
+        </div>
+        <div class="ps-activity-cell">
+          <div class="ps-activity-num" id="ps-read-count">0</div>
+          <div class="ps-activity-label">Přečtených veršů</div>
+        </div>
+        <div class="ps-activity-cell">
+          <div class="ps-activity-num" id="ps-joined">—</div>
+          <div class="ps-activity-label">Dní s námi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings section -->
+    <div class="ps-section">
+      <div class="ps-section-title">Nastavení</div>
+      <div class="ps-row">
+        <div class="ps-row-left">
+          <div class="ps-row-label">Tmavý režim</div>
+          <div class="ps-row-sub">Přepne barevný motiv</div>
+        </div>
+        <label class="ps-toggle" aria-label="Tmavý režim">
+          <input type="checkbox" id="ps-dark-toggle">
+          <span class="ps-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="ps-row">
+        <div class="ps-row-left">
+          <div class="ps-row-label">Velikost písma</div>
+        </div>
+        <div class="ps-font-row">
+          <span class="ps-font-label-sm">A</span>
+          <input type="range" id="ps-font-slider" class="ps-font-slider" min="92" max="118" step="2" value="100" aria-label="Velikost písma">
+          <span class="ps-font-label-lg">A</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications section -->
+    <div class="ps-section">
+      <div class="ps-section-title">Notifikace</div>
+      <div class="ps-row">
+        <div class="ps-row-left">
+          <div class="ps-row-label">Denní připomínky</div>
+          <div class="ps-row-sub" id="ps-notif-sub">Stav notifikací</div>
+        </div>
+        <span class="ps-notif-status" id="ps-notif-status"></span>
+      </div>
+      <div class="ps-row" style="border-bottom:none">
+        <button class="ps-btn-notif" id="ps-notif-btn" onclick="handleProfileNotif()">Spravovat notifikace</button>
+      </div>
+    </div>
+
+    <!-- Sign out -->
+    <button class="ps-btn-signout" id="ps-signout-btn" onclick="authSignOut()">Odhlásit se</button>
+  </div>
+</div>
+
+<!-- Firebase Auth SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script id="auth-profile-script">
+(function(){
+  'use strict';
+
+  var FIREBASE_AUTH_CONFIG = {
+    apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+    authDomain: "myeshim-app.firebaseapp.com",
+    projectId: "myeshim-app",
+    storageBucket: "myeshim-app.firebasestorage.app",
+    messagingSenderId: "360259005980",
+    appId: "1:360259005980:web:610695f8b44de04dc079d9"
+  };
+
+  var auth = null;
+
+  function safeLS(key, fallback) {
+    try { var v = localStorage.getItem(key); return v === null ? fallback : v; } catch(e) { return fallback; }
+  }
+  function safeLSSet(key, val) {
+    try { localStorage.setItem(key, val); } catch(e) {}
+  }
+
+  function initAuth() {
+    if (!window.firebase || typeof firebase.auth !== 'function') return;
+    // Re-use existing app if already initialized
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_AUTH_CONFIG);
+    }
+    auth = firebase.auth();
+    auth.onAuthStateChanged(onAuthChange);
+  }
+
+  function onAuthChange(user) {
+    if (user) {
+      hideAuthOverlay();
+      updateAvatar(user);
+      // Record join date on first sign-in
+      if (!safeLS('myeshim-joined', '')) {
+        safeLSSet('myeshim-joined', new Date().toISOString().slice(0, 10));
+      }
+    } else {
+      showAuthOverlay();
+      clearAvatar();
+    }
+  }
+
+  function showAuthOverlay() {
+    var ov = document.getElementById('auth-overlay');
+    if (ov) { ov.classList.add('visible'); document.body.style.overflow = 'hidden'; }
+  }
+
+  function hideAuthOverlay() {
+    var ov = document.getElementById('auth-overlay');
+    if (ov) { ov.classList.remove('visible'); document.body.style.overflow = ''; }
+  }
+
+  function getInitials(name) {
+    if (!name) return '?';
+    var parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  function updateAvatar(user) {
+    var img = document.getElementById('tb-avatar-img');
+    var initials = document.getElementById('tb-avatar-initials');
+    if (!img || !initials) return;
+    if (user.photoURL) {
+      img.src = user.photoURL;
+      img.style.display = 'block';
+      initials.style.display = 'none';
+    } else {
+      img.style.display = 'none';
+      initials.style.display = '';
+      initials.textContent = getInitials(user.displayName || user.email);
+    }
+  }
+
+  function clearAvatar() {
+    var img = document.getElementById('tb-avatar-img');
+    var initials = document.getElementById('tb-avatar-initials');
+    if (img) img.style.display = 'none';
+    if (initials) { initials.style.display = ''; initials.textContent = '👤'; }
+  }
+
+  // ── Google Sign-In ──
+  function signInWithGoogle() {
+    if (!auth) return;
+    var provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(function(err) {
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        showAuthError('Přihlášení se nezdařilo. Zkus to prosím znovu.');
+        console.error(err);
+      }
+    });
+  }
+
+  function showAuthError(msg) {
+    var el = document.getElementById('auth-overlay-error');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 4000);
+  }
+
+  // ── Sign Out ──
+  window.authSignOut = function() {
+    if (!auth) return;
+    closeProfile();
+    auth.signOut();
+  };
+
+  // ── Profile Panel ──
+  function buildDailyVerse() {
+    if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
+    var local = new Date(); local.setHours(0,0,0,0);
+    var day = Math.floor(local.getTime() / 86400000);
+    return window.VERSES[day % window.VERSES.length];
+  }
+
+  window.openProfile = function() {
+    var user = auth ? auth.currentUser : null;
+    if (!user) { showAuthOverlay(); return; }
+
+    // Avatar
+    var psImg = document.getElementById('ps-avatar-img');
+    var psInit = document.getElementById('ps-avatar-initials');
+    if (psImg && psInit) {
+      if (user.photoURL) {
+        psImg.src = user.photoURL;
+        psImg.style.display = 'block';
+        psInit.style.display = 'none';
+      } else {
+        psImg.style.display = 'none';
+        psInit.style.display = '';
+        psInit.textContent = getInitials(user.displayName || user.email);
+      }
+    }
+
+    // Name + email
+    var nameEl = document.getElementById('ps-name');
+    var emailEl = document.getElementById('ps-email');
+    if (nameEl) nameEl.textContent = user.displayName || 'Uživatel';
+    if (emailEl) emailEl.textContent = user.email || '';
+
+    // Activity
+    var streak = parseInt(safeLS('streak_count', '0'), 10) || 0;
+    var readCount = parseInt(safeLS('myeshim-read-count', '0'), 10) || 0;
+    // Also count current verse on profile open
+    try {
+      var raw = localStorage.getItem('myeshim-read-verses') || '[]';
+      var visited; try { visited = JSON.parse(raw); } catch(e2) { visited = []; }
+      if (Array.isArray(visited)) readCount = visited.length;
+    } catch(e) {}
+    var joinedStr = safeLS('myeshim-joined', '');
+    var daysWithUs = 0;
+    if (joinedStr) {
+      daysWithUs = Math.max(1, Math.round((Date.now() - new Date(joinedStr).getTime()) / 86400000));
+    }
+    var psStreak = document.getElementById('ps-streak');
+    var psRead = document.getElementById('ps-read-count');
+    var psJoined = document.getElementById('ps-joined');
+    if (psStreak) psStreak.textContent = streak;
+    if (psRead) psRead.textContent = readCount;
+    if (psJoined) psJoined.textContent = daysWithUs || '1';
+
+    // Daily verse chip
+    var verse = buildDailyVerse();
+    var quoteEl = document.getElementById('ps-verse-quote');
+    if (quoteEl && verse) {
+      var short = verse.t.length > 90 ? verse.t.slice(0, 90) + '…' : verse.t;
+      quoteEl.textContent = '„' + short + '" — Zj ' + verse.c + ':' + verse.v;
+    }
+
+    // Dark mode toggle
+    var darkToggle = document.getElementById('ps-dark-toggle');
+    if (darkToggle) {
+      darkToggle.checked = document.body.classList.contains('dark');
+    }
+
+    // Font slider
+    var fontSlider = document.getElementById('ps-font-slider');
+    if (fontSlider) {
+      var scale = parseFloat(safeLS('ux35-font', '1'));
+      fontSlider.value = Math.round(scale * 100);
+      var pct = ((scale - 0.92) / (1.18 - 0.92) * 100).toFixed(1) + '%';
+      fontSlider.style.setProperty('--pct', pct);
+    }
+
+    // Notifications
+    updateProfileNotifStatus();
+
+    var ov = document.getElementById('profile-overlay');
+    if (ov) { ov.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  };
+
+  window.closeProfile = function() {
+    var ov = document.getElementById('profile-overlay');
+    if (ov) ov.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  function updateProfileNotifStatus() {
+    var statusEl = document.getElementById('ps-notif-status');
+    var subEl = document.getElementById('ps-notif-sub');
+    var perm = ('Notification' in window) ? Notification.permission : 'denied';
+    if (!statusEl) return;
+    statusEl.className = 'ps-notif-status ' + perm;
+    var labels = { granted: '✓ Povoleny', denied: '✕ Zakázány', default: '? Nezvoleno' };
+    statusEl.textContent = labels[perm] || perm;
+    if (subEl) {
+      var subs = { granted: 'Dostaneš denní připomínky', denied: 'Povolte v nastavení prohlížeče', default: 'Klepnutím zapneš připomínky' };
+      subEl.textContent = subs[perm] || '';
+    }
+  }
+
+  window.handleProfileNotif = function() {
+    closeProfile();
+    if (typeof window.openNotifSettings === 'function') {
+      window.openNotifSettings();
+    } else {
+      var ov = document.getElementById('notif-settings-overlay');
+      if (ov) { ov.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+  };
+
+  // ── Dark toggle wiring ──
+  function wireDarkToggle() {
+    var toggle = document.getElementById('ps-dark-toggle');
+    if (!toggle || toggle.dataset.wired) return;
+    toggle.dataset.wired = '1';
+    toggle.addEventListener('change', function() {
+      var theme = toggle.checked ? 'dark' : 'light';
+      // Click the corresponding theme button in display settings (which fires applyTheme internally)
+      var btn = document.getElementById('dss-theme-' + theme);
+      if (btn) {
+        btn.click();
+      } else {
+        // Fallback: set class + localStorage directly
+        document.body.classList.toggle('dark', toggle.checked);
+        try { localStorage.setItem('ux35-theme', theme); } catch(e) {}
+      }
+    });
+  }
+
+  // ── Font slider wiring in profile ──
+  function wireProfileFontSlider() {
+    var slider = document.getElementById('ps-font-slider');
+    if (!slider || slider.dataset.wired) return;
+    slider.dataset.wired = '1';
+    slider.addEventListener('input', function() {
+      var scale = parseInt(slider.value, 10) / 100;
+      if (typeof window.applyFont === 'function') {
+        window.applyFont(scale);
+      }
+      var pct = ((scale - 0.92) / (1.18 - 0.92) * 100).toFixed(1) + '%';
+      slider.style.setProperty('--pct', pct);
+    });
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      var ov = document.getElementById('profile-overlay');
+      if (ov && ov.classList.contains('open')) window.closeProfile();
+    }
+  });
+
+  // ── Verse read tracking ──
+  function trackVerseRead(idx) {
+    try {
+      var key = 'myeshim-read-verses';
+      var raw = localStorage.getItem(key) || '[]';
+      var visited;
+      try { visited = JSON.parse(raw); } catch(e) { visited = []; }
+      if (!Array.isArray(visited)) visited = [];
+      if (visited.indexOf(idx) < 0) {
+        visited.push(idx);
+        localStorage.setItem(key, JSON.stringify(visited));
+        localStorage.setItem('myeshim-read-count', visited.length);
+      }
+    } catch(e) {}
+  }
+
+  function hookGoFunction() {
+    var origGo = window.go;
+    if (typeof origGo !== 'function' || origGo._readTracked) return;
+    window.go = function(dir) {
+      origGo(dir);
+      try {
+        var state = window.state;
+        if (state && typeof state.idx === 'number') trackVerseRead(state.idx);
+      } catch(e) {}
+    };
+    window.go._readTracked = true;
+  }
+
+  // ── Bootstrap ──
+  function bootstrap() {
+    // Wire Google sign-in button
+    var googleBtn = document.getElementById('auth-google-btn');
+    if (googleBtn) googleBtn.addEventListener('click', signInWithGoogle);
+
+    wireDarkToggle();
+    wireProfileFontSlider();
+    hookGoFunction();
+
+    // Init Firebase Auth (wait for firebase SDK)
+    if (window.firebase && typeof firebase.auth === 'function') {
+      initAuth();
+    } else {
+      // SDK loads async; poll briefly
+      var tries = 0;
+      var iv = setInterval(function() {
+        tries++;
+        if (window.firebase && typeof firebase.auth === 'function') {
+          clearInterval(iv);
+          initAuth();
+        } else if (tries > 40) {
+          clearInterval(iv);
+          // No auth available – show the overlay so user knows
+          showAuthOverlay();
+        }
+      }, 100);
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap);
+  else bootstrap();
 })();
 </script>
 </body>
