@@ -3852,6 +3852,14 @@ const FCM_SENDER_ID = '360259005980';
   function renderProfileFavorites() {
     var host = document.getElementById('ps-favorites-list');
     if (!host) return;
+    var MIN_SWIPE_START_PX = 12;
+    var MAX_SWIPE_DISTANCE_PX = 120;
+    var MIN_SWIPE_OPACITY = 0.45;
+    var OPACITY_FADE_DISTANCE_PX = 180;
+    var SWIPE_REMOVE_THRESHOLD_PX = 72;
+    var MAX_VERTICAL_DEVIATION_PX = 56;
+    var CLICK_SUPPRESS_DRAG_MS = 450;
+    var CLICK_SUPPRESS_REMOVE_MS = 650;
     var swipeState = host._favoriteSwipeState || (host._favoriteSwipeState = {
       active: false,
       dragging: false,
@@ -3889,7 +3897,7 @@ const FCM_SENDER_ID = '360259005980';
       host.addEventListener('touchstart', function(ev) {
         var item = getFavoriteItemFromEvent(ev);
         var touch = ev.changedTouches && ev.changedTouches[0];
-        resetFavoriteSwipe();
+        if (swipeState.item && swipeState.item !== item) resetFavoriteSwipe();
         swipeState.item = item || null;
         swipeState.active = !!(item && touch);
         swipeState.dragging = false;
@@ -3903,17 +3911,17 @@ const FCM_SENDER_ID = '360259005980';
         if (!touch) return;
         var dx = touch.clientX - swipeState.startX;
         var dy = touch.clientY - swipeState.startY;
-        if (dx >= 0 || Math.abs(dx) < 12 || Math.abs(dx) <= Math.abs(dy)) {
+        if (dx >= 0 || Math.abs(dx) < MIN_SWIPE_START_PX || Math.abs(dx) <= Math.abs(dy)) {
           if (swipeState.dragging) resetFavoriteSwipe();
           swipeState.dragging = false;
           return;
         }
         swipeState.dragging = true;
         ev.preventDefault();
-        var clampedDx = Math.max(dx, -120);
+        var clampedDx = Math.max(dx, -MAX_SWIPE_DISTANCE_PX);
         swipeState.item.classList.add('ps-note-item-swiping');
         swipeState.item.style.transform = 'translateX(' + clampedDx + 'px)';
-        swipeState.item.style.opacity = String(Math.max(0.45, 1 - (Math.abs(clampedDx) / 180)));
+        swipeState.item.style.opacity = String(Math.max(MIN_SWIPE_OPACITY, 1 - (Math.abs(clampedDx) / OPACITY_FADE_DISTANCE_PX)));
       }, {passive:false});
       host.addEventListener('touchend', function(ev) {
         if (!swipeState.active || !swipeState.item) return;
@@ -3922,14 +3930,14 @@ const FCM_SENDER_ID = '360259005980';
         var touch = ev.changedTouches && ev.changedTouches[0];
         var dx = touch ? touch.clientX - swipeState.startX : 0;
         var dy = touch ? touch.clientY - swipeState.startY : 0;
-        var shouldRemove = dx <= -72 && Math.abs(dy) < 56 && Math.abs(dx) > Math.abs(dy);
-        if (swipeState.dragging) swipeState.suppressClickUntil = Date.now() + 450;
+        var shouldRemove = dx <= -SWIPE_REMOVE_THRESHOLD_PX && Math.abs(dy) < MAX_VERTICAL_DEVIATION_PX && Math.abs(dx) > Math.abs(dy);
+        if (swipeState.dragging) swipeState.suppressClickUntil = Date.now() + CLICK_SUPPRESS_DRAG_MS;
         resetFavoriteSwipe(item);
         swipeState.active = false;
         swipeState.dragging = false;
         swipeState.item = null;
         if (shouldRemove) {
-          swipeState.suppressClickUntil = Date.now() + 650;
+          swipeState.suppressClickUntil = Date.now() + CLICK_SUPPRESS_REMOVE_MS;
           removeFavoriteVerse(ref);
         }
       }, {passive:true});
