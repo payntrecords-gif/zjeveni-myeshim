@@ -773,7 +773,7 @@ body.dark .ws-notif-btn{border-color:rgba(255,140,194,.3);color:#ff8cc2}
   100%{opacity:0;transform:translateY(80vh) rotate(540deg)}
 }
 </style>
-<meta name="theme-color" content="#e5458e">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MYEShim">
@@ -1742,12 +1742,15 @@ function hasNote(c,v){ return !!(state.notes[c+':'+v]||'').trim(); }
 function hasFavorite(c,v){ return Array.isArray(state.favorites) && state.favorites.includes(c+':'+v); }
 
 const GUIDE=[
-  ['1','Přečti verš pomalu','Všimni si, kdo jedná, co se děje a které slovo je nejdůležitější.'],
-  ['2','Polož si 5W1H','Kdo, co, kdy, kde, proč a jak — zkus si odpovědět vlastními slovy.'],
-  ['3','Otevři Q&A','Porovnej svoji odpověď s připravenými otázkami k tomuto verši.'],
-  ['4','Zapiš poznámku','Stačí jedna věta: co sis zapamatoval nebo co tě zaujalo.'],
-  ['5','Řekni to nahlas','Zkus verš stručně převyprávět, jako bys to vysvětloval kamarádovi.'],
-  ['6','Sdílej uvědomění','Hlavní myšlenku si ulož do poznámek nebo sdílej ve skupině.'],
+  ['1','Podle slibu Jezíše jaké postavy a jaké události se objeví?',''],
+  ['2','Odpovědět na 5W1H a převypravět',''],
+  ['3','Vymyslet otázky','',[
+    'Otázky na porozumění verše a fyzické naplnění',
+    'Otázky na srdce Boží a srdce postav'
+  ]],
+  ['4','Odpovědět si na otázky',''],
+  ['5','Speech',''],
+  ['6','Sdílet uvědomění',''],
 ];
 
 function render(){
@@ -1782,7 +1785,7 @@ function setTab(t){
   if(t==='guide'){
     document.getElementById('panel-guide').innerHTML=
       '<div class="guide-card"><div class="guide-title">Návod na MYEShim</div>'+
-      GUIDE.map(([n,h,p])=>`<div class="guide-step"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4><p>${p}</p></div></div>`).join('')+
+      GUIDE.map(([n,h,p,bullets])=>`<div class="guide-step"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4>${p?`<p>${p}</p>`:''}${Array.isArray(bullets)&&bullets.length?`<ul><li>${bullets.join('</li><li>')}</li></ul>`:''}</div></div>`).join('')+
       '</div>';
   } else if(t==='qa'){
     const items=getQA(vv.c,vv.v);
@@ -2023,6 +2026,8 @@ render();
   function applyTheme(theme){
     const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.body.classList.toggle('dark', isDark);
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    if(themeColorMeta) themeColorMeta.setAttribute('content', isDark ? '#120f15' : '#ffffff');
     store.set('ux35-theme', theme);
     ['light','system','dark'].forEach(function(t){
       document.getElementById('dss-theme-' + t)?.classList.toggle('active', t === theme);
@@ -3490,6 +3495,8 @@ const FCM_SENDER_ID = '360259005980';
       var isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark && prefersDark.matches);
       document.documentElement.classList.toggle('dark', isDark);
       document.body.classList.toggle('dark', isDark);
+      var themeColorMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeColorMeta) themeColorMeta.setAttribute('content', isDark ? '#120f15' : '#ffffff');
     } catch(e) {}
   }
 
