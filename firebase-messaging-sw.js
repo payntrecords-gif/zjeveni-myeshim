@@ -21,7 +21,29 @@ messaging.onBackgroundMessage(function(payload) {
     body: notification.body || data.body || 'Otevři appku a přečti si dnešní verš.',
     icon: './icon-192.png',
     badge: './icon-96.png',
-    tag: data.tag || 'myeshim-daily'
+    tag: data.tag || 'myeshim-daily',
+    data: {
+      ref: data.ref || '',
+      url: self.registration && self.registration.scope ? self.registration.scope : './'
+    }
   };
   return self.registration.showNotification(title, options);
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  const payload = event.notification && event.notification.data ? event.notification.data : {};
+  const ref = payload.ref || '';
+  const targetUrl = (payload.url || './') + (ref ? '#' + ref : '');
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      for (const client of clientList) {
+        if (client.url.startsWith(self.registration.scope) && 'focus' in client) {
+          if (ref) client.postMessage({ type: 'NAVIGATE_TO_REF', ref: ref });
+          return client.focus();
+        }
+      }
+      return clients.openWindow(targetUrl);
+    })
+  );
 });
