@@ -3613,7 +3613,7 @@ const FCM_SENDER_ID = '360259005980';
     var host = document.getElementById('ps-favorites-list');
     if (!host) return;
     var escapeHtml = function(value) {
-      return (value || '').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+      return (value || '').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m] || m; });
     };
     var getFavoriteItemFromEvent = function(ev) {
       return ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
@@ -3646,8 +3646,7 @@ const FCM_SENDER_ID = '360259005980';
       var text = v ? v.t : '';
       var short = text.length > 96 ? text.slice(0, 96) + '…' : text;
       var safeRef = escapeHtml(ref);
-      var safeRefLabel = escapeHtml(ref);
-      return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" aria-label="Otevřít verš Zj ' + safeRefLabel + '" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + safeRefLabel + '</div>'
+      return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" aria-label="Otevřít verš Zj ' + safeRef + '" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + safeRef + '</div>'
         + '<div class="ps-note-text">' + escapeHtml(short) + '</div></div>';
     }).join('');
     host.onclick = function(ev) {
