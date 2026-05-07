@@ -4015,10 +4015,6 @@ const FCM_SENDER_ID = '360259005980';
     var url = new URL(window.location.href);
     url.searchParams.set('update', Date.now().toString());
     window.location.replace(url.toString());
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = original;
-    }
   };
 
   // ── Dark toggle wiring ──
