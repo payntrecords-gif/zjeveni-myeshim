@@ -271,7 +271,7 @@ body.dark .ux35-status{color:var(--sub)}
   #ux35-progress-wrap{max-width:820px}
 }
 @media print{
-  #topbar,#bottomnav,#nav-ov,.tabs,#app-tabs-outer,.note-save,.ux35-dock,#ux35-toast,#sw-update-toast,#ux35-progress-wrap{display:none !important}
+  #topbar,#bottomnav,#nav-ov,.tabs,#app-tabs-outer,.note-save,.ux35-dock,#ux35-toast,#sw-update-toast,#ux35-progress-wrap,#display-settings-overlay{display:none !important}
   html,body{background:#fff !important;color:#000 !important}
   #app,#app-panels{max-width:none;padding:0 0 0 0}
   .panel{display:block !important}
@@ -1092,24 +1092,145 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
 .verse-card.swipe-left{transform:translateX(-5px) scale(.982)}
 .verse-card.swipe-right{transform:translateX(5px) scale(.982)}
 </style>
+
+<style id="ux46-restructure">
+/* ── TOPBAR: 3-column grid ── */
+#topbar{
+  display:grid;
+  grid-template-columns:44px 1fr auto;
+  gap:6px;
+  align-items:center;
+  padding:max(10px,calc(10px + env(safe-area-inset-top))) 12px 10px;
+  overflow:visible;
+}
+/* Hide logo / brand now replaced by hamburger */
+.tb-logo,.tb-brand{display:none !important}
+/* Left: standalone hamburger button */
+#tb-menu-btn{
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:none;cursor:pointer;padding:0;
+  border-radius:12px;color:var(--text,#1c1820);
+  width:44px;height:44px;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+#tb-menu-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;flex-shrink:0}
+body.dark #tb-menu-btn{color:#f8eef5}
+/* Center: verse reference pill (no hamburger inside) */
+#nav-pill{flex:none;display:flex;justify-content:center;min-width:0}
+#nav-pill button{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(229,69,142,.18);
+  border-radius:999px;padding:8px 16px;
+  font:inherit;font-size:.92rem;font-weight:900;
+  color:var(--pink,#e5458e);cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  min-height:40px;box-shadow:0 2px 10px rgba(0,0,0,.07);
+}
+body.dark #nav-pill button{background:rgba(40,28,44,.78);border-color:rgba(255,150,200,.18);color:#ff93c7}
+#nav-pill button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;flex-shrink:0;opacity:.7}
+/* Right: Aa button + streak */
+.tb-right-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+/* "Aa" display-settings button */
+#display-settings-btn{
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(229,69,142,.18);
+  border-radius:999px;padding:6px 12px;
+  font:inherit;font-size:.93rem;font-weight:900;
+  color:#c53580;cursor:pointer;flex-shrink:0;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .14s;letter-spacing:.01em;
+}
+#display-settings-btn:hover{transform:scale(1.06)}
+body.dark #display-settings-btn{background:rgba(40,24,36,.72);border-color:rgba(255,150,200,.18);color:#ff8cc2}
+/* Hide the old floating dock */
+#ux35-dock{display:none !important}
+/* ── DISPLAY SETTINGS SHEET ── */
+#display-settings-overlay{
+  position:fixed;inset:0;z-index:80;
+  background:rgba(0,0,0,.45);
+  display:none;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#display-settings-overlay.open{display:flex;animation:wov-in .22s ease}
+#display-settings-sheet{
+  width:100%;max-width:480px;
+  background:#fff;border-radius:28px 28px 0 0;
+  padding:24px 20px 28px;
+  animation:wsh-up .28s cubic-bezier(.22,1,.36,1);
+}
+body.dark #display-settings-sheet{background:#1c161d}
+.dss-handle{width:40px;height:4px;border-radius:999px;background:rgba(0,0,0,.12);margin:0 auto 20px;cursor:pointer}
+body.dark .dss-handle{background:rgba(255,255,255,.15)}
+.dss-title{font-size:1.05rem;font-weight:900;color:var(--pink,#e5458e);margin-bottom:20px}
+body.dark .dss-title{color:#ff8cc2}
+.dss-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.dss-label{font-size:.97rem;font-weight:800;color:var(--text,#1c1820)}
+body.dark .dss-label{color:#f8eef5}
+.dss-section-label{font-size:.82rem;font-weight:800;color:var(--sub,#5e4f5b);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+body.dark .dss-section-label{color:#c4a8b8}
+.dss-font-row{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.dss-font-row .ux35-btn{flex:1;justify-content:center;min-height:48px;font-size:1rem}
+#dss-font-status{flex-shrink:0;font-size:.9rem;font-weight:900;color:var(--sub,#5e4f5b);min-width:48px;text-align:center}
+body.dark #dss-font-status{color:#c4a8b8}
+.dss-close-btn{
+  width:100%;border:none;border-radius:18px;padding:14px;
+  background:linear-gradient(135deg,#f05ca2,#de4089);
+  color:#fff;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.dss-close-btn:active{transform:scale(.98)}
+/* ── ACCESSIBILITY: improved contrast ── */
+/* Inactive tabs – #6b5060 on #ede7eb = 5.3:1 ✓ */
+.tabs button{color:#6b5060 !important}
+body.dark .tabs button{color:#c4a8b8 !important}
+/* Sub-text – #5e4f5b on #f3f5fa = 6.3:1 ✓ */
+:root{--sub:#5e4f5b}
+body.dark{--sub:#c4a8b8}
+/* ── BOTTOM NAV: solid background, no blur ── */
+#bottomnav{
+  background:#ffffff !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  border-top:1.5px solid #dfe1e8 !important;
+  box-shadow:none !important;
+}
+body.dark #bottomnav{
+  background:#12141a !important;
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  border-top:1.5px solid #252b38 !important;
+  box-shadow:none !important;
+}
+/* Keep print rule up to date */
+@media print{
+  #display-settings-overlay{display:none !important}
+}
+</style>
 </head>
 <body>
 <div id="topbar">
-  <div class="tb-logo">
-    <img src="logo.png" alt="MYEShim" style="height:30px;width:auto;display:block;object-fit:contain" />
-    <div class="tb-name">iginjaSlovo</div>
-  </div>
+  <!-- Left: hamburger -->
+  <button id="tb-menu-btn" onclick="openNav()" aria-label="Navigace" title="Navigace">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+  </button>
+  <!-- Center: verse reference pill -->
   <div id="nav-pill">
     <button onclick="openNav()" id="nav-pill-btn">
-      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
       <span id="nav-label">Zj 1:1</span>
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
   </div>
-  <div class="tb-brand">MYEShim</div>
-  <button id="notif-bell-btn" onclick="openNotifSettings()" title="Nastavení notifikací" aria-label="Nastavení notifikací">🔔</button>
-  <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
-    <span class="sb-fire">🔥</span>
-    <span class="sb-num" id="streak-num">0</span>
+  <!-- Right: Aa + streak -->
+  <div class="tb-right-actions">
+    <button id="display-settings-btn" onclick="openDisplaySettings()" aria-label="Nastavení zobrazení" title="Nastavení zobrazení">Aa</button>
+    <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
+      <span class="sb-fire">🔥</span>
+      <span class="sb-num" id="streak-num">0</span>
+    </div>
   </div>
 </div>
 
@@ -1146,22 +1267,34 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
 </div>
 
 
-<div class="ux35-dock" id="ux35-dock">
-  <button class="ux35-btn icon-only" id="ux35-search" type="button" title="Hledat (/)" aria-label="Hledat">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="16" y1="16" x2="22" y2="22"></line></svg>
-  </button>
-  <button class="ux35-btn icon-only" id="ux35-theme" type="button" title="Tmavý režim (D)" aria-label="Přepnout na tmavý režim">
-    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3c0 0 0 0 0 0A7 7 0 0 0 21 12.79Z"></path></svg>
-  </button>
-  <button class="ux35-btn" id="ux35-font-minus" type="button" title="Menší písmo (-)">
-    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-    A-
-  </button>
-  <button class="ux35-btn" id="ux35-font-plus" type="button" title="Větší písmo (+)">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-    A+
-  </button>
-<div class="ux35-status" id="ux35-status"></div>
+<!-- old dock hidden; buttons moved to #display-settings-sheet -->
+<div class="ux35-dock" id="ux35-dock" aria-hidden="true"></div>
+
+<!-- DISPLAY SETTINGS SHEET -->
+<div id="display-settings-overlay" role="dialog" aria-modal="true" aria-label="Nastavení zobrazení" onclick="if(event.target===this)closeDisplaySettings()">
+  <div id="display-settings-sheet">
+    <div class="dss-handle" onclick="closeDisplaySettings()"></div>
+    <div class="dss-title">Nastavení zobrazení</div>
+    <div class="dss-row">
+      <span class="dss-label">Tmavý / světlý režim</span>
+      <button class="ux35-btn icon-only" id="ux35-theme" type="button" title="Tmavý režim (D)" aria-label="Přepnout na tmavý režim">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>
+      </button>
+    </div>
+    <div class="dss-section-label">Velikost písma</div>
+    <div class="dss-font-row">
+      <button class="ux35-btn" id="ux35-font-minus" type="button" title="Menší písmo (-)">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        A-
+      </button>
+      <div id="dss-font-status" class="ux35-status">100%</div>
+      <button class="ux35-btn" id="ux35-font-plus" type="button" title="Větší písmo (+)">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        A+
+      </button>
+    </div>
+    <button class="dss-close-btn" type="button" onclick="closeDisplaySettings()">Hotovo</button>
+  </div>
 </div>
 <div id="ux35-toast" aria-live="polite"></div>
 <div id="sw-update-toast" role="status" aria-live="polite"></div>
@@ -2499,5 +2632,44 @@ const FCM_SENDER_ID = '360259005980';
 })();
 </script>
 
+<script id="display-settings-script">
+(function(){
+  function updateFontStatus(){
+    const s = parseFloat(localStorage.getItem('ux35-font') || '1');
+    const el = document.getElementById('dss-font-status');
+    if(el) el.textContent = Math.round(s*100)+'%';
+  }
+  window.openDisplaySettings = function(){
+    const ov = document.getElementById('display-settings-overlay');
+    if(!ov) return;
+    updateFontStatus();
+    ov.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeDisplaySettings = function(){
+    const ov = document.getElementById('display-settings-overlay');
+    if(ov) ov.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  // Update font status when font buttons are clicked.
+  // Short delay lets ux35-script write the new value to localStorage first.
+  const FONT_UPDATE_DELAY = 60;
+  ['ux35-font-minus','ux35-font-plus'].forEach(function(id){
+    document.getElementById(id)?.addEventListener('click', function(){
+      setTimeout(updateFontStatus, FONT_UPDATE_DELAY);
+    });
+  });
+  // Close on Escape
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      const ov = document.getElementById('display-settings-overlay');
+      if(ov && ov.classList.contains('open')) window.closeDisplaySettings();
+    }
+  });
+  // Initialize status on load
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateFontStatus);
+  else updateFontStatus();
+})();
+</script>
 </body>
 </html>
