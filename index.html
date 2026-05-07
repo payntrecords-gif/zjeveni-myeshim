@@ -1132,23 +1132,23 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
 #topbar{
   display:grid;
   grid-template-columns:auto 1fr auto;
-  gap:6px;
+  gap:8px;
   align-items:center;
-  padding:max(10px,calc(10px + env(safe-area-inset-top))) 12px 10px;
+  padding:max(7px,calc(7px + env(safe-area-inset-top))) 14px 7px;
   overflow:visible;
 }
 /* Left wrapper: logo + hamburger */
-.tb-left{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tb-left{display:flex;align-items:center;gap:8px;flex-shrink:0}
 /* Show logo again alongside hamburger */
 .tb-brand{display:none !important}
 .tb-logo{display:flex !important;align-items:center;flex-shrink:0}
-.tb-logo img{height:28px;width:auto;display:block}
+.tb-logo img{height:26px;width:auto;display:block}
 /* Left: standalone hamburger button */
 #tb-menu-btn{
   display:flex;align-items:center;justify-content:center;
   background:none;border:none;cursor:pointer;padding:0;
   border-radius:12px;color:var(--text,#1c1820);
-  width:44px;height:44px;flex-shrink:0;
+  width:40px;height:40px;flex-shrink:0;
   -webkit-tap-highlight-color:transparent;
 }
 #tb-menu-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;flex-shrink:0}
@@ -1159,12 +1159,12 @@ body.dark #tb-menu-btn{color:#f8eef5}
   display:flex;align-items:center;gap:6px;
   background:rgba(255,255,255,.72);
   border:1px solid rgba(229,69,142,.18);
-  border-radius:999px;padding:8px 16px;
+  border-radius:999px;padding:7px 14px;
   font:inherit;font-size:.92rem;font-weight:900;
   color:var(--pink,#e5458e);cursor:pointer;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  min-height:40px;box-shadow:0 2px 10px rgba(0,0,0,.07);
+  min-height:36px;max-width:min(46vw,210px);box-shadow:0 2px 10px rgba(0,0,0,.07);
 }
 body.dark #nav-pill button{background:rgba(40,28,44,.78);border-color:rgba(255,150,200,.18);color:#ff93c7}
 #nav-pill button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;flex-shrink:0;opacity:.7}
@@ -1184,12 +1184,12 @@ body.dark #tb-search-btn{background:rgba(40,24,36,.72);border-color:rgba(255,150
   display:flex;align-items:center;justify-content:center;
   background:rgba(255,255,255,.72);
   border:1px solid rgba(229,69,142,.18);
-  border-radius:999px;padding:6px 12px;
+  border-radius:999px;padding:6px 10px;
   font:inherit;font-size:.93rem;font-weight:900;
   color:#c53580;cursor:pointer;flex-shrink:0;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   -webkit-tap-highlight-color:transparent;
-  transition:transform .14s;letter-spacing:.01em;
+  transition:transform .14s;letter-spacing:.01em;min-height:34px;
 }
 #display-settings-btn:hover{transform:scale(1.06)}
 body.dark #display-settings-btn{background:rgba(40,24,36,.72);border-color:rgba(255,150,200,.18);color:#ff8cc2}
@@ -1278,6 +1278,12 @@ body.dark #bottomnav{
 }
 /* ── FIX: reduce #app-panels padding-bottom to match actual bottomnav height ── */
 #app-panels{padding-bottom:calc(80px + env(safe-area-inset-bottom)) !important}
+
+/* ── MOBILE TOPBAR CLEANUP ── */
+@media (max-width:720px){
+  #tb-search-btn,#streak-badge,#tb-avatar-btn{display:none !important}
+  .tb-right-actions{gap:0}
+}
 </style>
 
 <style id="auth-profile-style">
