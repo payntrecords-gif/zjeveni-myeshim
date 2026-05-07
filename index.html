@@ -1568,6 +1568,10 @@ body.dark .ps-app-version{color:#baa5b3}
 }
 body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69,142,.2);color:#cab5c3}
 .ps-verse-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+#ps-verse-quote{
+  flex:1;min-width:0;display:block;
+  white-space:normal;overflow-wrap:break-word;
+}
 .ps-notes-list{
   border:1px solid rgba(229,69,142,.14);border-radius:14px;padding:6px 10px;max-height:200px;overflow:auto;background:#fff;
 }
@@ -3926,8 +3930,7 @@ const FCM_SENDER_ID = '360259005980';
     var verse = buildDailyVerse();
     var quoteEl = document.getElementById('ps-verse-quote');
     if (quoteEl && verse) {
-      var short = verse.t.length > 90 ? verse.t.slice(0, 90) + '…' : verse.t;
-      quoteEl.textContent = '„' + short + '" — Zj ' + verse.c + ':' + verse.v;
+      quoteEl.textContent = '„' + verse.t + '" — Zj ' + verse.c + ':' + verse.v;
     }
 
     // Dark mode toggle
