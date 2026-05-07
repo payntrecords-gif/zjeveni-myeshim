@@ -3639,8 +3639,8 @@ const FCM_SENDER_ID = '360259005980';
       var v = versesMap[ref];
       var text = v ? v.t : '';
       var short = text.length > 96 ? text.slice(0, 96) + '…' : text;
-      var safeRef = (ref || '').replace(/"/g, '&quot;');
-      return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + ref.replace(':', ':') + '</div>'
+      var safeRef = (ref || '').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+      return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + ref + '</div>'
         + '<div class="ps-note-text">' + short.replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }) + '</div></div>';
     }).join('');
     Array.prototype.forEach.call(host.querySelectorAll('.ps-note-item-clickable'), function(item) {
@@ -3648,7 +3648,9 @@ const FCM_SENDER_ID = '360259005980';
         window.openFavoriteVerse(item.getAttribute('data-ref') || '');
       });
       item.addEventListener('keydown', function(ev) {
-        if (ev.key === 'Enter' || ev.key === ' ') {
+        var isEnter = ev.key === 'Enter';
+        var isSpace = ev.key === ' ' || ev.key === 'Spacebar' || ev.code === 'Space';
+        if (isEnter || isSpace) {
           ev.preventDefault();
           window.openFavoriteVerse(item.getAttribute('data-ref') || '');
         }
