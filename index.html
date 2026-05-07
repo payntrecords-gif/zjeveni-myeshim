@@ -1081,8 +1081,12 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
   background:#15181f;
   border-radius:28px 28px 0 0;
   padding:28px 20px 32px;
+  touch-action:pan-y;
+  transition:transform .22s ease;
+  will-change:transform;
   animation:wsh-up .28s cubic-bezier(.22,1,.36,1);
 }
+#notif-settings-sheet.dragging{transition:none}
 .nss-handle{width:40px;height:4px;border-radius:999px;background:rgba(255,255,255,.15);margin:0 auto 20px}
 .nss-title{font-size:1.08rem;font-weight:900;color:#e5458e;margin-bottom:20px}
 .nss-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px}
@@ -1646,7 +1650,7 @@ body.dark .ps-note-item.ps-note-item-clickable.ps-note-item-swiping{background:r
 }
 .iov-title{font-size:1.05rem;font-weight:800;margin-bottom:8px;color:#1c1820}
 .iov-sub{font-size:.88rem;color:#7a6a76;margin-bottom:20px;line-height:1.45}
-/* Native install button (shown only when beforeinstallprompt is available) */
+/* Install action button (native prompt or external browser handoff) */
 #iov-native-btn{
   display:none;width:100%;padding:14px 20px;margin-bottom:14px;
   background:linear-gradient(135deg,#f05ca2,#de4089);border:none;border-radius:14px;
@@ -2393,9 +2397,13 @@ render();
   const LAST_ROUTE_KEY='myeshim-last-route';
   const SUPPORTS_BEFOREINSTALLPROMPT='onbeforeinstallprompt' in window;
   const standaloneMedia=window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
+  const UA=navigator.userAgent || '';
   let deferredPrompt=null;
   let installDismissed=false;
   function $(id){return document.getElementById(id)}
+  function isAndroid(){ return /Android/i.test(UA); }
+  function isIOS(){ return /iPhone|iPad|iPod/i.test(UA); }
+  function isTelegramBrowser(){ return /Telegram|TgWebView/i.test(UA); }
   function isMobile(){
     return window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
   }
@@ -2411,6 +2419,64 @@ render();
     tip.hidden=!text;
     if(text) tip.textContent=text;
   }
+  function getExternalInstallContext(){
+    if(!isTelegramBrowser() || isStandalone()) return null;
+    if(isAndroid()){
+      return {
+        title:'Dokonči instalaci v Chrome',
+        sub:'Telegram neumí instalaci PWA přímo. Otevři MYEShim jedním klepnutím v Chrome a tam zvol „Instalovat aplikaci“.',
+        button:'📲 Otevřít v Chrome',
+        tip:'V Telegramu instalace nefunguje přímo — otevři stránku v Chrome a tam aplikaci nainstaluj.'
+      };
+    }
+    if(isIOS()){
+      return {
+        title:'Dokonči instalaci v Safari',
+        sub:'Telegram neumí instalaci PWA přímo. Otevři MYEShim v Safari a tam zvol „Přidat na plochu“.',
+        button:'📋 Zkopírovat odkaz pro Safari',
+        tip:'Odkaz si zkopíruj do Safari a pak použij Sdílet → „Přidat na plochu“.'
+      };
+    }
+    return {
+      title:'Dokonči instalaci v prohlížeči',
+      sub:'Tento interní prohlížeč instalaci aplikace nepodporuje. Otevři MYEShim v plném prohlížeči a tam aplikaci nainstaluj.',
+      button:'📲 Otevřít v prohlížeči',
+      tip:'Interní prohlížeč Telegramu instalaci nepodporuje — otevři stránku v běžném prohlížeči.'
+    };
+  }
+  function buildChromeIntentUrl(){
+    try{
+      const url=new URL(window.location.href);
+      const fullPath=(url.pathname || '/') + (url.search || '');
+      return `intent://${url.host}${fullPath}#Intent;scheme=${url.protocol.replace(':','')};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url.origin + fullPath)};end`;
+    }catch(e){
+      try{ console.warn('Failed to prepare Chrome intent URL.', e); }catch(ignore){}
+      return '';
+    }
+  }
+  function openInstallInPreferredBrowser(){
+    const context=getExternalInstallContext();
+    if(!context) return false;
+    saveProgress();
+    if(isAndroid()){
+      const chromeIntent=buildChromeIntentUrl();
+      if(chromeIntent){
+        window.location.href=chromeIntent;
+        return true;
+      }
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(window.location.href).then(function(){
+        setTip(context.tip);
+      }).catch(function(){
+        setTip('Otevři stránku mimo Telegram a dokonči instalaci v běžném prohlížeči.');
+      });
+    } else {
+      setTip(context.tip);
+    }
+    window.open(window.location.href, '_blank', 'noopener');
+    return true;
+  }
   function hideInstallCard(){
     const card=$('installCard');
     if(card) card.classList.remove('show');
@@ -2421,12 +2487,16 @@ render();
       setTip('');
       return;
     }
+    const externalInstallContext=getExternalInstallContext();
     const canPrompt=!!deferredPrompt;
     const noPromptSupport=!SUPPORTS_BEFOREINSTALLPROMPT;
-    const showCard=(canPrompt || noPromptSupport) && !installDismissed;
+    const showCard=(canPrompt || noPromptSupport || !!externalInstallContext) && !installDismissed;
     const title=$('installTitle'), sub=$('installSub'), btn=$('installBtn');
     if(title && sub){
-      if(noPromptSupport){
+      if(externalInstallContext){
+        title.textContent=externalInstallContext.title;
+        sub.textContent=externalInstallContext.sub;
+      } else if(noPromptSupport){
         title.textContent='Přidat MYEShim na plochu';
         sub.textContent=isDesktop()
           ? 'V Chrome nebo Edge otevři menu (⋮) a zvol „Instalovat aplikaci“ nebo „Přidat na plochu“.'
@@ -2439,12 +2509,12 @@ render();
       }
     }
     if(btn){
-      btn.hidden=!canPrompt;
-      if(!noPromptSupport) btn.textContent='Instalovat';
+      btn.hidden=!(canPrompt || !!externalInstallContext);
+      btn.textContent=externalInstallContext ? externalInstallContext.button : 'Instalovat';
     }
     const card=$('installCard');
     if(card) card.classList.toggle('show', showCard);
-    setTip('');
+    setTip(externalInstallContext ? externalInstallContext.tip : '');
   }
   function saveProgress(){
     try{
@@ -2471,6 +2541,7 @@ render();
     }
     if(btn){
       btn.addEventListener('click', async function(){
+        if(openInstallInPreferredBrowser()) return;
         if(!deferredPrompt || isStandalone()) return;
         const promptEvent=deferredPrompt;
         deferredPrompt=null;
@@ -2512,6 +2583,8 @@ render();
   // Expose helpers so auth / install-overlay scripts can use them
   window.isStandalone = isStandalone;
   window.hasDeferredPrompt = function(){ return !!deferredPrompt && !isStandalone(); };
+  window.getExternalInstallContext = getExternalInstallContext;
+  window.openInstallInPreferredBrowser = openInstallInPreferredBrowser;
   window.triggerInstallPrompt = async function(){
     if(!deferredPrompt || isStandalone()) return false;
     const promptEvent = deferredPrompt;
@@ -3185,16 +3258,27 @@ const FCM_SENDER_ID = '360259005980';
     if (timeInput) timeInput.value = notifTime;
     if (status) status.textContent = 'Stav: ' + getPermStatus();
   }
+  const notifOverlay = document.getElementById('notif-settings-overlay');
+  const notifSheet = document.getElementById('notif-settings-sheet');
+  function resetNotifSheetDrag() {
+    if (notifSheet) {
+      notifSheet.classList.remove('dragging');
+      notifSheet.style.transform = '';
+    }
+    if (notifOverlay) notifOverlay.style.background = '';
+  }
   window.openNotifSettings = function() {
     const ov = document.getElementById('notif-settings-overlay');
     if (!ov) return;
     syncNotifSettings();
+    resetNotifSheetDrag();
     ov.classList.add('open');
     document.body.style.overflow = 'hidden';
     if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('notif-settings-overlay');
   };
   window.closeNotifSettings = function() {
     const ov = document.getElementById('notif-settings-overlay');
+    resetNotifSheetDrag();
     if (ov) ov.classList.remove('open');
     document.body.style.overflow = '';
   };
@@ -3202,6 +3286,66 @@ const FCM_SENDER_ID = '360259005980';
     if (e.target === this) window.closeNotifSettings();
   });
   document.getElementById('nss-close-btn')?.addEventListener('click', window.closeNotifSettings);
+  if (notifOverlay && notifSheet) {
+    const NOTIF_DRAG_CLOSE_PX = 110;
+    const NOTIF_HORIZONTAL_IGNORE_PX = 10;
+    const NOTIF_MAX_OVERLAY_OPACITY = 0.55;
+    const NOTIF_MIN_OVERLAY_OPACITY = 0.18;
+    const NOTIF_OVERLAY_FADE_DISTANCE = 420;
+    let startX = 0;
+    let startY = 0;
+    let dragY = 0;
+    let draggingSheet = false;
+    function canDragNotifSheet(target) {
+      return !(target && target.closest && target.closest('button,input,label'));
+    }
+    notifSheet.addEventListener('touchstart', function(e) {
+      if (!canDragNotifSheet(e.target)) return;
+      const touch = e.changedTouches && e.changedTouches[0];
+      if (!touch) return;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      dragY = 0;
+      draggingSheet = true;
+      notifSheet.classList.add('dragging');
+    }, { passive: true });
+    notifSheet.addEventListener('touchmove', function(e) {
+      if (!draggingSheet) return;
+      const touch = e.changedTouches && e.changedTouches[0];
+      if (!touch) return;
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      if (dy < 0) {
+        resetNotifSheetDrag();
+        return;
+      }
+      if (Math.abs(dx) > NOTIF_HORIZONTAL_IGNORE_PX && Math.abs(dy) < Math.abs(dx)) {
+        // Ignore horizontal gestures so sheet controls keep their native touch behavior.
+        return;
+      }
+      dragY = dy;
+      e.preventDefault();
+      notifSheet.style.transform = 'translateY(' + dy + 'px)';
+      notifOverlay.style.background = 'rgba(0,0,0,' + Math.max(NOTIF_MIN_OVERLAY_OPACITY, NOTIF_MAX_OVERLAY_OPACITY - (dy / NOTIF_OVERLAY_FADE_DISTANCE)) + ')';
+    }, { passive: false });
+    function finishNotifSheetDrag() {
+      if (!draggingSheet) return;
+      draggingSheet = false;
+      notifSheet.classList.remove('dragging');
+      if (dragY > NOTIF_DRAG_CLOSE_PX) {
+        window.closeNotifSettings();
+      } else {
+        resetNotifSheetDrag();
+      }
+      dragY = 0;
+    }
+    notifSheet.addEventListener('touchend', finishNotifSheetDrag, { passive: true });
+    notifSheet.addEventListener('touchcancel', function() {
+      draggingSheet = false;
+      dragY = 0;
+      resetNotifSheetDrag();
+    }, { passive: true });
+  }
   document.getElementById('nss-toggle-input')?.addEventListener('change', async function() {
     if (this.checked) {
       if (!('Notification' in window)) { this.checked = false; return; }
@@ -3474,9 +3618,13 @@ const FCM_SENDER_ID = '360259005980';
   <div class="iov-card">
     <div class="iov-title">Přidej aplikaci na plochu 📲</div>
     <div class="iov-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
-    <!-- Native install button – shown only when browser supports beforeinstallprompt -->
+    <!-- Install action button – native prompt or Telegram browser handoff -->
     <button id="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
     <div class="iov-steps">
+      <div class="iov-step">
+        <span class="iov-step-icon">✈️</span>
+        <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři MYEShim v Chrome nebo Safari.</span>
+      </div>
       <div class="iov-step">
         <span class="iov-step-icon">🤖</span>
         <span><strong>Android (Chrome):</strong> klepni na ⋮ v pravém horním rohu a zvol „Přidat na plochu" nebo „Instalovat aplikaci".</span>
@@ -3727,7 +3875,9 @@ const FCM_SENDER_ID = '360259005980';
     var btn = document.getElementById('iov-native-btn');
     if (!btn) return;
     var hasPrompt = typeof window.hasDeferredPrompt === 'function' && window.hasDeferredPrompt();
-    btn.classList.toggle('visible', hasPrompt);
+    var externalContext = typeof window.getExternalInstallContext === 'function' ? window.getExternalInstallContext() : null;
+    btn.classList.toggle('visible', hasPrompt || !!externalContext);
+    btn.textContent = externalContext ? externalContext.button : '📥 Nainstalovat aplikaci';
   };
 
   // Wire up native install button inside the install overlay
@@ -3735,6 +3885,10 @@ const FCM_SENDER_ID = '360259005980';
     var nativeBtn = document.getElementById('iov-native-btn');
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
+        if (typeof window.openInstallInPreferredBrowser === 'function' && window.openInstallInPreferredBrowser()) {
+          updateInstallOverlayBtn();
+          return;
+        }
         if (typeof window.triggerInstallPrompt === 'function') {
           await window.triggerInstallPrompt();
           updateInstallOverlayBtn();
