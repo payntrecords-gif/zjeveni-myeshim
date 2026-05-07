@@ -2447,7 +2447,7 @@ render();
         title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
         sub.textContent=isDesktop()
           ? 'Přidej si MYEShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
-          : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější kažodenní používání.';
+          : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
       }
     }
     if(btn){
@@ -2523,6 +2523,7 @@ render();
   }
   // Expose helpers so auth / install-overlay scripts can use them
   window.isStandalone = isStandalone;
+  window.isTelegramBrowser = isTelegramBrowser;
   window.hasDeferredPrompt = function(){ return !!deferredPrompt && !isStandalone(); };
   window.triggerInstallPrompt = async function(){
     if(!deferredPrompt || isStandalone()) return false;
@@ -3758,11 +3759,13 @@ const FCM_SENDER_ID = '360259005980';
     btn.classList.toggle('visible', hasPrompt);
   };
 
-  // Detect Telegram in-app browser
+  // Detect Telegram in-app browser (delegates to shared helper exposed by ux40-pwa-script)
   function isTelegramBrowser() {
-    return !!(window.TelegramWebviewProxy || window.TelegramWebviewProxyProto ||
-              (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) ||
-              /Telegram/i.test(navigator.userAgent || ''));
+    return typeof window.isTelegramBrowser === 'function'
+      ? window.isTelegramBrowser()
+      : !!(window.TelegramWebviewProxy || window.TelegramWebviewProxyProto ||
+           (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) ||
+           /Telegram/i.test(navigator.userAgent || ''));
   }
 
   // Adapt install overlay for Telegram WebView: show copy-link warning
