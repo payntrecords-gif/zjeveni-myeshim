@@ -1746,6 +1746,7 @@ render();
   function registerSW(){
     if(!('serviceWorker' in navigator)) return;
     const updateToast = $('sw-update-toast');
+    const UPDATE_TOAST_DURATION_MS = 8000;
     let updateToastTimer = null;
     let hadController = !!navigator.serviceWorker.controller;
     const showUpdateToast = function(){
@@ -1753,7 +1754,7 @@ render();
       updateToast.textContent = 'MYEShim má novou verzi. Klepni pro obnovení.';
       updateToast.classList.add('show');
       clearTimeout(updateToastTimer);
-      updateToastTimer = setTimeout(function(){ updateToast.classList.remove('show'); }, 8000);
+      updateToastTimer = setTimeout(function(){ updateToast.classList.remove('show'); }, UPDATE_TOAST_DURATION_MS);
     };
     if(updateToast){
       updateToast.addEventListener('click', function(){ location.reload(); });
@@ -1874,7 +1875,7 @@ const FCM_SENDER_ID = '360259005980';
       });
       if (token) {
         safeLSSet('myeshim-fcm-token', token);
-        console.log('FCM token:', token);
+        console.log('FCM token:', token.slice(0, 10) + '…');
       }
     } catch (e) {
       fcmTokenRequested = false;
