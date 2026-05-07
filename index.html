@@ -982,6 +982,16 @@ body.dark .sd-motto{color:#cab5c3}
   color:#fff;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;
 }
 .sd-close:active{transform:scale(.98)}
+
+/* ── FILL VIEWPORT (Fix #4): eliminate black gap below content cards ── */
+/* Make body a flex column so its min-height:100dvh actually fills viewport height */
+body{display:flex;flex-direction:column}
+/* #app-panels grows to fill all remaining vertical space below topbar + tabs */
+#app-panels{flex:1;display:flex;flex-direction:column}
+/* Active panel stretches inside #app-panels */
+.panel.active{flex:1;display:flex;flex-direction:column}
+/* Guide and Q&A cards stretch to fill their active panel, eliminating the gap */
+.guide-card,.qa-card{flex:1}
 </style>
 
 
