@@ -1285,7 +1285,7 @@ body.dark #bottomnav{
     <div class="dss-font-row">
       <button class="ux35-btn" id="ux35-font-minus" type="button" title="Menší písmo (-)">
         <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        A−
+        A-
       </button>
       <div id="dss-font-status" class="ux35-status">100%</div>
       <button class="ux35-btn" id="ux35-font-plus" type="button" title="Větší písmo (+)">
@@ -2635,7 +2635,7 @@ const FCM_SENDER_ID = '360259005980';
 <script id="display-settings-script">
 (function(){
   function updateFontStatus(){
-    const s = parseFloat(localStorage.getItem('ux35-font')||'1')||1;
+    const s = parseFloat(localStorage.getItem('ux35-font') || '1');
     const el = document.getElementById('dss-font-status');
     if(el) el.textContent = Math.round(s*100)+'%';
   }
@@ -2651,10 +2651,12 @@ const FCM_SENDER_ID = '360259005980';
     if(ov) ov.classList.remove('open');
     document.body.style.overflow = '';
   };
-  // Update font status when font buttons are clicked
+  // Update font status when font buttons are clicked.
+  // Short delay lets ux35-script write the new value to localStorage first.
+  const FONT_UPDATE_DELAY = 60;
   ['ux35-font-minus','ux35-font-plus'].forEach(function(id){
     document.getElementById(id)?.addEventListener('click', function(){
-      setTimeout(updateFontStatus, 60);
+      setTimeout(updateFontStatus, FONT_UPDATE_DELAY);
     });
   });
   // Close on Escape
