@@ -4003,7 +4003,6 @@ const FCM_SENDER_ID = '360259005980';
         await Promise.all(regs.map(function(reg) {
           return reg.unregister().catch(function(err) {
             reportNonCriticalError('Odregistrace SW selhala:', err);
-            return false;
           });
         }));
       }
