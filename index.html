@@ -3172,9 +3172,9 @@ const FCM_SENDER_ID = '360259005980';
     if (ov) { ov.classList.remove('visible'); document.body.style.overflow = ''; }
     // Re-apply the user's saved theme now that we're past the login screen
     try {
-      var t = localStorage.getItem('ux35-theme') || 'system';
-      var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
-      var isDark = t === 'dark' || (t === 'system' && mq && mq.matches);
+      var savedTheme = localStorage.getItem('ux35-theme') || 'system';
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      var isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark && prefersDark.matches);
       document.documentElement.classList.toggle('dark', isDark);
       document.body.classList.toggle('dark', isDark);
     } catch(e) {}
