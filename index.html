@@ -927,7 +927,7 @@ body.dark #nav-pill button{
 /* Sticky outer wrapper for tab bar */
 #app-tabs-outer{
   position:sticky;
-  top:calc(52px + env(safe-area-inset-top));
+  top:calc(40px + env(safe-area-inset-top));
   z-index:18;
   background:var(--bg);
   border-bottom:1px solid var(--line);
@@ -1918,9 +1918,9 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
     <div class="dss-slider-row">
       <span class="dss-font-a dss-font-a--small">A</span>
       <!-- min/max are font-scale × 100 (92 = 0.92, 118 = 1.18); step=2 for smooth snapping -->
-      <input type="range" id="dss-font-slider" min="92" max="118" step="2" value="100" class="dss-slider" aria-label="Velikost písma">
+      <input type="range" id="dss-font-slider" min="92" max="118" step="1" value="105" class="dss-slider" aria-label="Velikost písma">
       <span class="dss-font-a dss-font-a--large">A</span>
-      <span id="dss-font-status">100%</span>
+      <span id="dss-font-status">105%</span>
     </div>
     <div class="dss-section-label">Motiv</div>
     <div class="dss-theme-row">
@@ -1952,9 +1952,9 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     <span>Předchozí</span>
   </button>
-  <button id="bn-nav" onclick="openNav()" aria-label="Přejít na verš">
+  <button id="bn-nav" onclick="focusCurrentVerse()" aria-label="Přejít na aktuální verš">
     <span id="nav-label">Zj 1:1</span>
-    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    <svg viewBox="0 0 24 24"><polyline points="6 14 12 8 18 14"/><line x1="12" y1="8" x2="12" y2="19"/></svg>
   </button>
   <button id="bn-next" onclick="go(1)" aria-label="Další verš">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -2032,7 +2032,7 @@ function render(){
   document.getElementById('cv-name').textContent=chName(vv.c);
   document.getElementById('cv-right').textContent='Verš '+pos+' z '+cvs.length;
   document.getElementById('vc-ref').textContent='Zj '+vv.c+':'+vv.v;
-  document.getElementById('vc-text').innerHTML='<b>'+vv.v+'.</b> '+esc(vv.t);
+  document.getElementById('vc-text').textContent=vv.t;
   document.getElementById('nav-label').textContent='Zj '+vv.c+':'+vv.v;
   const prevBtn=document.getElementById('bn-prev');
   const nextBtn=document.getElementById('bn-next');
@@ -2093,6 +2093,16 @@ function go(dir){
   if(ni===state.idx) return;
   state.idx=ni; render();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function focusCurrentVerse(){
+  const card=document.querySelector('.verse-card');
+  if(!card){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+  card.classList.remove('ux38-bump');
+  void card.offsetWidth;
+  card.classList.add('ux38-bump');
+  setTimeout(()=>card.classList.remove('ux38-bump'),220);
 }
 
 /* ── NAV OVERLAY ── */
@@ -2369,8 +2379,8 @@ render();
       if(e.key === '/' && !typing){ e.preventDefault(); openSearch(); }
       if(typing) return;
       if(e.key.toLowerCase() === 'd'){ applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark'); }
-      if(e.key === '+' || e.key === '='){ applyFont((parseFloat(store.get('ux35-font','1')) || 1) + 0.04); updateProgress(); }
-      if(e.key === '-'){ applyFont((parseFloat(store.get('ux35-font','1')) || 1) - 0.04); updateProgress(); }
+      if(e.key === '+' || e.key === '='){ applyFont((parseFloat(store.get('ux35-font','1.05')) || 1.05) + 0.04); updateProgress(); }
+      if(e.key === '-'){ applyFont((parseFloat(store.get('ux35-font','1.05')) || 1.05) - 0.04); updateProgress(); }
     });
   }
 
@@ -2410,7 +2420,7 @@ render();
   }
   function init(){
     applyTheme(preferredTheme());
-    applyFont(parseFloat(store.get('ux35-font','1')) || 1);
+    applyFont(parseFloat(store.get('ux35-font','1.05')) || 1.05);
     bind();
     updateProgress();
     wireNotes();
@@ -3639,7 +3649,7 @@ const FCM_SENDER_ID = '360259005980';
   function sliderPct(s){ return ((s - FONT_MIN) / (FONT_MAX - FONT_MIN) * 100).toFixed(1) + '%'; }
 
   function syncFontUI(){
-    var s = parseFloat(localStorage.getItem('ux35-font') || '1');
+    var s = parseFloat(localStorage.getItem('ux35-font') || '1.05');
     var slider = document.getElementById('dss-font-slider');
     var status = document.getElementById('dss-font-status');
     if(slider) {
@@ -4348,7 +4358,7 @@ const FCM_SENDER_ID = '360259005980';
     // Font slider
     var fontSlider = document.getElementById('ps-font-slider');
     if (fontSlider) {
-      var scale = parseFloat(safeLS('ux35-font', '1'));
+      var scale = parseFloat(safeLS('ux35-font', '1.05'));
       fontSlider.value = Math.round(scale * 100);
       var pct = ((scale - 0.92) / (1.18 - 0.92) * 100).toFixed(1) + '%';
       fontSlider.style.setProperty('--pct', pct);
@@ -4699,7 +4709,7 @@ const FCM_SENDER_ID = '360259005980';
     } else if (key === 'ux35-theme' || key === 'ux35-font') {
       await writeDoc('preferences', {
         theme: safeLSGet('ux35-theme', 'system'),
-        font: safeLSGet('ux35-font', '1'),
+        font: safeLSGet('ux35-font', '1.05'),
         updatedAt: new Date().toISOString()
       });
     } else if (key === 'notif_enabled' || key === 'notif_time' || key === 'myeshim-fcm-token') {
