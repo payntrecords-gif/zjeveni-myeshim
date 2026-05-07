@@ -1104,17 +1104,26 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
 }
 .nss-toggle input:checked + .nss-slider::before{transform:translateX(22px)}
 .nss-section-label{font-size:.82rem;font-weight:800;color:#a09bb0;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
-.nss-time-wrap{margin-bottom:20px}
+.nss-time-wrap{margin-bottom:20px;padding-right:10px}
 .nss-time-input{
+  --nss-time-padding-left:16px;
+  --nss-time-picker-space:46px;
+  --nss-time-indicator-hit-pad:8px;
   width:100%;
   border:1.5px solid #252a35;
   background:#252a35;
   color:#f8eef5;
   border-radius:12px;
-  padding:12px 14px;
+  padding:12px var(--nss-time-picker-space) 12px var(--nss-time-padding-left);
+  min-height:48px;
   font:inherit;
   font-size:.95rem;
   font-weight:900;
+}
+.nss-time-input::-webkit-calendar-picker-indicator{
+  cursor:pointer;
+  padding:var(--nss-time-indicator-hit-pad);
+  margin-right:calc(var(--nss-time-indicator-hit-pad) * -1);
 }
 .nss-time-input:focus{outline:none;border-color:#e5458e;box-shadow:0 0 0 3px rgba(229,69,142,.18)}
 .nss-status{
