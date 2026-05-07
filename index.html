@@ -1796,22 +1796,16 @@ body.dark #bn-prev,body.dark #bn-next{color:#ff8cc2 !important}
   border:1.5px solid rgba(229,69,142,.42) !important;
   border-radius:20px !important;
   color:var(--pink,#e5458e) !important;
-  padding:7px 8px !important;
-  gap:2px !important;
+  padding:7px 10px !important;
+  gap:6px !important;
   box-shadow:0 3px 10px rgba(229,69,142,.16) !important;
+  flex-direction:row !important;
+  align-items:center !important;
 }
 #bn-nav #nav-label{
-  font-size:.9rem;font-weight:900;line-height:1.1;display:block;
+  font-size:.92rem;font-weight:900;line-height:1.1;display:block;
 }
-#bn-nav .nav-hint{
-  font-size:.75rem;
-  font-weight:800;
-  line-height:1.2;
-  letter-spacing:.015em;
-  opacity:.88;
-  display:block;
-}
-#bn-nav svg{width:12px !important;height:12px !important;opacity:.75 !important}
+#bn-nav .bn-nav-chev{width:14px !important;height:14px !important;opacity:.8 !important;flex-shrink:0 !important}
 body.dark #bn-nav{
   background:rgba(255,140,194,.14) !important;
   border-color:rgba(255,140,194,.44) !important;
@@ -1963,9 +1957,9 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
     <span>Předchozí</span>
   </button>
   <button id="bn-nav" onclick="window.openSearch()" aria-label="Navigace a vyhledávání">
+    <svg class="bn-nav-chev" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     <span id="nav-label">Zj 1:1</span>
-    <span class="nav-hint">Kapitoly • Verše • Hledat</span>
-    <svg viewBox="0 0 24 24"><polyline points="6 14 12 8 18 14"/><line x1="12" y1="8" x2="12" y2="19"/></svg>
+    <svg class="bn-nav-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
   <button id="bn-next" onclick="go(1)" aria-label="Další verš">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
