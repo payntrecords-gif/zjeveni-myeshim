@@ -3913,7 +3913,7 @@ const FCM_SENDER_ID = '360259005980';
         var dy = touch.clientY - swipeState.startY;
         var isSwipingRight = dx >= 0;
         var isSwipeTooSmall = Math.abs(dx) < MIN_SWIPE_START_PX;
-        var isVerticalSwipe = Math.abs(dx) <= Math.abs(dy);
+        var isVerticalSwipe = Math.abs(dx) < Math.abs(dy);
         if (isSwipingRight || isSwipeTooSmall || isVerticalSwipe) {
           if (swipeState.dragging) resetFavoriteSwipe();
           swipeState.dragging = false;
@@ -3935,8 +3935,7 @@ const FCM_SENDER_ID = '360259005980';
         var dy = touch ? touch.clientY - swipeState.startY : 0;
         var swipedFarEnough = dx <= -SWIPE_REMOVE_THRESHOLD_PX;
         var withinVerticalBounds = Math.abs(dy) < MAX_VERTICAL_DEVIATION_PX;
-        var primarilyHorizontal = Math.abs(dx) > Math.abs(dy);
-        var shouldRemove = swipedFarEnough && withinVerticalBounds && primarilyHorizontal;
+        var shouldRemove = swipedFarEnough && withinVerticalBounds;
         if (swipeState.dragging) swipeState.suppressClickUntil = Date.now() + CLICK_SUPPRESS_DRAG_MS;
         resetFavoriteSwipe(item);
         swipeState.active = false;
