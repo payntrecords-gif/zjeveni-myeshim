@@ -1582,6 +1582,44 @@ body.dark .ps-note-item.ps-note-item-clickable:hover{background:rgba(255,140,194
 }
 #offline-banner.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
+<style id="guide-card-refresh">
+#panel-guide .guide-card{padding:16px}
+#panel-guide .guide-steps{display:grid;gap:12px}
+#panel-guide .guide-step{padding:0 !important;border-bottom:none !important}
+#panel-guide .guide-step-card{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  gap:12px;
+  align-items:start;
+  background:linear-gradient(180deg,#fff 0%,#fff8fc 100%);
+  border:1px solid rgba(229,69,142,.14);
+  border-radius:16px;
+  padding:14px 13px;
+  box-shadow:0 8px 20px rgba(229,69,142,.08);
+}
+body.dark #panel-guide .guide-step-card{
+  background:linear-gradient(180deg,#201620 0%,#281b28 100%);
+  border-color:rgba(255,140,194,.22);
+  box-shadow:none;
+}
+#panel-guide .gs-num{
+  width:48px;height:48px;font-size:1.15rem;
+  box-shadow:0 8px 16px rgba(229,69,142,.28);
+}
+#panel-guide .gs-body h4{margin:2px 0 4px}
+#panel-guide .gs-body p{margin:0}
+#panel-guide .gs-body ul{
+  margin:8px 0 0;
+  padding-left:19px;
+  color:var(--sub);
+  line-height:1.45;
+}
+#panel-guide .gs-body li+li{margin-top:4px}
+@media (max-width:420px){
+  #panel-guide .guide-step-card{grid-template-columns:44px minmax(0,1fr);gap:10px}
+  #panel-guide .gs-num{width:44px;height:44px;font-size:1.05rem}
+}
+</style>
 </head>
 <body>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
@@ -1789,9 +1827,9 @@ function setTab(t){
   const vv=VERSES[state.idx];
   if(t==='guide'){
     document.getElementById('panel-guide').innerHTML=
-      '<div class="guide-card"><div class="guide-title">Návod na MYEShim</div>'+
-      GUIDE.map(([n,h,p,bullets])=>`<div class="guide-step"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4>${p?`<p>${p}</p>`:''}${Array.isArray(bullets)&&bullets.length?`<ul><li>${bullets.join('</li><li>')}</li></ul>`:''}</div></div>`).join('')+
-      '</div>';
+      '<div class="guide-card"><div class="guide-title">Návod na MYEShim</div><div class="guide-steps">'+
+      GUIDE.map(([n,h,p,bullets])=>`<div class="guide-step"><div class="guide-step-card"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4>${p?`<p>${p}</p>`:''}${Array.isArray(bullets)&&bullets.length?`<ul><li>${bullets.join('</li><li>')}</li></ul>`:''}</div></div></div>`).join('')+
+      '</div></div>';
   } else if(t==='qa'){
     const items=getQA(vv.c,vv.v);
     if(!items.length){ document.getElementById('panel-qa').innerHTML='<p style="color:var(--sub);padding:10px 0 20px">Pro tento verš zatím není Q&A.</p>'; return; }
