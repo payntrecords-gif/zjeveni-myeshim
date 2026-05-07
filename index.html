@@ -3173,7 +3173,8 @@ const FCM_SENDER_ID = '360259005980';
     // Re-apply the user's saved theme now that we're past the login screen
     try {
       var t = localStorage.getItem('ux35-theme') || 'system';
-      var isDark = t === 'dark' || (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      var isDark = t === 'dark' || (t === 'system' && mq && mq.matches);
       document.documentElement.classList.toggle('dark', isDark);
       document.body.classList.toggle('dark', isDark);
     } catch(e) {}
@@ -3430,19 +3431,22 @@ const FCM_SENDER_ID = '360259005980';
     var lastY = 0;
     var tracking = false;
 
+    function startTracking() {
+      tracking = true;
+      sheet.style.transition = 'none';
+    }
+
     sheet.addEventListener('touchstart', function(e) {
       startY = e.touches[0].clientY;
       lastY = startY;
-      tracking = sheet.scrollTop <= 0;
-      if (tracking) sheet.style.transition = 'none';
+      if (sheet.scrollTop <= 0) startTracking();
     }, {passive: true});
 
     sheet.addEventListener('touchmove', function(e) {
       lastY = e.touches[0].clientY;
       var dy = lastY - startY;
       if (!tracking && sheet.scrollTop <= 0 && dy > 0) {
-        tracking = true;
-        sheet.style.transition = 'none';
+        startTracking();
       }
       if (tracking && dy > 0) {
         e.preventDefault();
