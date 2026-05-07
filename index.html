@@ -3911,7 +3911,10 @@ const FCM_SENDER_ID = '360259005980';
         if (!touch) return;
         var dx = touch.clientX - swipeState.startX;
         var dy = touch.clientY - swipeState.startY;
-        if (dx >= 0 || Math.abs(dx) < MIN_SWIPE_START_PX || Math.abs(dx) <= Math.abs(dy)) {
+        var isSwipingRight = dx >= 0;
+        var isSwipeTooSmall = Math.abs(dx) < MIN_SWIPE_START_PX;
+        var isVerticalSwipe = Math.abs(dx) <= Math.abs(dy);
+        if (isSwipingRight || isSwipeTooSmall || isVerticalSwipe) {
           if (swipeState.dragging) resetFavoriteSwipe();
           swipeState.dragging = false;
           return;
@@ -3930,7 +3933,10 @@ const FCM_SENDER_ID = '360259005980';
         var touch = ev.changedTouches && ev.changedTouches[0];
         var dx = touch ? touch.clientX - swipeState.startX : 0;
         var dy = touch ? touch.clientY - swipeState.startY : 0;
-        var shouldRemove = dx <= -SWIPE_REMOVE_THRESHOLD_PX && Math.abs(dy) < MAX_VERTICAL_DEVIATION_PX && Math.abs(dx) > Math.abs(dy);
+        var swipedFarEnough = dx <= -SWIPE_REMOVE_THRESHOLD_PX;
+        var withinVerticalBounds = Math.abs(dy) < MAX_VERTICAL_DEVIATION_PX;
+        var primarilyHorizontal = Math.abs(dx) > Math.abs(dy);
+        var shouldRemove = swipedFarEnough && withinVerticalBounds && primarilyHorizontal;
         if (swipeState.dragging) swipeState.suppressClickUntil = Date.now() + CLICK_SUPPRESS_DRAG_MS;
         resetFavoriteSwipe(item);
         swipeState.active = false;
