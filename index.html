@@ -1592,15 +1592,17 @@ body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69
 }
 .ps-note-item{padding:10px 2px;border-bottom:1px solid rgba(229,69,142,.12)}
 .ps-note-item:last-child{border-bottom:none}
-.ps-note-item.ps-note-item-clickable{cursor:pointer;transition:background .15s ease}
+.ps-note-item.ps-note-item-clickable{cursor:pointer;transition:transform .18s ease,opacity .18s ease,background .15s ease}
 .ps-note-item.ps-note-item-clickable:hover{background:rgba(229,69,142,.08)}
 .ps-note-item.ps-note-item-clickable:focus-visible{outline:2px solid rgba(123,62,244,.5);outline-offset:2px;border-radius:8px}
+.ps-note-item.ps-note-item-clickable.ps-note-item-swiping{background:rgba(229,69,142,.12)}
 .ps-note-ref{font-size:.8rem;font-weight:900;color:#c53580;margin-bottom:2px}
 .ps-note-text{font-size:.86rem;color:#6d5968;line-height:1.35}
 body.dark .ps-notes-list{background:#241d25;border-color:rgba(255,140,194,.2)}
 body.dark .ps-note-ref{color:#ff8cc2}
 body.dark .ps-note-text{color:#d8c0ce}
 body.dark .ps-note-item.ps-note-item-clickable:hover{background:rgba(255,140,194,.12)}
+body.dark .ps-note-item.ps-note-item-clickable.ps-note-item-swiping{background:rgba(255,140,194,.18)}
 #offline-banner{
   position:fixed;left:50%;top:max(10px,calc(10px + env(safe-area-inset-top)));
   transform:translateX(-50%) translateY(-12px);
@@ -3850,9 +3852,107 @@ const FCM_SENDER_ID = '360259005980';
   function renderProfileFavorites() {
     var host = document.getElementById('ps-favorites-list');
     if (!host) return;
+    var MIN_SWIPE_START_PX = 12;
+    var MAX_SWIPE_DISTANCE_PX = 120;
+    var MIN_SWIPE_OPACITY = 0.45;
+    var OPACITY_FADE_DISTANCE_PX = 180;
+    var SWIPE_REMOVE_THRESHOLD_PX = 72;
+    var MAX_VERTICAL_DEVIATION_PX = 56;
+    var CLICK_SUPPRESS_DRAG_MS = 450;
+    var CLICK_SUPPRESS_REMOVE_MS = 650;
+    var swipeState = host._favoriteSwipeState || (host._favoriteSwipeState = {
+      active: false,
+      dragging: false,
+      item: null,
+      startX: 0,
+      startY: 0,
+      suppressClickUntil: 0
+    });
     var getFavoriteItemFromEvent = function(ev) {
       return ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
     };
+    var resetFavoriteSwipe = function(item) {
+      var target = item || swipeState.item;
+      if (!target) return;
+      target.style.transform = '';
+      target.style.opacity = '';
+      target.classList.remove('ps-note-item-swiping');
+    };
+    var removeFavoriteVerse = function(ref) {
+      if (!ref || typeof ref !== 'string') return;
+      var nextFavs = [];
+      try { nextFavs = JSON.parse(localStorage.getItem('myeshim-favorites') || '[]') || []; } catch(e) { nextFavs = []; }
+      if (!Array.isArray(nextFavs)) nextFavs = [];
+      var ix = nextFavs.indexOf(ref);
+      if (ix < 0) return;
+      nextFavs.splice(ix, 1);
+      state.favorites = nextFavs.slice();
+      save();
+      updateFavoriteButton();
+      renderProfileFavorites();
+      if (typeof window.toast === 'function') window.toast('Odebráno z oblíbených');
+    };
+    if (!host.dataset.swipeWired) {
+      host.dataset.swipeWired = '1';
+      host.addEventListener('touchstart', function(ev) {
+        var item = getFavoriteItemFromEvent(ev);
+        var touch = ev.changedTouches && ev.changedTouches[0];
+        if (swipeState.item && swipeState.item !== item) resetFavoriteSwipe();
+        swipeState.item = item || null;
+        swipeState.active = !!(item && touch);
+        swipeState.dragging = false;
+        if (!item || !touch) return;
+        swipeState.startX = touch.clientX;
+        swipeState.startY = touch.clientY;
+      }, {passive:true});
+      host.addEventListener('touchmove', function(ev) {
+        if (!swipeState.active || !swipeState.item) return;
+        var touch = ev.changedTouches && ev.changedTouches[0];
+        if (!touch) return;
+        var dx = touch.clientX - swipeState.startX;
+        var dy = touch.clientY - swipeState.startY;
+        var isSwipingRight = dx >= 0;
+        var isSwipeTooSmall = Math.abs(dx) < MIN_SWIPE_START_PX;
+        var isVerticalSwipe = Math.abs(dx) < Math.abs(dy);
+        if (isSwipingRight || isSwipeTooSmall || isVerticalSwipe) {
+          if (swipeState.dragging) resetFavoriteSwipe();
+          swipeState.dragging = false;
+          return;
+        }
+        swipeState.dragging = true;
+        ev.preventDefault();
+        var clampedDx = Math.max(dx, -MAX_SWIPE_DISTANCE_PX);
+        swipeState.item.classList.add('ps-note-item-swiping');
+        swipeState.item.style.transform = 'translateX(' + clampedDx + 'px)';
+        swipeState.item.style.opacity = String(Math.max(MIN_SWIPE_OPACITY, 1 - (Math.abs(clampedDx) / OPACITY_FADE_DISTANCE_PX)));
+      }, {passive:false});
+      host.addEventListener('touchend', function(ev) {
+        if (!swipeState.active || !swipeState.item) return;
+        var item = swipeState.item;
+        var ref = item.getAttribute('data-ref') || '';
+        var touch = ev.changedTouches && ev.changedTouches[0];
+        var dx = touch ? touch.clientX - swipeState.startX : 0;
+        var dy = touch ? touch.clientY - swipeState.startY : 0;
+        var swipedFarEnough = dx <= -SWIPE_REMOVE_THRESHOLD_PX;
+        var withinVerticalBounds = Math.abs(dy) < MAX_VERTICAL_DEVIATION_PX;
+        var shouldRemove = swipedFarEnough && withinVerticalBounds;
+        if (swipeState.dragging) swipeState.suppressClickUntil = Date.now() + CLICK_SUPPRESS_DRAG_MS;
+        resetFavoriteSwipe(item);
+        swipeState.active = false;
+        swipeState.dragging = false;
+        swipeState.item = null;
+        if (shouldRemove) {
+          swipeState.suppressClickUntil = Date.now() + CLICK_SUPPRESS_REMOVE_MS;
+          removeFavoriteVerse(ref);
+        }
+      }, {passive:true});
+      host.addEventListener('touchcancel', function() {
+        resetFavoriteSwipe();
+        swipeState.active = false;
+        swipeState.dragging = false;
+        swipeState.item = null;
+      }, {passive:true});
+    }
     var favs = [];
     try { favs = JSON.parse(localStorage.getItem('myeshim-favorites') || '[]') || []; } catch(e) { favs = []; }
     if (!Array.isArray(favs) || !favs.length) {
@@ -3885,6 +3985,10 @@ const FCM_SENDER_ID = '360259005980';
         + '<div class="ps-note-text">' + escapeHtml(short) + '</div></div>';
     }).join('');
     host.onclick = function(ev) {
+      if (Date.now() < swipeState.suppressClickUntil) {
+        ev.preventDefault();
+        return;
+      }
       var item = getFavoriteItemFromEvent(ev);
       if (!item) return;
       window.openFavoriteVerse(item.getAttribute('data-ref') || '');
