@@ -23,5 +23,5 @@ messaging.onBackgroundMessage(function(payload) {
     badge: './icon-96.png',
     tag: data.tag || 'myeshim-daily'
   };
-  self.registration.showNotification(title, options);
+  return self.registration.showNotification(title, options);
 });

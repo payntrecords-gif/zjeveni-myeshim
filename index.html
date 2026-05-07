@@ -1757,7 +1757,10 @@ render();
       updateToastTimer = setTimeout(function(){ updateToast.classList.remove('show'); }, UPDATE_TOAST_DURATION_MS);
     };
     if(updateToast){
-      updateToast.addEventListener('click', function(){ location.reload(); });
+      updateToast.addEventListener('click', function(){
+        clearTimeout(updateToastTimer);
+        location.reload();
+      });
     }
     navigator.serviceWorker.addEventListener('controllerchange', function(){
       if(!hadController){
