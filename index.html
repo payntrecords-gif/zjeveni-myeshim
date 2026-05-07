@@ -1587,6 +1587,55 @@ body.dark .ps-note-item.ps-note-item-clickable:hover{background:rgba(255,140,194
 }
 #offline-banner.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
+<style id="install-overlay-style">
+/* ── INSTALL OVERLAY ── */
+#install-overlay{
+  position:fixed;inset:0;z-index:195;
+  background:radial-gradient(ellipse 100% 55% at 50% 0%,rgba(229,69,142,.14) 0%,transparent 65%),
+             radial-gradient(ellipse 70% 45% at 90% 100%,rgba(123,62,244,.08) 0%,transparent 60%),
+             #f8f3f7;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 24px 56px;overflow-y:auto;color-scheme:light;
+}
+#install-overlay.visible{display:flex}
+.iov-logo-wrap{position:relative;margin-bottom:24px;flex-shrink:0}
+.iov-logo-wrap::before{
+  content:'';position:absolute;inset:-20px;
+  background:radial-gradient(circle,rgba(229,69,142,.18) 0%,transparent 70%);
+  border-radius:50%;animation:auth-pulse 3s ease-in-out infinite;
+}
+.iov-logo-wrap img{width:80px;height:80px;border-radius:24px;box-shadow:0 18px 44px rgba(229,69,142,.28);position:relative;display:block}
+.iov-app-name{
+  font-size:2.2rem;font-weight:900;letter-spacing:-.02em;
+  background:linear-gradient(135deg,#7b3ef4 0%,#e5458e 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:6px;text-align:center;
+}
+.iov-tagline{font-size:.97rem;color:#7a6a76;text-align:center;line-height:1.5;margin-bottom:28px;max-width:260px}
+.iov-card{
+  background:#fff;border:1px solid rgba(229,69,142,.18);border-radius:24px;
+  padding:24px 22px;width:100%;max-width:368px;
+  box-shadow:0 16px 48px rgba(180,80,140,.12);
+  animation:auth-slide-up .45s cubic-bezier(.22,1,.36,1) both;flex-shrink:0;
+}
+.iov-title{font-size:1.05rem;font-weight:800;margin-bottom:8px;color:#1c1820}
+.iov-sub{font-size:.88rem;color:#7a6a76;margin-bottom:20px;line-height:1.45}
+/* Native install button (shown only when beforeinstallprompt is available) */
+#iov-native-btn{
+  display:none;width:100%;padding:14px 20px;margin-bottom:14px;
+  background:linear-gradient(135deg,#f05ca2,#de4089);border:none;border-radius:14px;
+  font:inherit;font-size:.97rem;font-weight:800;color:#fff;cursor:pointer;
+  box-shadow:0 8px 22px rgba(229,69,142,.32);transition:transform .14s,box-shadow .14s;
+}
+#iov-native-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(229,69,142,.42)}
+#iov-native-btn:active{transform:scale(.98)}
+#iov-native-btn.visible{display:block}
+.iov-steps{background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.iov-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.87rem;color:#5e4f5b;line-height:1.4}
+.iov-step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
+.iov-step-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.iov-note{font-size:.78rem;color:#9a7fa0;text-align:center;line-height:1.4;margin-top:4px}
+</style>
 <style id="guide-card-refresh">
 #panel-guide .guide-card{padding:16px}
 #panel-guide .guide-steps{display:grid;gap:12px;width:100%}
@@ -2409,47 +2458,46 @@ render();
       deferredPrompt=e;
       installDismissed=false;
       syncInstallUI();
+      if(typeof window.updateInstallOverlayBtn==='function') window.updateInstallOverlayBtn();
     });
     window.addEventListener('appinstalled', function(){
       deferredPrompt=null;
       installDismissed=true;
       syncInstallUI();
+      if(typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
     });
     window.addEventListener('resize', syncInstallUI);
     window.addEventListener('pageshow', syncInstallUI);
     if(standaloneMedia && standaloneMedia.addEventListener){
-      standaloneMedia.addEventListener('change', syncInstallUI);
+      standaloneMedia.addEventListener('change', function(){
+        syncInstallUI();
+        if(isStandalone() && typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
+      });
     }
     syncInstallUI();
   }
+  // Expose helpers so auth / install-overlay scripts can use them
+  window.isStandalone = isStandalone;
+  window.hasDeferredPrompt = function(){ return !!deferredPrompt && !isStandalone(); };
+  window.triggerInstallPrompt = async function(){
+    if(!deferredPrompt || isStandalone()) return false;
+    const promptEvent = deferredPrompt;
+    deferredPrompt = null;
+    promptEvent.prompt();
+    let choice = null;
+    try{ choice = await promptEvent.userChoice; }catch(e){}
+    installDismissed = !(choice && choice.outcome === 'accepted');
+    syncInstallUI();
+    return !!(choice && choice.outcome === 'accepted');
+  };
   function registerSW(){
     if(!('serviceWorker' in navigator)) return;
-    const updateToast = $('sw-update-toast');
-    const UPDATE_TOAST_DURATION_MS = 8000;
-    let updateToastTimer = null;
     let hadController = !!navigator.serviceWorker.controller;
-    const showUpdateToast = function(){
-      if(!updateToast) return;
-      updateToast.textContent = 'MYEShim má novou verzi. Klepni pro obnovení.';
-      updateToast.classList.add('show');
-      clearTimeout(updateToastTimer);
-      updateToastTimer = setTimeout(function(){ updateToast.classList.remove('show'); }, UPDATE_TOAST_DURATION_MS);
-    };
-    if(updateToast){
-      updateToast.addEventListener('click', function(){
-        clearTimeout(updateToastTimer);
-        location.reload();
-      });
-    }
     navigator.serviceWorker.addEventListener('controllerchange', function(){
-      if(!hadController){
-        hadController = true;
-        return;
-      }
-      showUpdateToast();
-    });
-    navigator.serviceWorker.addEventListener('message', function(event){
-      if(event.data && event.data.type === 'SW_UPDATED') showUpdateToast();
+      if(!hadController){ hadController = true; return; }
+      // New SW activated – reload immediately so users always get the latest version.
+      // App state is persisted in localStorage so no data is lost.
+      location.reload();
     });
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('service-worker.js', { scope: './' }).catch(function(){});
@@ -3375,6 +3423,32 @@ const FCM_SENDER_ID = '360259005980';
 </div>
 <div id="auth-overlay-error" role="alert"></div>
 
+<!-- ── INSTALL OVERLAY (step 2 of onboarding) ── -->
+<div id="install-overlay" role="dialog" aria-modal="true" aria-label="Nainstalovat aplikaci">
+  <div class="iov-logo-wrap">
+    <img src="logo.png" alt="MYEShim logo">
+  </div>
+  <div class="iov-app-name">MYEShim</div>
+  <div class="iov-tagline">Jeden krok před zahájením studia</div>
+  <div class="iov-card">
+    <div class="iov-title">Přidej aplikaci na plochu 📲</div>
+    <div class="iov-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
+    <!-- Native install button – shown only when browser supports beforeinstallprompt -->
+    <button id="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
+    <div class="iov-steps">
+      <div class="iov-step">
+        <span class="iov-step-icon">🤖</span>
+        <span><strong>Android (Chrome):</strong> klepni na ⋮ v pravém horním rohu a zvol „Přidat na plochu" nebo „Instalovat aplikaci".</span>
+      </div>
+      <div class="iov-step">
+        <span class="iov-step-icon">🍎</span>
+        <span><strong>iPhone / iPad (Safari):</strong> klepni na 📤 (Sdílet) ve spodní liště a zvol „Přidat na plochu".</span>
+      </div>
+    </div>
+    <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do studia.</p>
+  </div>
+</div>
+
 <!-- ── PROFILE PANEL ── -->
 <div id="profile-overlay" role="dialog" aria-modal="true" aria-label="Profil uživatele" onclick="if(event.target===this)closeProfile()">
   <div id="profile-sheet">
@@ -3539,7 +3613,13 @@ const FCM_SENDER_ID = '360259005980';
       if (!safeLS('myeshim-joined', '')) {
         safeLSSet('myeshim-joined', new Date().toISOString().slice(0, 10));
       }
+      // Step 2 of onboarding: if the app is NOT running in standalone mode,
+      // show the install overlay so the user knows to add it to their home screen.
+      if (typeof window.isStandalone === 'function' && !window.isStandalone()) {
+        showInstallOverlay();
+      }
     } else {
+      hideInstallOverlay(/* silent */true);
       showAuthOverlay();
       clearAvatar();
     }
@@ -3568,6 +3648,60 @@ const FCM_SENDER_ID = '360259005980';
       if (themeColorMeta) themeColorMeta.setAttribute('content', isDark ? '#120f15' : '#ffffff');
     } catch(e) {}
   }
+
+  // ── Install overlay (step 2 of onboarding) ──
+  function showInstallOverlay() {
+    // Keep light mode on the install screen
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark');
+    var ov = document.getElementById('install-overlay');
+    if (ov) { ov.classList.add('visible'); document.body.style.overflow = 'hidden'; }
+    updateInstallOverlayBtn();
+  }
+
+  function hideInstallOverlay(silent) {
+    var ov = document.getElementById('install-overlay');
+    if (!ov || !ov.classList.contains('visible')) return;
+    ov.classList.remove('visible');
+    document.body.style.overflow = '';
+    if (!silent) {
+      // Re-apply saved theme when entering the app for real
+      try {
+        var savedTheme = localStorage.getItem('ux35-theme') || 'system';
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+        var isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark && prefersDark.matches);
+        document.documentElement.classList.toggle('dark', isDark);
+        document.body.classList.toggle('dark', isDark);
+        var themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeColorMeta) themeColorMeta.setAttribute('content', isDark ? '#120f15' : '#ffffff');
+      } catch(e) {}
+    }
+  }
+
+  // Show the native install button only when the browser has a deferred prompt ready
+  window.updateInstallOverlayBtn = function() {
+    var btn = document.getElementById('iov-native-btn');
+    if (!btn) return;
+    var hasPrompt = typeof window.hasDeferredPrompt === 'function' && window.hasDeferredPrompt();
+    btn.classList.toggle('visible', hasPrompt);
+  };
+
+  // Wire up native install button inside the install overlay
+  document.addEventListener('DOMContentLoaded', function() {
+    var nativeBtn = document.getElementById('iov-native-btn');
+    if (nativeBtn) {
+      nativeBtn.addEventListener('click', async function() {
+        if (typeof window.triggerInstallPrompt === 'function') {
+          await window.triggerInstallPrompt();
+          updateInstallOverlayBtn();
+        }
+      });
+    }
+    updateInstallOverlayBtn();
+  });
+
+  // Expose so ux40-pwa-script can close the overlay after standalone is detected
+  window.hideInstallOverlay = function() { hideInstallOverlay(false); };
 
   function getInitials(name) {
     if (!name) return '?';

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myeshim-v44-cache';
+const CACHE_NAME = 'myeshim-v45-cache';
 const APP_SHELL = [
   './',
   './index.html',
@@ -31,6 +31,25 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  // Network-first for HTML / navigation: always fetch fresh markup after a deploy
+  const isNavigation = event.request.mode === 'navigate'
+    || url.pathname.endsWith('.html')
+    || url.pathname === '/'
+    || url.pathname.endsWith('/');
+  if (isNavigation) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        return response;
+      }).catch(() =>
+        caches.match(event.request).then(cached => cached || caches.match('./offline.html'))
+      )
+    );
+    return;
+  }
+  // Cache-first for all other assets (icons, JS, images, …)
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
       const copy = response.clone();
