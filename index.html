@@ -3208,7 +3208,6 @@ const FCM_SENDER_ID = '360259005980';
   document.getElementById('nss-time-input')?.addEventListener('change', function() {
     if (!TIME_RE.test(this.value || '')) return;
     safeLSSet('notif_time', this.value);
-    safeLSSet('notif_hour', String(parseInt(this.value.split(':')[0], 10)));
     syncNotifSettings();
   });
   document.addEventListener('keydown', function(e) {
@@ -4256,7 +4255,6 @@ const FCM_SENDER_ID = '360259005980';
     'ux35-font': true,
     'notif_enabled': true,
     'notif_time': true,
-    'notif_hour': true,
     'myeshim-fcm-token': true
   };
 
@@ -4312,7 +4310,7 @@ const FCM_SENDER_ID = '360259005980';
         font: safeLSGet('ux35-font', '1'),
         updatedAt: new Date().toISOString()
       });
-    } else if (key === 'notif_enabled' || key === 'notif_time' || key === 'notif_hour' || key === 'myeshim-fcm-token') {
+    } else if (key === 'notif_enabled' || key === 'notif_time' || key === 'myeshim-fcm-token') {
       var notifTime = getResolvedNotifTime();
       await writeDoc('notifications', {
         enabled: safeLSGet('notif_enabled', 'true') !== 'false',
@@ -4354,8 +4352,6 @@ const FCM_SENDER_ID = '360259005980';
         if (typeof notif.enabled === 'boolean') safeLSSet('notif_enabled', notif.enabled ? 'true' : 'false');
         if (notif.time) {
           safeLSSet('notif_time', String(notif.time));
-          var hh = TIME_RE.exec(String(notif.time));
-          if (hh) safeLSSet('notif_hour', String(parseInt(hh[1], 10)));
         }
         if (notif.fcmToken) safeLSSet('myeshim-fcm-token', String(notif.fcmToken));
       }
@@ -4367,12 +4363,18 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   function syncCurrentWatchedValues() {
+    var shouldSyncNotifications = false;
     Object.keys(watchedKeys).forEach(function(key) {
       try {
+        if (key === 'notif_enabled' || key === 'notif_time' || key === 'myeshim-fcm-token') {
+          shouldSyncNotifications = true;
+          return;
+        }
         var value = localStorage.getItem(key);
         if (value !== null) syncKeyToFirestore(key, value);
       } catch(e) { try { console.warn('Sync watched key failed:', key, e); } catch(ignore) {} }
     });
+    if (shouldSyncNotifications) syncKeyToFirestore('notif_time', safeLSGet('notif_time', ''));
   }
 
   var originalSetItem = localStorage.setItem.bind(localStorage);
