@@ -3238,7 +3238,9 @@ const FCM_SENDER_ID = '360259005980';
     auth = firebase.auth();
     setAuthBusy(true);
     if (firebase.auth.Auth && firebase.auth.Auth.Persistence && firebase.auth.Auth.Persistence.LOCAL) {
-      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(err){
+        reportNonCriticalError('Auth persistence selhala:', err);
+      });
     }
     auth.onAuthStateChanged(onAuthChange);
   }
@@ -3656,7 +3658,7 @@ const FCM_SENDER_ID = '360259005980';
           // No auth available – show the overlay so user knows
           showAuthOverlay();
           setAuthBusy(false);
-          showAuthError('Přihlášení je dočasně nedostupné. Zkontroluj internet a zkus to znovu.');
+          showAuthError('Přihlášení je dočasně nedostupné. Zkontroluj internetové připojení a zkus to znovu.');
         }
       }, 100);
     }

@@ -39,7 +39,9 @@ self.addEventListener('notificationclick', function(event) {
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
       for (const client of clientList) {
         if (client.url.startsWith(self.registration.scope) && 'focus' in client) {
-          if (ref) client.postMessage({ type: 'NAVIGATE_TO_REF', ref: ref });
+          if (ref) {
+            try { client.postMessage({ type: 'NAVIGATE_TO_REF', ref: ref }); } catch(e) {}
+          }
           return client.focus();
         }
       }
