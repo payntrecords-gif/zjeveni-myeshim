@@ -3612,6 +3612,12 @@ const FCM_SENDER_ID = '360259005980';
   function renderProfileFavorites() {
     var host = document.getElementById('ps-favorites-list');
     if (!host) return;
+    var escapeHtml = function(value) {
+      return (value || '').replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; });
+    };
+    var getFavoriteItemFromEvent = function(ev) {
+      return ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
+    };
     var favs = [];
     try { favs = JSON.parse(localStorage.getItem('myeshim-favorites') || '[]') || []; } catch(e) { favs = []; }
     if (!Array.isArray(favs) || !favs.length) {
@@ -3639,18 +3645,18 @@ const FCM_SENDER_ID = '360259005980';
       var v = versesMap[ref];
       var text = v ? v.t : '';
       var short = text.length > 96 ? text.slice(0, 96) + '…' : text;
-      var safeRef = (ref || '').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
-      var safeRefLabel = (ref || '').replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; });
+      var safeRef = escapeHtml(ref).replace(/'/g, '&#39;');
+      var safeRefLabel = escapeHtml(ref);
       return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + safeRefLabel + '</div>'
-        + '<div class="ps-note-text">' + short.replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }) + '</div></div>';
+        + '<div class="ps-note-text">' + escapeHtml(short) + '</div></div>';
     }).join('');
     host.onclick = function(ev) {
-      var item = ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
+      var item = getFavoriteItemFromEvent(ev);
       if (!item || !host.contains(item)) return;
       window.openFavoriteVerse(item.getAttribute('data-ref') || '');
     };
     host.onkeydown = function(ev) {
-      var item = ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
+      var item = getFavoriteItemFromEvent(ev);
       if (!item || !host.contains(item)) return;
       var isEnter = ev.key === 'Enter';
       var isSpace = ev.key === ' ' || ev.key === 'Spacebar' || ev.code === 'Space';
