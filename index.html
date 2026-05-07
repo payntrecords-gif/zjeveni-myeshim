@@ -1298,6 +1298,7 @@ body.dark #bottomnav{
     <div class="dss-section-label">Velikost písma</div>
     <div class="dss-slider-row">
       <span class="dss-font-a dss-font-a--small">A</span>
+      <!-- min/max are font-scale × 100 (92 = 0.92, 118 = 1.18); step=2 for smooth snapping -->
       <input type="range" id="dss-font-slider" min="92" max="118" step="2" value="100" class="dss-slider" aria-label="Velikost písma">
       <span class="dss-font-a dss-font-a--large">A</span>
       <span id="dss-font-status">100%</span>
@@ -2646,6 +2647,7 @@ const FCM_SENDER_ID = '360259005980';
 
 <script id="display-settings-script">
 (function(){
+  /* Font scale range: 0.92 (min readable) – 1.18 (max comfortable); slider values are scale×100 */
   var FONT_MIN = 0.92, FONT_MAX = 1.18;
 
   function sliderPct(s){ return ((s - FONT_MIN) / (FONT_MAX - FONT_MIN) * 100).toFixed(1) + '%'; }
@@ -2689,9 +2691,9 @@ const FCM_SENDER_ID = '360259005980';
     if(!slider || slider.dataset.wired) return;
     slider.dataset.wired = '1';
     function onSlider(){
-      var pct = parseInt(slider.value, 10) / 100;
+      var scale = parseInt(slider.value, 10) / 100;
       if(typeof window.applyFont === 'function'){
-        var s = window.applyFont(pct);
+        var s = window.applyFont(scale);
         var status = document.getElementById('dss-font-status');
         if(status) status.textContent = Math.round(s * 100) + '%';
         slider.style.setProperty('--pct', sliderPct(s));
