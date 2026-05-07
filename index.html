@@ -3396,6 +3396,11 @@ const FCM_SENDER_ID = '360259005980';
     </div>
 
     <div class="ps-section">
+      <div class="ps-section-title">Moje oblíbené verše</div>
+      <div class="ps-notes-list" id="ps-favorites-list"></div>
+    </div>
+
+    <div class="ps-section">
       <div class="ps-section-title">Moje zápisky</div>
       <div class="ps-notes-list" id="ps-notes-list"></div>
     </div>
@@ -3600,6 +3605,28 @@ const FCM_SENDER_ID = '360259005980';
     }).join('');
   }
 
+  function renderProfileFavorites() {
+    var host = document.getElementById('ps-favorites-list');
+    if (!host) return;
+    var favs = [];
+    try { favs = JSON.parse(localStorage.getItem('myeshim-favorites') || '[]') || []; } catch(e) { favs = []; }
+    if (!Array.isArray(favs) || !favs.length) {
+      host.innerHTML = '<div class="ps-note-text">Zatím nemáš žádné oblíbené verše.</div>';
+      return;
+    }
+    var versesMap = {};
+    if (Array.isArray(window.VERSES)) {
+      window.VERSES.forEach(function(v) { versesMap[v.c + ':' + v.v] = v; });
+    }
+    host.innerHTML = favs.map(function(ref) {
+      var v = versesMap[ref];
+      var text = v ? v.t : '';
+      var short = text.length > 96 ? text.slice(0, 96) + '…' : text;
+      return '<div class="ps-note-item"><div class="ps-note-ref">Zj ' + ref.replace(':', ':') + '</div>'
+        + '<div class="ps-note-text">' + short.replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }) + '</div></div>';
+    }).join('');
+  }
+
   window.openProfile = function() {
     var user = auth ? auth.currentUser : null;
     if (!user) { showAuthOverlay(); return; }
@@ -3645,6 +3672,7 @@ const FCM_SENDER_ID = '360259005980';
     if (psStreak) animateProfileCount(psStreak, streak);
     if (psRead) psRead.textContent = readCount;
     if (psJoined) psJoined.textContent = daysWithUs || '1';
+    renderProfileFavorites();
     renderProfileNotes();
 
     // Daily verse chip
