@@ -67,6 +67,15 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
 .vc-ref{font-size:1.9rem;font-weight:900;color:#fff;line-height:1;margin-bottom:10px}
 .vc-text{font-size:1.06rem;line-height:1.58;color:#fff}
 .vc-text b{font-weight:800;opacity:.8}
+.verse-actions{display:flex;gap:8px;margin:0 0 14px}
+.va-btn{
+  border:none;border-radius:14px;padding:10px 12px;
+  font:inherit;font-size:.85rem;font-weight:900;cursor:pointer;
+  background:linear-gradient(135deg,#f05ca2,#de4089);color:#fff;flex:1;
+}
+.va-btn.ghost{background:#fff;color:var(--pink);border:1px solid rgba(229,69,142,.25)}
+.va-btn.ghost.active{background:rgba(229,69,142,.12);border-color:rgba(229,69,142,.45)}
+body.dark .va-btn.ghost{background:#241b27;color:#ff8cc2;border-color:rgba(255,140,194,.3)}
 
 .tabs{
   display:grid;grid-template-columns:repeat(3,1fr);gap:5px;
@@ -200,6 +209,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
 .ns-sr-ref{font-weight:900;color:var(--pink);font-size:.88rem}
 .ns-sr-name{font-size:.76rem;color:var(--sub);margin-top:1px}
 .ns-sr-text{font-size:.95rem;color:var(--text);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ns-sr-text .ns-hit{font-weight:900;color:var(--pink)}
 </style>
 
 <style id="ux35-style">
@@ -990,6 +1000,11 @@ body.dark .sd-motto{color:#cab5c3}
   background:linear-gradient(135deg,#f05ca2,#de4089);
   color:#fff;font:inherit;font-size:1rem;font-weight:900;cursor:pointer;
 }
+.sd-share{
+  width:100%;border:1.5px solid rgba(229,69,142,.28);border-radius:18px;padding:13px;
+  background:transparent;color:#c53580;font:inherit;font-size:.97rem;font-weight:900;cursor:pointer;margin-bottom:9px;
+}
+body.dark .sd-share{color:#ff8cc2;border-color:rgba(255,140,194,.3)}
 .sd-close:active{transform:scale(.98)}
 
 /* ── FILL VIEWPORT (Fix #4): eliminate black gap below content cards ── */
@@ -1155,6 +1170,15 @@ body.dark #nav-pill button{background:rgba(40,28,44,.78);border-color:rgba(255,1
 #nav-pill button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5;flex-shrink:0;opacity:.7}
 /* Right: Aa button + streak */
 .tb-right-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+#tb-search-btn{
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.72);border:1px solid rgba(229,69,142,.18);
+  color:#c53580;cursor:pointer;flex-shrink:0;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+#tb-search-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.2}
+body.dark #tb-search-btn{background:rgba(40,24,36,.72);border-color:rgba(255,150,200,.18);color:#ff8cc2}
 /* "Aa" display-settings button */
 #display-settings-btn{
   display:flex;align-items:center;justify-content:center;
@@ -1423,6 +1447,17 @@ body.dark .ps-section-title{color:#cab5c3}
   border:1px solid rgba(229,69,142,.14);
   border-radius:16px;padding:12px 8px;text-align:center;
 }
+.ps-streak-cell{
+  background:linear-gradient(135deg,rgba(123,62,244,.12),rgba(229,69,142,.16));
+  border-color:rgba(229,69,142,.3);
+  box-shadow:0 10px 20px rgba(170,64,140,.16);
+}
+.ps-streak-num{
+  font-size:2rem;line-height:1;
+  background:linear-gradient(135deg,#7b3ef4,#e5458e);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.ps-streak-cell.streak-pulse{animation:milestone-pulse .8s cubic-bezier(.22,1,.36,1)}
 body.dark .ps-activity-cell{background:rgba(229,69,142,.08);border-color:rgba(229,69,142,.2)}
 .ps-activity-num{font-size:1.25rem;font-weight:900;color:#e5458e;margin-bottom:2px;line-height:1}
 .ps-activity-label{font-size:.72rem;font-weight:700;color:#7a6a76;line-height:1.2}
@@ -1523,6 +1558,16 @@ body.dark .ps-app-version{color:#baa5b3}
 }
 body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69,142,.2);color:#cab5c3}
 .ps-verse-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+.ps-notes-list{
+  border:1px solid rgba(229,69,142,.14);border-radius:14px;padding:6px 10px;max-height:200px;overflow:auto;background:#fff;
+}
+.ps-note-item{padding:10px 2px;border-bottom:1px solid rgba(229,69,142,.12)}
+.ps-note-item:last-child{border-bottom:none}
+.ps-note-ref{font-size:.8rem;font-weight:900;color:#c53580;margin-bottom:2px}
+.ps-note-text{font-size:.86rem;color:#6d5968;line-height:1.35}
+body.dark .ps-notes-list{background:#241d25;border-color:rgba(255,140,194,.2)}
+body.dark .ps-note-ref{color:#ff8cc2}
+body.dark .ps-note-text{color:#d8c0ce}
 #offline-banner{
   position:fixed;left:50%;top:max(10px,calc(10px + env(safe-area-inset-top)));
   transform:translateX(-50%) translateY(-12px);
@@ -1553,6 +1598,9 @@ body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69
   </div>
   <!-- Right: Aa + streak + avatar -->
   <div class="tb-right-actions">
+    <button id="tb-search-btn" onclick="openSearch()" aria-label="Hledat v bibli" title="Hledat">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
+    </button>
     <button id="display-settings-btn" onclick="openDisplaySettings()" aria-label="Nastavení zobrazení" title="Nastavení zobrazení">Aa</button>
     <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
       <span class="sb-fire">🔥</span>
@@ -1582,6 +1630,10 @@ body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69
   <div class="verse-card">
     <div class="vc-ref" id="vc-ref"></div>
     <div class="vc-text" id="vc-text"></div>
+  </div>
+  <div class="verse-actions">
+    <button class="va-btn" id="verse-share-btn" onclick="shareCurrentVerse()">Sdílet verš</button>
+    <button class="va-btn ghost" id="verse-fav-btn" onclick="toggleFavoriteVerse()">♡ Oblíbené</button>
   </div>
 </div>
 <div id="app-tabs-outer">
@@ -1672,15 +1724,22 @@ let state={
   idx: parseInt(localStorage.getItem('mye_idx')||'0'),
   tab: 'guide',
   notes: JSON.parse(localStorage.getItem('mye_notes')||'{}'),
+  favorites: JSON.parse(localStorage.getItem('myeshim-favorites')||'[]'),
   navCh: 1,
   navView: 'chapters'
 };
-function save(){ localStorage.setItem('mye_idx',state.idx); localStorage.setItem('mye_notes',JSON.stringify(state.notes)); }
+window.state=state;
+function save(){
+  localStorage.setItem('mye_idx',state.idx);
+  localStorage.setItem('mye_notes',JSON.stringify(state.notes));
+  localStorage.setItem('myeshim-favorites',JSON.stringify(state.favorites||[]));
+}
 function esc(s){ return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 function chVS(ch){ return VERSES.filter(v=>v.c===ch); }
 function chName(ch){ return CHAPTERS[ch]||'Kapitola '+ch; }
 function getQA(c,v){ return QA[c+':'+v]||[]; }
 function hasNote(c,v){ return !!(state.notes[c+':'+v]||'').trim(); }
+function hasFavorite(c,v){ return Array.isArray(state.favorites) && state.favorites.includes(c+':'+v); }
 
 const GUIDE=[
   ['1','Přečti verš pomalu','Všimni si, kdo jedná, co se děje a které slovo je nejdůležitější.'],
@@ -1709,6 +1768,7 @@ function render(){
   prevBtn.setAttribute('aria-disabled',state.idx===0?'true':'false');
   nextBtn.setAttribute('aria-disabled',state.idx===VERSES.length-1?'true':'false');
   setTab(state.tab||'qa');
+  updateFavoriteButton();
   save();
 }
 
@@ -1822,9 +1882,38 @@ function navGo(c,v){
   if(idx>-1){ state.idx=idx; render(); closeNav(); window.scrollTo({top:0,behavior:'smooth'}); }
 }
 
+function updateFavoriteButton(){
+  const vv=VERSES[state.idx];
+  const btn=document.getElementById('verse-fav-btn');
+  if(!btn||!vv) return;
+  const active=hasFavorite(vv.c,vv.v);
+  btn.textContent=active?'♥ Oblíbené':'♡ Oblíbené';
+  btn.classList.toggle('active',active);
+}
+
+window.toggleFavoriteVerse=function(){
+  const vv=VERSES[state.idx];
+  if(!vv) return;
+  const ref=vv.c+':'+vv.v;
+  if(!Array.isArray(state.favorites)) state.favorites=[];
+  const ix=state.favorites.indexOf(ref);
+  if(ix>-1) state.favorites.splice(ix,1);
+  else state.favorites.push(ref);
+  updateFavoriteButton();
+  save();
+  if(typeof window.toast==='function') window.toast(ix>-1?'Odebráno z oblíbených':'Přidáno do oblíbených');
+};
+
+function highlightQuery(text,q){
+  const escapedQ=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  if(!escapedQ) return esc(text);
+  return esc(text).replace(new RegExp('('+escapedQ+')','ig'),'<span class="ns-hit">$1</span>');
+}
+
 function nsSearch(){
-  const q=document.getElementById('ns-input').value.trim().toLowerCase();
-  if(q.length<2){ renderNavGrid(); return; }
+  const rawQ=document.getElementById('ns-input').value.trim();
+  const q=rawQ.toLowerCase();
+  if(q.length<1){ renderNavGrid(); return; }
   // try to parse "6:9" style
   const refM=q.match(/^(\d{1,2}):(\d{1,3})$/);
   let res;
@@ -1835,10 +1924,62 @@ function nsSearch(){
     res=VERSES.filter(vv=>vv.t.toLowerCase().includes(q)).slice(0,50);
   }
   let h='<div class="ns-section-label">'+(res.length?res.length+' výsledků':'Žádné výsledky')+'</div><div class="ns-sr">';
-  h+=res.length?res.map(vv=>`<div class="ns-sr-item" onclick="navGo(${vv.c},${vv.v})"><div><div class="ns-sr-ref">Zj ${vv.c}:${vv.v}</div><div class="ns-sr-name">${esc(chName(vv.c))}</div></div><div class="ns-sr-text">${esc(vv.t)}</div></div>`).join(''):'<p style="color:var(--sub);padding:8px 0">Zkus jiné slovo.</p>';
+  h+=res.length
+    ?res.map(vv=>{
+      const preview=vv.t.length>140?vv.t.slice(0,140)+'…':vv.t;
+      return `<div class="ns-sr-item" onclick="navGo(${vv.c},${vv.v})"><div><div class="ns-sr-ref">Zj ${vv.c}:${vv.v}</div><div class="ns-sr-name">${esc(chName(vv.c))}</div></div><div class="ns-sr-text">${highlightQuery(preview,q)}</div></div>`;
+    }).join('')
+    :`<p style="color:var(--sub);padding:8px 0">🔍 Žádné verše nenalezeny pro „${esc(rawQ)}“</p>`;
   h+='</div>';
   document.getElementById('ns-scroll').innerHTML=h;
 }
+
+window.openSearch=function(){
+  openNav();
+  const input=document.getElementById('ns-input');
+  if(input){ setTimeout(()=>input.focus(),90); }
+};
+
+window.shareCurrentVerse=async function(){
+  const vv=VERSES[state.idx];
+  if(!vv) return;
+  const ref='Zjevení '+vv.c+':'+vv.v;
+  const text=vv.t;
+  const canvas=document.createElement('canvas');
+  canvas.width=1080; canvas.height=1080;
+  const ctx=canvas.getContext('2d');
+  const bg=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+  bg.addColorStop(0,'#7b3ef4'); bg.addColorStop(1,'#e5458e');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='rgba(255,255,255,.95)';
+  ctx.font='700 40px sans-serif';
+  const words=text.split(' ');
+  const lines=[]; let line='';
+  words.forEach(w=>{ const t=(line?line+' ':'')+w; if(ctx.measureText(t).width>860){ lines.push(line); line=w; } else line=t; });
+  if(line) lines.push(line);
+  ctx.font='700 52px sans-serif';
+  ctx.fillText('MYEShim',90,130);
+  ctx.font='500 48px sans-serif';
+  lines.slice(0,11).forEach((l,i)=>ctx.fillText(l,90,240+i*62));
+  ctx.font='700 42px sans-serif';
+  ctx.fillText(ref,90,960);
+  canvas.toBlob(async blob=>{
+    const file=new File([blob],'myeshim-vers.png',{type:'image/png'});
+    try{
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({title:'MYEShim verš',text:ref,files:[file]});
+      } else {
+        await navigator.clipboard.writeText('„'+text+'“ — '+ref);
+        if(typeof window.toast==='function') window.toast('Verš zkopírován!');
+      }
+    }catch(e){
+      try{
+        await navigator.clipboard.writeText('„'+text+'“ — '+ref);
+        if(typeof window.toast==='function') window.toast('Verš zkopírován!');
+      }catch(_e){}
+    }
+  },'image/png');
+};
 
 // swipe to close nav sheet
 (function(){
@@ -1848,6 +1989,14 @@ function nsSearch(){
     if(e.touches[0].clientY-sy>70&&document.getElementById('ns-scroll').scrollTop<2) closeNav();
   },{passive:true});
 })();
+
+window.addEventListener('myeshim-data-synced',function(){
+  try{
+    state.notes=JSON.parse(localStorage.getItem('mye_notes')||'{}');
+    state.favorites=JSON.parse(localStorage.getItem('myeshim-favorites')||'[]');
+    render();
+  }catch(e){}
+});
 
 render();
 </script>
@@ -2258,6 +2407,7 @@ render();
     <div class="sd-count" id="sd-count">0 dní v řadě</div>
     <div class="sd-best" id="sd-best">Nejvíce: 0 dní</div>
     <div class="sd-motto">Dělej MYEShim každý den!</div>
+    <button class="sd-share" onclick="shareStreakCard()">Sdílet svůj streak</button>
     <button class="sd-close" onclick="closeStreakDetail()">Hotovo</button>
   </div>
 </div>
@@ -2392,6 +2542,17 @@ const FCM_SENDER_ID = '360259005980';
     if (badge) badge.title = streak === 1 ? '1 den studia' : streak + ' dní v řadě';
   }
 
+  function animateCountUp(el, target, duration) {
+    if (!el) return;
+    const start = performance.now();
+    function step(now) {
+      const p = Math.min(1, (now - start) / duration);
+      el.textContent = Math.round(target * p);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
   function showMilestone(streak) {
     const msg = MILESTONES[streak];
     if (!msg) return;
@@ -2490,7 +2651,11 @@ const FCM_SENDER_ID = '360259005980';
     const best = parseInt(safeLS('streak_best', '0'), 10) || 0;
     const countEl = document.getElementById('sd-count');
     const bestEl = document.getElementById('sd-best');
-    if (countEl) countEl.textContent = pluralDays(count);
+    if (countEl) {
+      countEl.textContent = '0 dní v řadě';
+      animateCountUp(countEl, count, 650);
+      setTimeout(() => { countEl.textContent = pluralDays(count); }, 700);
+    }
     if (bestEl) bestEl.textContent = 'Nejvíce: ' + pluralBest(best);
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2541,9 +2706,49 @@ const FCM_SENDER_ID = '360259005980';
     safeLSSet('streak_last_date', today);
     safeLSSet('streak_best', best);
     updateStreakBadge(streak);
+    if (isNewDay) {
+      const cell = document.getElementById('ps-streak-cell');
+      if (cell) { cell.classList.remove('streak-pulse'); void cell.offsetWidth; cell.classList.add('streak-pulse'); }
+    }
     // Show welcome modal on first open of day
     showWelcomeModal(streak, isNewDay);
   }
+
+  window.shareStreakCard = function() {
+    const user = window.firebase && firebase.auth && firebase.auth().currentUser;
+    const name = user && (user.displayName || user.email) ? (user.displayName || user.email) : 'MYEShim uživatel';
+    const streak = parseInt(safeLS('streak_count', '0'), 10) || 0;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080; canvas.height = 1440;
+    const ctx = canvas.getContext('2d');
+    const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    bg.addColorStop(0, '#7b3ef4'); bg.addColorStop(1, '#e5458e');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 58px sans-serif';
+    ctx.fillText('MYEShim', 90, 120);
+    ctx.font = '900 240px sans-serif';
+    ctx.fillText('🔥' + streak, 90, 520);
+    ctx.font = '600 52px sans-serif';
+    ctx.fillText((name + '').slice(0, 28), 90, 640);
+    ctx.font = '500 48px sans-serif';
+    ctx.fillText('Studuji už ' + streak + ' dní v řadě!', 90, 760);
+    ctx.fillText('„Vytrvej každý den.“', 90, 840);
+    canvas.toBlob(async function(blob) {
+      const file = new File([blob], 'myeshim-streak.png', { type: 'image/png' });
+      try {
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ title: 'Můj MYEShim streak', text: '🔥 ' + streak + ' dní v řadě', files: [file] });
+          return;
+        }
+      } catch(e) {}
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'myeshim-streak.png';
+      a.click();
+      setTimeout(function() { URL.revokeObjectURL(a.href); }, 1200);
+    }, 'image/png');
+  };
 
   // ── PUSH NOTIFICATIONS ──
   function urlBase64ToUint8Array(base64String) {
@@ -3130,8 +3335,8 @@ const FCM_SENDER_ID = '360259005980';
     <div class="ps-section">
       <div class="ps-section-title">Moje aktivita</div>
       <div class="ps-activity-grid">
-        <div class="ps-activity-cell">
-          <div class="ps-activity-num" id="ps-streak">0</div>
+        <div class="ps-activity-cell ps-streak-cell" id="ps-streak-cell">
+          <div class="ps-activity-num ps-streak-num" id="ps-streak">0</div>
           <div class="ps-activity-label">Streak (dní)</div>
         </div>
         <div class="ps-activity-cell">
@@ -3185,6 +3390,11 @@ const FCM_SENDER_ID = '360259005980';
       </div>
     </div>
 
+    <div class="ps-section">
+      <div class="ps-section-title">Moje zápisky</div>
+      <div class="ps-notes-list" id="ps-notes-list"></div>
+    </div>
+
     <!-- Sign out -->
     <button class="ps-btn-signout" id="ps-signout-btn" onclick="authSignOut()">Odhlásit se</button>
     <div class="ps-app-version" id="ps-app-version">MYEShim v1.0</div>
@@ -3193,6 +3403,7 @@ const FCM_SENDER_ID = '360259005980';
 
 <!-- Firebase Auth SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script id="auth-profile-script">
 (function(){
@@ -3349,6 +3560,39 @@ const FCM_SENDER_ID = '360259005980';
     return window.VERSES[day % window.VERSES.length];
   }
 
+  function animateProfileCount(el, target) {
+    if (!el) return;
+    var from = 0;
+    var start = performance.now();
+    function tick(now) {
+      var p = Math.min(1, (now - start) / 650);
+      el.textContent = Math.round(from + (target - from) * p);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function renderProfileNotes() {
+    var host = document.getElementById('ps-notes-list');
+    if (!host) return;
+    var notes = {};
+    try { notes = JSON.parse(localStorage.getItem('mye_notes') || '{}') || {}; } catch(e) { notes = {}; }
+    var entries = Object.keys(notes).filter(function(ref){ return (notes[ref] || '').trim(); });
+    if (!entries.length) {
+      host.innerHTML = '<div class="ps-note-text">Zatím nemáš žádné zápisky.</div>';
+      return;
+    }
+    entries.sort(function(a,b){
+      var pa = a.split(':').map(Number), pb = b.split(':').map(Number);
+      return (pb[0]-pa[0]) || (pb[1]-pa[1]);
+    });
+    host.innerHTML = entries.slice(0, 40).map(function(ref){
+      var short = (notes[ref] || '').trim().replace(/\s+/g,' ');
+      if (short.length > 96) short = short.slice(0, 96) + '…';
+      return '<div class="ps-note-item"><div class="ps-note-ref">Zj ' + ref + '</div><div class="ps-note-text">' + short.replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }) + '</div></div>';
+    }).join('');
+  }
+
   window.openProfile = function() {
     var user = auth ? auth.currentUser : null;
     if (!user) { showAuthOverlay(); return; }
@@ -3391,9 +3635,10 @@ const FCM_SENDER_ID = '360259005980';
     var psStreak = document.getElementById('ps-streak');
     var psRead = document.getElementById('ps-read-count');
     var psJoined = document.getElementById('ps-joined');
-    if (psStreak) psStreak.textContent = streak;
+    if (psStreak) animateProfileCount(psStreak, streak);
     if (psRead) psRead.textContent = readCount;
     if (psJoined) psJoined.textContent = daysWithUs || '1';
+    renderProfileNotes();
 
     // Daily verse chip
     var verse = buildDailyVerse();
@@ -3666,6 +3911,112 @@ const FCM_SENDER_ID = '360259005980';
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap);
   else bootstrap();
+})();
+</script>
+<script id="firestore-sync-script">
+(function(){
+  var syncingFromRemote = false;
+  var db = null;
+  var watchedKeys = {
+    'streak_count': true,
+    'streak_last_date': true,
+    'streak_best': true,
+    'mye_notes': true,
+    'myeshim-favorites': true,
+    'ux35-theme': true,
+    'ux35-font': true
+  };
+
+  function getUid() {
+    try {
+      return window.firebase && firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.uid : '';
+    } catch(e) { return ''; }
+  }
+  function getDb() {
+    try {
+      if (!window.firebase || typeof firebase.firestore !== 'function') return null;
+      if (!db) db = firebase.firestore();
+      return db;
+    } catch(e) { return null; }
+  }
+  function safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
+  function safeLSGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
+
+  async function writeDoc(doc, payload) {
+    var uid = getUid();
+    var _db = getDb();
+    if (!uid || !_db) return;
+    try { await _db.collection('users').doc(uid).collection('data').doc(doc).set(payload, { merge: true }); } catch(e) {}
+  }
+
+  async function syncKeyToFirestore(key, value) {
+    if (key === 'streak_count' || key === 'streak_last_date' || key === 'streak_best') {
+      await writeDoc('streak', {
+        count: parseInt(safeLSGet('streak_count', '0'), 10) || 0,
+        lastDate: safeLSGet('streak_last_date', ''),
+        best: parseInt(safeLSGet('streak_best', '0'), 10) || 0,
+        updatedAt: new Date().toISOString()
+      });
+    } else if (key === 'mye_notes') {
+      var notes = {};
+      try { notes = JSON.parse(value || '{}') || {}; } catch(e) { notes = {}; }
+      await writeDoc('notes', { items: notes, updatedAt: new Date().toISOString() });
+    } else if (key === 'myeshim-favorites') {
+      var favorites = [];
+      try { favorites = JSON.parse(value || '[]') || []; } catch(e) { favorites = []; }
+      await writeDoc('favorites', { items: favorites, updatedAt: new Date().toISOString() });
+    } else if (key === 'ux35-theme' || key === 'ux35-font') {
+      await writeDoc('preferences', {
+        theme: safeLSGet('ux35-theme', 'system'),
+        font: safeLSGet('ux35-font', '1'),
+        updatedAt: new Date().toISOString()
+      });
+    }
+  }
+
+  async function loadFirestoreData() {
+    var uid = getUid();
+    var _db = getDb();
+    if (!uid || !_db) return;
+    try {
+      var refs = ['streak', 'notes', 'favorites', 'preferences'];
+      var docs = await Promise.all(refs.map(function(name){
+        return _db.collection('users').doc(uid).collection('data').doc(name).get();
+      }));
+      syncingFromRemote = true;
+      var streak = docs[0].exists ? (docs[0].data() || {}) : null;
+      if (streak) {
+        safeLSSet('streak_count', String(streak.count || 0));
+        safeLSSet('streak_last_date', String(streak.lastDate || ''));
+        safeLSSet('streak_best', String(streak.best || 0));
+      }
+      var notes = docs[1].exists ? (docs[1].data() || {}) : null;
+      if (notes && notes.items && typeof notes.items === 'object') safeLSSet('mye_notes', JSON.stringify(notes.items));
+      var favs = docs[2].exists ? (docs[2].data() || {}) : null;
+      if (favs && Array.isArray(favs.items)) safeLSSet('myeshim-favorites', JSON.stringify(favs.items));
+      var prefs = docs[3].exists ? (docs[3].data() || {}) : null;
+      if (prefs) {
+        if (prefs.theme) safeLSSet('ux35-theme', String(prefs.theme));
+        if (prefs.font) safeLSSet('ux35-font', String(prefs.font));
+      }
+      syncingFromRemote = false;
+      window.dispatchEvent(new CustomEvent('myeshim-data-synced'));
+    } catch(e) {
+      syncingFromRemote = false;
+    }
+  }
+
+  var originalSetItem = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(key, value) {
+    originalSetItem(key, value);
+    if (!watchedKeys[key] || syncingFromRemote) return;
+    syncKeyToFirestore(key, value);
+  };
+
+  document.addEventListener('myeshim-auth-ready', function(event) {
+    if (event && event.detail && event.detail.loggedIn) loadFirestoreData();
+  });
+  setTimeout(function(){ if (getUid()) loadFirestoreData(); }, 900);
 })();
 </script>
 </body>
