@@ -3057,11 +3057,20 @@ const FCM_SENDER_ID = '360259005980';
 
 <script id="new-features-script">
 (function(){
+  const TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
   function safeLS(k, d) {
     try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; }
   }
   function safeLSSet(k, v) {
     try { localStorage.setItem(k, v); } catch(e) {}
+  }
+  function resolveNotifTime() {
+    const current = safeLS('notif_time', '');
+    const match = TIME_RE.exec(current);
+    if (match) return String(parseInt(match[1], 10)).padStart(2, '0') + ':' + match[2];
+    const legacyHour = parseInt(safeLS('notif_hour', '8'), 10);
+    const safeHour = Number.isFinite(legacyHour) && legacyHour >= 0 && legacyHour <= 23 ? legacyHour : 8;
+    return String(safeHour).padStart(2, '0') + ':00';
   }
   function showToast(msg, ms) {
     const el = document.getElementById('ux35-toast');
@@ -3080,8 +3089,8 @@ const FCM_SENDER_ID = '360259005980';
     const today = new Date().toISOString().slice(0, 10);
     if (safeLS('notif_last_shown', '') === today) return;
     const now = new Date();
-    const notifTime = safeLS('notif_time', safeLS('notif_hour', '8') + ':00');
-    const parts = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(notifTime);
+    const notifTime = resolveNotifTime();
+    const parts = TIME_RE.exec(notifTime);
     const hour = parts ? parseInt(parts[1], 10) : 8;
     const minute = parts ? parseInt(parts[2], 10) : 0;
     if (now.getHours() < hour || (now.getHours() === hour && now.getMinutes() < minute)) return;
@@ -3147,7 +3156,7 @@ const FCM_SENDER_ID = '360259005980';
     if (Notification.permission === 'denied') return 'Blokovány prohlížečem — povolte je v nastavení prohlížeče.';
     if (Notification.permission === 'default') return 'Zatím nebyly povoleny.';
     const on = safeLS('notif_enabled', 'true') !== 'false';
-    const h = safeLS('notif_time', safeLS('notif_hour', '8') + ':00');
+    const h = resolveNotifTime();
     return on
       ? 'Aktivní · připomenutí při otevření po ' + h
       : 'Povoleny, ale aktuálně vypnuty.';
@@ -3156,7 +3165,7 @@ const FCM_SENDER_ID = '360259005980';
     const toggle = document.getElementById('nss-toggle-input');
     const status = document.getElementById('nss-status');
     const timeInput = document.getElementById('nss-time-input');
-    const notifTime = safeLS('notif_time', safeLS('notif_hour', '8') + ':00');
+    const notifTime = resolveNotifTime();
     if (toggle) {
       const granted = ('Notification' in window) && Notification.permission === 'granted';
       toggle.checked = granted && safeLS('notif_enabled', 'true') !== 'false';
@@ -3197,7 +3206,7 @@ const FCM_SENDER_ID = '360259005980';
     syncNotifSettings();
   });
   document.getElementById('nss-time-input')?.addEventListener('change', function() {
-    if (!/^([01]\d|2[0-3]):([0-5]\d)$/.test(this.value || '')) return;
+    if (!TIME_RE.test(this.value || '')) return;
     safeLSSet('notif_time', this.value);
     safeLSSet('notif_hour', String(parseInt(this.value.split(':')[0], 10)));
     syncNotifSettings();
@@ -3326,11 +3335,7 @@ const FCM_SENDER_ID = '360259005980';
 
   // ── INIT ──
   function init() {
-    if (!safeLS('notif_time', '')) {
-      const legacyHour = parseInt(safeLS('notif_hour', '8'), 10);
-      const safeHour = Number.isFinite(legacyHour) && legacyHour >= 0 && legacyHour <= 23 ? legacyHour : 8;
-      safeLSSet('notif_time', String(safeHour).padStart(2, '0') + ':00');
-    }
+    safeLSSet('notif_time', resolveNotifTime());
     checkDailyNotif();
     showSwipeHint();
     // Default notif_enabled=true if permission already granted
@@ -4239,6 +4244,8 @@ const FCM_SENDER_ID = '360259005980';
 (function(){
   var syncingFromRemote = false;
   var db = null;
+  var TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
+  var cachedTimezone = (typeof Intl !== 'undefined' && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '';
   var watchedKeys = {
     'streak_count': true,
     'streak_last_date': true,
@@ -4267,6 +4274,14 @@ const FCM_SENDER_ID = '360259005980';
   }
   function safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
   function safeLSGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
+  function getResolvedNotifTime() {
+    var notifTime = safeLSGet('notif_time', '');
+    var timeMatch = TIME_RE.exec(String(notifTime));
+    if (timeMatch) return String(parseInt(timeMatch[1], 10)).padStart(2, '0') + ':' + timeMatch[2];
+    var fallbackHour = parseInt(safeLSGet('notif_hour', '8'), 10);
+    var validHour = Number.isFinite(fallbackHour) && fallbackHour >= 0 && fallbackHour <= 23 ? fallbackHour : 8;
+    return String(validHour).padStart(2, '0') + ':00';
+  }
 
   async function writeDoc(doc, payload) {
     var uid = getUid();
@@ -4298,16 +4313,11 @@ const FCM_SENDER_ID = '360259005980';
         updatedAt: new Date().toISOString()
       });
     } else if (key === 'notif_enabled' || key === 'notif_time' || key === 'notif_hour' || key === 'myeshim-fcm-token') {
-      var notifTime = safeLSGet('notif_time', '');
-      if (!notifTime) {
-        var fallbackHour = parseInt(safeLSGet('notif_hour', '8'), 10);
-        var validHour = Number.isFinite(fallbackHour) && fallbackHour >= 0 && fallbackHour <= 23 ? fallbackHour : 8;
-        notifTime = String(validHour).padStart(2, '0') + ':00';
-      }
+      var notifTime = getResolvedNotifTime();
       await writeDoc('notifications', {
         enabled: safeLSGet('notif_enabled', 'true') !== 'false',
         time: notifTime,
-        timezone: (typeof Intl !== 'undefined' && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '',
+        timezone: cachedTimezone,
         fcmToken: safeLSGet('myeshim-fcm-token', ''),
         updatedAt: new Date().toISOString()
       });
@@ -4344,7 +4354,7 @@ const FCM_SENDER_ID = '360259005980';
         if (typeof notif.enabled === 'boolean') safeLSSet('notif_enabled', notif.enabled ? 'true' : 'false');
         if (notif.time) {
           safeLSSet('notif_time', String(notif.time));
-          var hh = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(notif.time));
+          var hh = TIME_RE.exec(String(notif.time));
           if (hh) safeLSSet('notif_hour', String(parseInt(hh[1], 10)));
         }
         if (notif.fcmToken) safeLSSet('myeshim-fcm-token', String(notif.fcmToken));
@@ -4361,7 +4371,7 @@ const FCM_SENDER_ID = '360259005980';
       try {
         var value = localStorage.getItem(key);
         if (value !== null) syncKeyToFirestore(key, value);
-      } catch(e) {}
+      } catch(e) { try { console.warn('Sync watched key failed:', key, e); } catch(ignore) {} }
     });
   }
 
