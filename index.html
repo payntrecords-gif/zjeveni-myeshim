@@ -6,6 +6,15 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>MYEShim – Zjevení</title>
+<meta name="description" content="MYEShim – mobilní studijní aplikace pro knihu Zjevení s denním veršem, poznámkami a vedením ke každodennímu studiu.">
+<meta property="og:title" content="MYEShim – Zjevení">
+<meta property="og:description" content="Studuj Zjevení každý den. Denní verš, otázky a odpovědi, poznámky a připomínky v jedné PWA aplikaci.">
+<meta property="og:image" content="https://payntrecords-gif.github.io/zjeveni-myeshim/icon-512.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="cs_CZ">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 :root{
@@ -1317,6 +1326,16 @@ body.dark #bottomnav{
 .auth-btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.16)}
 .auth-btn-google:active{transform:translateY(0)}
 .auth-btn-google svg{width:22px;height:22px;flex-shrink:0}
+.auth-btn-google[disabled]{opacity:.72;cursor:wait;transform:none}
+.auth-btn-loading{display:none;align-items:center;gap:8px}
+.auth-btn-google.loading .auth-btn-label{display:none}
+.auth-btn-google.loading .auth-btn-loading{display:inline-flex}
+.auth-spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(31,31,31,.2);border-top-color:#e5458e;
+  animation:auth-spin .8s linear infinite;
+}
+@keyframes auth-spin{to{transform:rotate(360deg)}}
 .auth-privacy{
   font-size:.77rem;color:#9a7fa0;margin-top:14px;line-height:1.4;text-align:center;
 }
@@ -1489,6 +1508,10 @@ body.dark .ps-btn-notif{color:#ff8cc2;border-color:rgba(255,140,194,.35)}
 }
 .ps-btn-signout:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(199,61,90,.30)}
 .ps-btn-signout:active{transform:scale(.98)}
+.ps-app-version{
+  margin-top:10px;text-align:center;font-size:.76rem;color:#8a7583;letter-spacing:.03em;
+}
+body.dark .ps-app-version{color:#baa5b3}
 
 /* Encourage verse at top of profile */
 .ps-verse-chip{
@@ -1500,9 +1523,19 @@ body.dark .ps-btn-notif{color:#ff8cc2;border-color:rgba(255,140,194,.35)}
 }
 body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69,142,.2);color:#cab5c3}
 .ps-verse-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px}
+#offline-banner{
+  position:fixed;left:50%;top:max(10px,calc(10px + env(safe-area-inset-top)));
+  transform:translateX(-50%) translateY(-12px);
+  z-index:140;opacity:0;pointer-events:none;
+  background:rgba(42,34,39,.94);color:#fff;font-size:.8rem;font-weight:700;
+  border-radius:999px;padding:10px 14px;border:1px solid rgba(255,255,255,.12);
+  transition:opacity .2s ease,transform .2s ease;max-width:min(92vw,520px);text-align:center;
+}
+#offline-banner.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
+<div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
 <div id="topbar">
   <!-- Left: logo + hamburger -->
   <div class="tb-left">
@@ -1729,12 +1762,16 @@ function go(dir){
 }
 
 /* ── NAV OVERLAY ── */
+function pushOverlayHistory(overlayId){
+  try { history.pushState({ myeshimOverlay: overlayId }, '', location.href); } catch(e) {}
+}
 function openNav(){
   state.navCh=VERSES[state.idx].c;
   state.navView='chapters';
   document.getElementById('ns-input').value='';
   renderNavGrid();
   document.getElementById('nav-ov').classList.add('open');
+  pushOverlayHistory('nav-ov');
 }
 function closeNav(){ document.getElementById('nav-ov').classList.remove('open'); }
 
@@ -2280,6 +2317,19 @@ const FCM_SENDER_ID = '360259005980';
     measurementId: "G-CB0L0ZPC7B"
   };
   let fcmTokenRequested = false;
+  let autoPromptScheduled = false;
+
+  function reportNonCriticalError(label, err) {
+    try { console.warn(label, err && err.message ? err.message : err); } catch(e) {}
+  }
+
+  function isUserAuthenticated() {
+    try {
+      return !!(window.firebase && firebase.auth && firebase.auth().currentUser);
+    } catch(e) {
+      return false;
+    }
+  }
 
   function getMessagingInstance() {
     if (!window.firebase || typeof firebase.initializeApp !== 'function' || typeof firebase.messaging !== 'function') return null;
@@ -2291,6 +2341,7 @@ const FCM_SENDER_ID = '360259005980';
     if (fcmTokenRequested) return;
     if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
+    if (!isUserAuthenticated()) return;
     const messaging = getMessagingInstance();
     if (!messaging) return;
     fcmTokenRequested = true;
@@ -2306,8 +2357,23 @@ const FCM_SENDER_ID = '360259005980';
       }
     } catch (e) {
       fcmTokenRequested = false;
-      console.error('FCM token selhal:', e);
+      reportNonCriticalError('FCM token selhal:', e);
     }
+  }
+
+  async function refreshFcmTokenSilently() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    if (!isUserAuthenticated()) return;
+    const messaging = getMessagingInstance();
+    if (!messaging) return;
+    try {
+      const fcmRegistration = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './firebase-cloud-messaging-push-scope' });
+      const token = await messaging.getToken({
+        vapidKey: (typeof VAPID_PUBLIC_KEY !== 'undefined') ? VAPID_PUBLIC_KEY : '',
+        serviceWorkerRegistration: fcmRegistration
+      });
+      if (token) safeLSSet('myeshim-fcm-token', token);
+    } catch(e) {}
   }
 
   function pickDailyVerse() {
@@ -2391,6 +2457,7 @@ const FCM_SENDER_ID = '360259005980';
     if (motto) motto.textContent = MOTTOS[Math.floor(Math.random() * MOTTOS.length)];
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('welcome-overlay');
     updateNotifBtn();
     if (MILESTONES[streak]) setTimeout(() => showMilestone(streak), 600);
   }
@@ -2427,6 +2494,7 @@ const FCM_SENDER_ID = '360259005980';
     if (bestEl) bestEl.textContent = 'Nejvíce: ' + pluralBest(best);
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('streak-detail-overlay');
   };
 
   window.closeStreakDetail = function() {
@@ -2499,7 +2567,7 @@ const FCM_SENDER_ID = '360259005980';
       console.log('Push sub OK:', sub);
       safeLSSet('myeshim-push-sub', JSON.stringify(sub));
     } catch(e) {
-      console.error('Push sub selhal:', e);
+      reportNonCriticalError('Push sub selhal:', e);
     }
   }
 
@@ -2527,6 +2595,7 @@ const FCM_SENDER_ID = '360259005980';
 
   async function requestPushPermission() {
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    if (!isUserAuthenticated()) return;
     if (Notification.permission === 'granted') {
       navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
       ensureFcmToken();
@@ -2581,7 +2650,6 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   function init() {
-    const isFirstLaunch = !safeLS('streak_last_date', '');
     if (Array.isArray(window.VERSES) && window.VERSES.length) {
       initStreak();
     } else {
@@ -2590,8 +2658,17 @@ const FCM_SENDER_ID = '360259005980';
         if (Array.isArray(window.VERSES) && window.VERSES.length) initStreak();
       }, 200);
     }
-    // On first launch request permission sooner so the welcome notification arrives within 5 min
-    setTimeout(requestPushPermission, isFirstLaunch ? 1500 : 4000);
+    document.addEventListener('myeshim-auth-ready', function(event) {
+      if (!event || !event.detail || !event.detail.loggedIn || autoPromptScheduled) return;
+      autoPromptScheduled = true;
+      const isFirstLaunch = !safeLS('streak_last_date', '');
+      setTimeout(requestPushPermission, isFirstLaunch ? 1500 : 4000);
+      refreshFcmTokenSilently();
+    });
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible') refreshFcmTokenSilently();
+    });
+    window.addEventListener('online', refreshFcmTokenSilently);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
@@ -2753,6 +2830,7 @@ const FCM_SENDER_ID = '360259005980';
     syncNotifSettings();
     ov.classList.add('open');
     document.body.style.overflow = 'hidden';
+    if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('notif-settings-overlay');
   };
   window.closeNotifSettings = function() {
     const ov = document.getElementById('notif-settings-overlay');
@@ -2956,6 +3034,7 @@ const FCM_SENDER_ID = '360259005980';
     syncThemeUI();
     ov.classList.add('open');
     document.body.style.overflow = 'hidden';
+    if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('display-settings-overlay');
   };
   window.closeDisplaySettings = function(){
     var ov = document.getElementById('display-settings-overlay');
@@ -3016,7 +3095,8 @@ const FCM_SENDER_ID = '360259005980';
         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
       </svg>
-      Přihlásit se přes Google
+      <span class="auth-btn-label">Přihlásit se přes Google</span>
+      <span class="auth-btn-loading"><span class="auth-spinner" aria-hidden="true"></span> Přihlašuji…</span>
     </button>
     <p class="auth-privacy">Přihlášení slouží pouze k ověření členů komunity. Vaše data nejsou sdílena.</p>
   </div>
@@ -3107,6 +3187,7 @@ const FCM_SENDER_ID = '360259005980';
 
     <!-- Sign out -->
     <button class="ps-btn-signout" id="ps-signout-btn" onclick="authSignOut()">Odhlásit se</button>
+    <div class="ps-app-version" id="ps-app-version">MYEShim v1.0</div>
   </div>
 </div>
 
@@ -3127,6 +3208,7 @@ const FCM_SENDER_ID = '360259005980';
   };
 
   var auth = null;
+  var authInitialized = false;
 
   function safeLS(key, fallback) {
     try { var v = localStorage.getItem(key); return v === null ? fallback : v; } catch(e) { return fallback; }
@@ -3135,17 +3217,36 @@ const FCM_SENDER_ID = '360259005980';
     try { localStorage.setItem(key, val); } catch(e) {}
   }
 
+  function reportNonCriticalError(label, err) {
+    try { console.warn(label, err && err.message ? err.message : err); } catch(e) {}
+  }
+
+  function setAuthBusy(isBusy) {
+    var btn = document.getElementById('auth-google-btn');
+    if (!btn) return;
+    btn.disabled = !!isBusy;
+    btn.classList.toggle('loading', !!isBusy);
+  }
+
   function initAuth() {
-    if (!window.firebase || typeof firebase.auth !== 'function') return;
+    if (!window.firebase || typeof firebase.auth !== 'function' || authInitialized) return;
+    authInitialized = true;
     // Re-use existing app if already initialized
     if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(FIREBASE_AUTH_CONFIG);
     }
     auth = firebase.auth();
+    setAuthBusy(true);
+    if (firebase.auth.Auth && firebase.auth.Auth.Persistence && firebase.auth.Auth.Persistence.LOCAL) {
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(err){
+        reportNonCriticalError('Auth persistence selhala:', err);
+      });
+    }
     auth.onAuthStateChanged(onAuthChange);
   }
 
   function onAuthChange(user) {
+    setAuthBusy(false);
     if (user) {
       hideAuthOverlay();
       updateAvatar(user);
@@ -3157,6 +3258,7 @@ const FCM_SENDER_ID = '360259005980';
       showAuthOverlay();
       clearAvatar();
     }
+    document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
   }
 
   function showAuthOverlay() {
@@ -3212,12 +3314,15 @@ const FCM_SENDER_ID = '360259005980';
   // ── Google Sign-In ──
   function signInWithGoogle() {
     if (!auth) return;
+    setAuthBusy(true);
     var provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(function(err) {
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         showAuthError('Přihlášení se nezdařilo. Zkus to prosím znovu.');
-        console.error(err);
+        reportNonCriticalError('Auth sign-in selhal:', err);
       }
+    }).finally(function(){
+      setAuthBusy(false);
     });
   }
 
@@ -3317,7 +3422,11 @@ const FCM_SENDER_ID = '360259005980';
     updateProfileNotifStatus();
 
     var ov = document.getElementById('profile-overlay');
-    if (ov) { ov.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    if (ov) {
+      ov.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('profile-overlay');
+    }
   };
 
   window.closeProfile = function() {
@@ -3346,7 +3455,11 @@ const FCM_SENDER_ID = '360259005980';
       window.openNotifSettings();
     } else {
       var ov = document.getElementById('notif-settings-overlay');
-      if (ov) { ov.classList.add('open'); document.body.style.overflow = 'hidden'; }
+      if (ov) {
+        ov.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('notif-settings-overlay');
+      }
     }
   };
 
@@ -3476,8 +3589,48 @@ const FCM_SENDER_ID = '360259005980';
     sheet.addEventListener('touchcancel', finishSwipe, {passive: true});
   }
 
+  function wireConnectivityFeedback() {
+    var banner = document.getElementById('offline-banner');
+    if (!banner) return;
+    function syncBanner() {
+      var offline = typeof navigator.onLine === 'boolean' ? !navigator.onLine : false;
+      banner.classList.toggle('show', offline);
+    }
+    window.addEventListener('online', syncBanner);
+    window.addEventListener('offline', syncBanner);
+    syncBanner();
+  }
+
+  function closeTopOverlayForBack() {
+    var ordered = [
+      ['profile-overlay', window.closeProfile],
+      ['notif-settings-overlay', window.closeNotifSettings],
+      ['display-settings-overlay', window.closeDisplaySettings],
+      ['streak-detail-overlay', window.closeStreakDetail],
+      ['welcome-overlay', window.closeWelcome],
+      ['nav-ov', window.closeNav]
+    ];
+    for (var i = 0; i < ordered.length; i++) {
+      var item = ordered[i];
+      var el = document.getElementById(item[0]);
+      if (el && el.classList.contains('open')) {
+        if (typeof item[1] === 'function') item[1]();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function wireAndroidBackHandling() {
+    window.addEventListener('popstate', function() {
+      closeTopOverlayForBack();
+    });
+  }
+
   // ── Bootstrap ──
   function bootstrap() {
+    showAuthOverlay();
+    setAuthBusy(true);
     // Wire Google sign-in button
     var googleBtn = document.getElementById('auth-google-btn');
     if (googleBtn) googleBtn.addEventListener('click', signInWithGoogle);
@@ -3485,6 +3638,8 @@ const FCM_SENDER_ID = '360259005980';
     wireDarkToggle();
     wireProfileFontSlider();
     wireProfileSwipe();
+    wireConnectivityFeedback();
+    wireAndroidBackHandling();
     hookGoFunction();
 
     // Init Firebase Auth (wait for firebase SDK)
@@ -3502,6 +3657,8 @@ const FCM_SENDER_ID = '360259005980';
           clearInterval(iv);
           // No auth available – show the overlay so user knows
           showAuthOverlay();
+          setAuthBusy(false);
+          showAuthError('Přihlášení je dočasně nedostupné. Zkontroluj internetové připojení a zkus to znovu.');
         }
       }, 100);
     }
