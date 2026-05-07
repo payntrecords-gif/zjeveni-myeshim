@@ -2448,7 +2448,7 @@ render();
     try{
       const url=new URL(window.location.href);
       const fullPath=(url.pathname || '/') + (url.search || '');
-      return 'intent://' + url.host + fullPath + '#Intent;scheme=' + url.protocol.replace(':','') + ';package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url.origin + fullPath) + ';end';
+      return `intent://${url.host}${fullPath}#Intent;scheme=${url.protocol.replace(':','')};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url.origin + fullPath)};end`;
     }catch(e){
       return '';
     }
@@ -3286,6 +3286,10 @@ const FCM_SENDER_ID = '360259005980';
   });
   document.getElementById('nss-close-btn')?.addEventListener('click', window.closeNotifSettings);
   if (notifOverlay && notifSheet) {
+    const NOTIF_DRAG_CLOSE_PX = 110;
+    const NOTIF_MAX_OVERLAY_OPACITY = 0.55;
+    const NOTIF_MIN_OVERLAY_OPACITY = 0.18;
+    const NOTIF_OVERLAY_FADE_DISTANCE = 420;
     let startX = 0;
     let startY = 0;
     let dragY = 0;
@@ -3309,20 +3313,23 @@ const FCM_SENDER_ID = '360259005980';
       if (!touch) return;
       const dx = touch.clientX - startX;
       const dy = touch.clientY - startY;
-      if (dy <= 0 || Math.abs(dy) < Math.abs(dx)) {
-        if (dy < 0) resetNotifSheetDrag();
+      if (dy < 0) {
+        resetNotifSheetDrag();
+        return;
+      }
+      if (Math.abs(dy) < Math.abs(dx)) {
         return;
       }
       dragY = dy;
       e.preventDefault();
       notifSheet.style.transform = 'translateY(' + dy + 'px)';
-      notifOverlay.style.background = 'rgba(0,0,0,' + Math.max(0.18, 0.55 - (dy / 420)) + ')';
+      notifOverlay.style.background = 'rgba(0,0,0,' + Math.max(NOTIF_MIN_OVERLAY_OPACITY, NOTIF_MAX_OVERLAY_OPACITY - (dy / NOTIF_OVERLAY_FADE_DISTANCE)) + ')';
     }, { passive: false });
     function finishNotifSheetDrag() {
       if (!draggingSheet) return;
       draggingSheet = false;
       notifSheet.classList.remove('dragging');
-      if (dragY > 110) {
+      if (dragY > NOTIF_DRAG_CLOSE_PX) {
         window.closeNotifSettings();
       } else {
         resetNotifSheetDrag();
