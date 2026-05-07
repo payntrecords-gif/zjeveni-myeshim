@@ -1107,14 +1107,18 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
 /* ── TOPBAR: 3-column grid ── */
 #topbar{
   display:grid;
-  grid-template-columns:44px 1fr auto;
+  grid-template-columns:auto 1fr auto;
   gap:6px;
   align-items:center;
   padding:max(10px,calc(10px + env(safe-area-inset-top))) 12px 10px;
   overflow:visible;
 }
-/* Hide logo / brand now replaced by hamburger */
-.tb-logo,.tb-brand{display:none !important}
+/* Left wrapper: logo + hamburger */
+.tb-left{display:flex;align-items:center;gap:6px;flex-shrink:0}
+/* Show logo again alongside hamburger */
+.tb-brand{display:none !important}
+.tb-logo{display:flex !important;align-items:center;flex-shrink:0}
+.tb-logo img{height:28px;width:auto;display:block}
 /* Left: standalone hamburger button */
 #tb-menu-btn{
   display:flex;align-items:center;justify-content:center;
@@ -1239,14 +1243,19 @@ body.dark #bottomnav{
 @media print{
   #display-settings-overlay{display:none !important}
 }
+/* ── FIX: reduce #app-panels padding-bottom to match actual bottomnav height ── */
+#app-panels{padding-bottom:calc(80px + env(safe-area-inset-bottom)) !important}
 </style>
 </head>
 <body>
 <div id="topbar">
-  <!-- Left: hamburger -->
-  <button id="tb-menu-btn" onclick="openNav()" aria-label="Navigace" title="Navigace">
-    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-  </button>
+  <!-- Left: logo + hamburger -->
+  <div class="tb-left">
+    <div class="tb-logo"><img src="logo.png" alt="MYEShim"></div>
+    <button id="tb-menu-btn" onclick="openNav()" aria-label="Navigace" title="Navigace">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    </button>
+  </div>
   <!-- Center: verse reference pill -->
   <div id="nav-pill">
     <button onclick="openNav()" id="nav-pill-btn">
