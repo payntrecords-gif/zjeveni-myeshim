@@ -253,6 +253,13 @@ body.dark .ux35-status{color:var(--sub)}
   opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease;
 }
 #ux35-toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+#sw-update-toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom));z-index:45;
+  max-width:min(420px,calc(100vw - 28px));width:max-content;background:rgba(30,20,30,.92);color:#fff;
+  border-radius:14px;padding:12px 16px;font-size:.9rem;font-weight:700;line-height:1.35;text-align:center;
+  box-shadow:0 10px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease;
+}
+#sw-update-toast.show{opacity:1;pointer-events:auto;cursor:pointer;transform:translateX(-50%) translateY(-4px)}
 #ux35-note-meta{margin-top:10px;font-size:.82rem;color:var(--sub);text-align:right}
 @media (max-width:720px){
   .ux35-dock{left:9px;right:9px;transform:none;gap:6px;padding:7px;width:auto;overflow:visible;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));justify-content:stretch}
@@ -264,7 +271,7 @@ body.dark .ux35-status{color:var(--sub)}
   #ux35-progress-wrap{max-width:820px}
 }
 @media print{
-  #topbar,#bottomnav,#nav-ov,.tabs,#app-tabs-outer,.note-save,.ux35-dock,#ux35-toast,#ux35-progress-wrap{display:none !important}
+  #topbar,#bottomnav,#nav-ov,.tabs,#app-tabs-outer,.note-save,.ux35-dock,#ux35-toast,#sw-update-toast,#ux35-progress-wrap{display:none !important}
   html,body{background:#fff !important;color:#000 !important}
   #app,#app-panels{max-width:none;padding:0 0 0 0}
   .panel{display:block !important}
@@ -1157,6 +1164,7 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
 <div class="ux35-status" id="ux35-status"></div>
 </div>
 <div id="ux35-toast" aria-live="polite"></div>
+<div id="sw-update-toast" role="status" aria-live="polite"></div>
 
 <div id="bottomnav">
   <button id="bn-prev" onclick="go(-1)">
@@ -1737,8 +1745,35 @@ render();
   }
   function registerSW(){
     if(!('serviceWorker' in navigator)) return;
+    const updateToast = $('sw-update-toast');
+    const UPDATE_TOAST_DURATION_MS = 8000;
+    let updateToastTimer = null;
+    let hadController = !!navigator.serviceWorker.controller;
+    const showUpdateToast = function(){
+      if(!updateToast) return;
+      updateToast.textContent = 'MYEShim má novou verzi. Klepni pro obnovení.';
+      updateToast.classList.add('show');
+      clearTimeout(updateToastTimer);
+      updateToastTimer = setTimeout(function(){ updateToast.classList.remove('show'); }, UPDATE_TOAST_DURATION_MS);
+    };
+    if(updateToast){
+      updateToast.addEventListener('click', function(){
+        clearTimeout(updateToastTimer);
+        location.reload();
+      });
+    }
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(!hadController){
+        hadController = true;
+        return;
+      }
+      showUpdateToast();
+    });
+    navigator.serviceWorker.addEventListener('message', function(event){
+      if(event.data && event.data.type === 'SW_UPDATED') showUpdateToast();
+    });
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('service-worker.js').catch(function(){});
+      navigator.serviceWorker.register('service-worker.js', { scope: './' }).catch(function(){});
     });
   }
   // TWA / standalone mode detection
@@ -1786,6 +1821,8 @@ render();
 const VAPID_PUBLIC_KEY = 'BNkpx_SJASrkt48mXCZQBoDRJt_CUlDNXiM4MfJO6aO0Qc1dc84pYcNLXCVQj23EPJKCuLm15QOMJLCleeol_fk';
 const FCM_SENDER_ID = '360259005980';
 </script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 
 <script id="streak-push-script">
 (function(){
@@ -1808,6 +1845,45 @@ const FCM_SENDER_ID = '360259005980';
   }
   function safeLSSet(key, value) {
     try { localStorage.setItem(key, value); } catch(e) {}
+  }
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+    authDomain: "myeshim-app.firebaseapp.com",
+    projectId: "myeshim-app",
+    storageBucket: "myeshim-app.firebasestorage.app",
+    messagingSenderId: (typeof FCM_SENDER_ID !== 'undefined' && FCM_SENDER_ID) ? FCM_SENDER_ID : "360259005980",
+    appId: "1:360259005980:web:610695f8b44de04dc079d9",
+    measurementId: "G-CB0L0ZPC7B"
+  };
+  let fcmTokenRequested = false;
+
+  function getMessagingInstance() {
+    if (!window.firebase || typeof firebase.initializeApp !== 'function' || typeof firebase.messaging !== 'function') return null;
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    return firebase.messaging();
+  }
+
+  async function ensureFcmToken() {
+    if (fcmTokenRequested) return;
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    const messaging = getMessagingInstance();
+    if (!messaging) return;
+    fcmTokenRequested = true;
+    try {
+      const fcmRegistration = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './firebase-cloud-messaging-push-scope' });
+      const token = await messaging.getToken({
+        vapidKey: (typeof VAPID_PUBLIC_KEY !== 'undefined') ? VAPID_PUBLIC_KEY : '',
+        serviceWorkerRegistration: fcmRegistration
+      });
+      if (token) {
+        safeLSSet('myeshim-fcm-token', token);
+        console.log('FCM token:', token.slice(0, 10) + '…');
+      }
+    } catch (e) {
+      fcmTokenRequested = false;
+      console.error('FCM token selhal:', e);
+    }
   }
 
   function pickDailyVerse() {
@@ -2029,6 +2105,7 @@ const FCM_SENDER_ID = '360259005980';
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
     if (Notification.permission === 'granted') {
       navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+      ensureFcmToken();
       scheduleWelcomeNotification();
       return;
     }
@@ -2037,6 +2114,7 @@ const FCM_SENDER_ID = '360259005980';
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+      ensureFcmToken();
       scheduleWelcomeNotification();
     }
   }
