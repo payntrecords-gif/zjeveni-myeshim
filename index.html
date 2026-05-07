@@ -927,11 +927,11 @@ body.dark #nav-pill button{
 /* Sticky outer wrapper for tab bar */
 #app-tabs-outer{
   position:sticky;
-  top:calc(56px + env(safe-area-inset-top));
+  top:calc(52px + env(safe-area-inset-top));
   z-index:18;
   background:var(--bg);
   border-bottom:1px solid var(--line);
-  padding:2px 12px 0;
+  padding:0 12px;
 }
 body.dark #app-tabs-outer{background:#0d0f14}
 
@@ -1666,7 +1666,13 @@ body.dark #panel-guide .guide-step-card{
 #panel-guide .gs-num{
   width:48px;height:48px;font-size:1.15rem;
   box-shadow:0 8px 16px rgba(229,69,142,.28);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
 }
+#panel-guide .guide-step-card.has-bullets{align-items:flex-start}
+#panel-guide .guide-step-card.has-bullets .gs-num{margin-top:2px}
 #panel-guide .gs-body{
   flex:1;
   min-width:0;
@@ -1898,7 +1904,7 @@ function setTab(t){
   if(t==='guide'){
     document.getElementById('panel-guide').innerHTML=
       '<div class="guide-card"><div class="guide-title">Návod na MYEShim</div><div class="guide-steps">'+
-      GUIDE.map(([n,h,p,bullets])=>`<div class="guide-step"><div class="guide-step-card"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4>${p?`<p>${p}</p>`:''}${Array.isArray(bullets)&&bullets.length?`<ul><li>${bullets.join('</li><li>')}</li></ul>`:''}</div></div></div>`).join('')+
+      GUIDE.map(([n,h,p,bullets])=>`<div class="guide-step"><div class="guide-step-card${Array.isArray(bullets)&&bullets.length?' has-bullets':''}"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4>${p?`<p>${p}</p>`:''}${Array.isArray(bullets)&&bullets.length?`<ul><li>${bullets.join('</li><li>')}</li></ul>`:''}</div></div></div>`).join('')+
       '</div></div>';
   } else if(t==='qa'){
     const items=getQA(vv.c,vv.v);
@@ -2464,7 +2470,11 @@ render();
       deferredPrompt=null;
       installDismissed=true;
       syncInstallUI();
-      if(typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
+      if(isStandalone()){
+        if(typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
+      }else if(typeof window.showInstallOverlay==='function'){
+        window.showInstallOverlay();
+      }
     });
     window.addEventListener('resize', syncInstallUI);
     window.addEventListener('pageshow', syncInstallUI);
@@ -3445,7 +3455,7 @@ const FCM_SENDER_ID = '360259005980';
         <span><strong>iPhone / iPad (Safari):</strong> klepni na 📤 (Sdílet) ve spodní liště a zvol „Přidat na plochu".</span>
       </div>
     </div>
-    <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do studia.</p>
+    <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
   </div>
 </div>
 
@@ -3702,6 +3712,7 @@ const FCM_SENDER_ID = '360259005980';
 
   // Expose so ux40-pwa-script can close the overlay after standalone is detected
   window.hideInstallOverlay = function() { hideInstallOverlay(false); };
+  window.showInstallOverlay = function() { showInstallOverlay(); };
 
   function getInitials(name) {
     if (!name) return '?';
