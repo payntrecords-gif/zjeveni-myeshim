@@ -1661,6 +1661,10 @@ body.dark .ps-note-item.ps-note-item-clickable.ps-note-item-swiping{background:r
 .iov-step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
 .iov-step-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
 .iov-note{font-size:.78rem;color:#9a7fa0;text-align:center;line-height:1.4;margin-top:4px}
+#iov-telegram-warn{display:none;background:#e8f4ff;border:1px solid rgba(0,136,204,.22);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:.84rem;color:#1a4f6e;line-height:1.5}
+#iov-telegram-warn strong{color:#0077b6}
+#iov-copy-url-btn{display:none;width:100%;padding:12px 20px;margin-bottom:10px;background:#0088cc;border:none;border-radius:14px;font:inherit;font-size:.95rem;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(0,136,204,.28)}
+#iov-copy-url-btn:active{transform:scale(.98)}
 </style>
 <style id="guide-card-refresh">
 #panel-guide .guide-card{padding:16px}
@@ -2415,6 +2419,11 @@ render();
     const card=$('installCard');
     if(card) card.classList.remove('show');
   }
+  function isTelegramBrowser(){
+    return !!(window.TelegramWebviewProxy || window.TelegramWebviewProxyProto ||
+              (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) ||
+              /Telegram/i.test(navigator.userAgent || ''));
+  }
   function syncInstallUI(){
     if(isStandalone()){
       hideInstallCard();
@@ -2426,7 +2435,10 @@ render();
     const showCard=(canPrompt || noPromptSupport) && !installDismissed;
     const title=$('installTitle'), sub=$('installSub'), btn=$('installBtn');
     if(title && sub){
-      if(noPromptSupport){
+      if(isTelegramBrowser()){
+        title.textContent='Instalace z Telegramu';
+        sub.textContent='Telegram prohlížeč nepodporuje instalaci. Zkopíruj odkaz a otevři ho v Chrome nebo Safari.';
+      } else if(noPromptSupport){
         title.textContent='Přidat MYEShim na plochu';
         sub.textContent=isDesktop()
           ? 'V Chrome nebo Edge otevři menu (⋮) a zvol „Instalovat aplikaci“ nebo „Přidat na plochu“.'
@@ -2435,7 +2447,7 @@ render();
         title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
         sub.textContent=isDesktop()
           ? 'Přidej si MYEShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
-          : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
+          : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější kažodenní používání.';
       }
     }
     if(btn){
@@ -3228,6 +3240,17 @@ const FCM_SENDER_ID = '360259005980';
     }
   });
 
+  // swipe down to close notif settings sheet
+  (function(){
+    const sheet = document.getElementById('notif-settings-sheet');
+    if (!sheet) return;
+    let sy = 0;
+    sheet.addEventListener('touchstart', function(e){ sy = e.touches[0].clientY; }, {passive: true});
+    sheet.addEventListener('touchmove', function(e){
+      if (e.touches[0].clientY - sy > 70) window.closeNotifSettings();
+    }, {passive: true});
+  })();
+
   // ── SWIPE: VERSE CARD SCALE ANIMATION + ENHANCED THRESHOLDS ──
   (function() {
     const MIN_SWIPE_PX = 50;
@@ -3476,6 +3499,11 @@ const FCM_SENDER_ID = '360259005980';
     <div class="iov-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
     <!-- Native install button – shown only when browser supports beforeinstallprompt -->
     <button id="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
+    <!-- Telegram browser warning – shown only when Telegram WebView is detected -->
+    <div id="iov-telegram-warn">
+      <strong>✈️ Telegram prohlížeč</strong> — instalace přímo z Telegramového prohlížeče není možná. Zkopíruj odkaz níže a otevři ho v <strong>Chrome</strong> nebo <strong>Safari</strong>, pak aplikaci normálně nainstaluj.
+    </div>
+    <button id="iov-copy-url-btn" type="button">📋 Kopírovat odkaz</button>
     <div class="iov-steps">
       <div class="iov-step">
         <span class="iov-step-icon">🤖</span>
@@ -3730,6 +3758,36 @@ const FCM_SENDER_ID = '360259005980';
     btn.classList.toggle('visible', hasPrompt);
   };
 
+  // Detect Telegram in-app browser
+  function isTelegramBrowser() {
+    return !!(window.TelegramWebviewProxy || window.TelegramWebviewProxyProto ||
+              (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) ||
+              /Telegram/i.test(navigator.userAgent || ''));
+  }
+
+  // Adapt install overlay for Telegram WebView: show copy-link warning
+  function adaptInstallOverlayForTelegram() {
+    var warn = document.getElementById('iov-telegram-warn');
+    var copyBtn = document.getElementById('iov-copy-url-btn');
+    if (!warn || !copyBtn) return;
+    if (!isTelegramBrowser()) return;
+    warn.style.display = 'block';
+    copyBtn.style.display = 'block';
+    copyBtn.addEventListener('click', function() {
+      var url = window.location.href.split('#')[0];
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+          copyBtn.textContent = '✅ Odkaz zkopírován!';
+          setTimeout(function() { copyBtn.textContent = '📋 Kopírovat odkaz'; }, 2500);
+        }).catch(function() {
+          prompt('Zkopíruj tento odkaz a otevři ho v Chrome nebo Safari:', url);
+        });
+      } else {
+        prompt('Zkopíruj tento odkaz a otevři ho v Chrome nebo Safari:', url);
+      }
+    });
+  }
+
   // Wire up native install button inside the install overlay
   document.addEventListener('DOMContentLoaded', function() {
     var nativeBtn = document.getElementById('iov-native-btn');
@@ -3742,6 +3800,7 @@ const FCM_SENDER_ID = '360259005980';
       });
     }
     updateInstallOverlayBtn();
+    adaptInstallOverlayForTelegram();
   });
 
   // Expose so ux40-pwa-script can close the overlay after standalone is detected
