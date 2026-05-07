@@ -1589,13 +1589,20 @@ body.dark .ps-note-item.ps-note-item-clickable:hover{background:rgba(255,140,194
 </style>
 <style id="guide-card-refresh">
 #panel-guide .guide-card{padding:16px}
-#panel-guide .guide-steps{display:grid;gap:12px}
-#panel-guide .guide-step{padding:0 !important;border-bottom:none !important}
+#panel-guide .guide-steps{display:grid;gap:12px;width:100%}
+#panel-guide .guide-step{
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:0 !important;
+  border-bottom:none !important;
+}
 #panel-guide .guide-step-card{
-  display:grid;
-  grid-template-columns:48px minmax(0,1fr);
+  display:flex;
   gap:12px;
   align-items:start;
+  width:100%;
+  min-width:0;
   background:linear-gradient(180deg,#fff 0%,#fff8fc 100%);
   border:1px solid rgba(229,69,142,.14);
   border-radius:16px;
@@ -1611,8 +1618,17 @@ body.dark #panel-guide .guide-step-card{
   width:48px;height:48px;font-size:1.15rem;
   box-shadow:0 8px 16px rgba(229,69,142,.28);
 }
+#panel-guide .gs-body{
+  flex:1;
+  min-width:0;
+}
 #panel-guide .gs-body h4{margin:2px 0 4px}
-#panel-guide .gs-body p{margin:0}
+#panel-guide .gs-body p{
+  margin:0;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:break-word;
+}
 #panel-guide .gs-body ul{
   margin:8px 0 0;
   padding-left:19px;
@@ -1621,7 +1637,7 @@ body.dark #panel-guide .guide-step-card{
 }
 #panel-guide .gs-body li+li{margin-top:4px}
 @media (max-width:420px){
-  #panel-guide .guide-step-card{grid-template-columns:44px minmax(0,1fr);gap:10px}
+  #panel-guide .guide-step-card{gap:10px}
   #panel-guide .gs-num{width:44px;height:44px;font-size:1.05rem}
 }
 </style>
