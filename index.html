@@ -3640,22 +3640,25 @@ const FCM_SENDER_ID = '360259005980';
       var text = v ? v.t : '';
       var short = text.length > 96 ? text.slice(0, 96) + '…' : text;
       var safeRef = (ref || '').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
-      return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + ref + '</div>'
+      var safeRefLabel = (ref || '').replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; });
+      return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + safeRefLabel + '</div>'
         + '<div class="ps-note-text">' + short.replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }) + '</div></div>';
     }).join('');
-    Array.prototype.forEach.call(host.querySelectorAll('.ps-note-item-clickable'), function(item) {
-      item.addEventListener('click', function() {
+    host.onclick = function(ev) {
+      var item = ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
+      if (!item || !host.contains(item)) return;
+      window.openFavoriteVerse(item.getAttribute('data-ref') || '');
+    };
+    host.onkeydown = function(ev) {
+      var item = ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
+      if (!item || !host.contains(item)) return;
+      var isEnter = ev.key === 'Enter';
+      var isSpace = ev.key === ' ' || ev.key === 'Spacebar' || ev.code === 'Space';
+      if (isEnter || isSpace) {
+        ev.preventDefault();
         window.openFavoriteVerse(item.getAttribute('data-ref') || '');
-      });
-      item.addEventListener('keydown', function(ev) {
-        var isEnter = ev.key === 'Enter';
-        var isSpace = ev.key === ' ' || ev.key === 'Spacebar' || ev.code === 'Space';
-        if (isEnter || isSpace) {
-          ev.preventDefault();
-          window.openFavoriteVerse(item.getAttribute('data-ref') || '');
-        }
-      });
-    });
+      }
+    };
   }
 
   window.openProfile = function() {
