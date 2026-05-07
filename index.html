@@ -1733,6 +1733,7 @@ let state={
   navView: 'chapters'
 };
 window.state=state;
+window.VERSES=VERSES;
 function save(){
   localStorage.setItem('mye_idx',state.idx);
   localStorage.setItem('mye_notes',JSON.stringify(state.notes));
