@@ -2450,6 +2450,7 @@ render();
       const fullPath=(url.pathname || '/') + (url.search || '');
       return `intent://${url.host}${fullPath}#Intent;scheme=${url.protocol.replace(':','')};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url.origin + fullPath)};end`;
     }catch(e){
+      try{ console.warn('Nepodařilo se připravit Chrome intent URL.', e); }catch(ignore){}
       return '';
     }
   }
@@ -2468,7 +2469,7 @@ render();
       navigator.clipboard.writeText(window.location.href).then(function(){
         setTip(context.tip);
       }).catch(function(){
-        setTip(context.tip);
+        setTip('Otevři stránku mimo Telegram a dokonči instalaci v běžném prohlížeči.');
       });
     } else {
       setTip(context.tip);
@@ -3294,11 +3295,11 @@ const FCM_SENDER_ID = '360259005980';
     let startY = 0;
     let dragY = 0;
     let draggingSheet = false;
-    function isNotifSheetDragTarget(target) {
+    function canDragNotifSheet(target) {
       return !(target && target.closest && target.closest('button,input,label'));
     }
     notifSheet.addEventListener('touchstart', function(e) {
-      if (!isNotifSheetDragTarget(e.target)) return;
+      if (!canDragNotifSheet(e.target)) return;
       const touch = e.changedTouches && e.changedTouches[0];
       if (!touch) return;
       startX = touch.clientX;
@@ -3318,6 +3319,7 @@ const FCM_SENDER_ID = '360259005980';
         return;
       }
       if (Math.abs(dy) < Math.abs(dx)) {
+        // Ignore horizontal gestures so sheet controls keep their native touch behavior.
         return;
       }
       dragY = dy;
