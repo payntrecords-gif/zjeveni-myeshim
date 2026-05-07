@@ -2450,7 +2450,7 @@ render();
       const fullPath=(url.pathname || '/') + (url.search || '');
       return `intent://${url.host}${fullPath}#Intent;scheme=${url.protocol.replace(':','')};package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url.origin + fullPath)};end`;
     }catch(e){
-      try{ console.warn('Nepodařilo se připravit Chrome intent URL.', e); }catch(ignore){}
+      try{ console.warn('Failed to prepare Chrome intent URL.', e); }catch(ignore){}
       return '';
     }
   }
@@ -3288,6 +3288,7 @@ const FCM_SENDER_ID = '360259005980';
   document.getElementById('nss-close-btn')?.addEventListener('click', window.closeNotifSettings);
   if (notifOverlay && notifSheet) {
     const NOTIF_DRAG_CLOSE_PX = 110;
+    const NOTIF_HORIZONTAL_IGNORE_PX = 10;
     const NOTIF_MAX_OVERLAY_OPACITY = 0.55;
     const NOTIF_MIN_OVERLAY_OPACITY = 0.18;
     const NOTIF_OVERLAY_FADE_DISTANCE = 420;
@@ -3318,7 +3319,7 @@ const FCM_SENDER_ID = '360259005980';
         resetNotifSheetDrag();
         return;
       }
-      if (Math.abs(dy) < Math.abs(dx)) {
+      if (Math.abs(dx) > NOTIF_HORIZONTAL_IGNORE_PX && Math.abs(dy) < Math.abs(dx)) {
         // Ignore horizontal gestures so sheet controls keep their native touch behavior.
         return;
       }
