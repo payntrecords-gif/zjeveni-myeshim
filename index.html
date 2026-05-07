@@ -1532,6 +1532,15 @@ body.dark .ps-notif-status.default{background:rgba(229,69,142,.15);color:#ff8cc2
 }
 .ps-btn-notif:hover{background:rgba(229,69,142,.07)}
 body.dark .ps-btn-notif{color:#ff8cc2;border-color:rgba(255,140,194,.35)}
+.ps-btn-update{
+  border:1.5px solid rgba(123,62,244,.38);border-radius:12px;
+  padding:9px 14px;font:inherit;font-size:.86rem;font-weight:900;
+  color:#6f39d9;background:transparent;cursor:pointer;
+  transition:background .14s,opacity .14s;white-space:nowrap;
+}
+.ps-btn-update:hover{background:rgba(123,62,244,.08)}
+body.dark .ps-btn-update{color:#c2a3ff;border-color:rgba(194,163,255,.38)}
+.ps-btn-update:disabled{opacity:.65;cursor:wait}
 
 .ps-btn-signout{
   width:100%;margin-top:14px;
@@ -3517,6 +3526,9 @@ const FCM_SENDER_ID = '360259005980';
           <span class="ps-font-label-lg">A</span>
         </div>
       </div>
+      <div class="ps-row" style="border-bottom:none">
+        <button class="ps-btn-update" id="ps-update-btn" onclick="forceAppUpdate()">Aktualizovat aplikaci</button>
+      </div>
     </div>
 
     <!-- Notifications section -->
@@ -3976,6 +3988,33 @@ const FCM_SENDER_ID = '360259005980';
         if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('notif-settings-overlay');
       }
     }
+  };
+
+  window.forceAppUpdate = async function() {
+    var btn = document.getElementById('ps-update-btn');
+    if (!btn) return;
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = 'Aktualizuji…';
+    try {
+      if ('serviceWorker' in navigator) {
+        var regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(function(reg) {
+          return reg.unregister().catch(function(err) {
+            reportNonCriticalError('Odregistrace service workera selhala:', err);
+          });
+        }));
+      }
+      if ('caches' in window) {
+        var keys = await caches.keys();
+        await Promise.all(keys.map(function(key) { return caches.delete(key); }));
+      }
+    } catch (err) {
+      reportNonCriticalError('Vynucení aktualizace selhalo:', err);
+    }
+    var url = new URL(window.location.href);
+    url.searchParams.set('_cache_bust', Date.now().toString());
+    window.location.href = url.toString();
   };
 
   // ── Dark toggle wiring ──
