@@ -1139,20 +1139,16 @@ body.dark #notif-bell-btn{background:rgba(40,24,36,.72);border-color:rgba(255,15
 }
 /* Left wrapper: logo + hamburger */
 .tb-left{display:flex;align-items:center;gap:8px;flex-shrink:0}
-/* Show logo again alongside hamburger */
+/* Show logo again alongside brand text */
 .tb-brand{display:none !important}
 .tb-logo{display:flex !important;align-items:center;flex-shrink:0}
 .tb-logo img{height:26px;width:auto;display:block}
-/* Left: standalone hamburger button */
-#tb-menu-btn{
-  display:flex;align-items:center;justify-content:center;
-  background:none;border:none;cursor:pointer;padding:0;
-  border-radius:12px;color:var(--text,#1c1820);
-  width:38px;height:38px;flex-shrink:0;
-  -webkit-tap-highlight-color:transparent;
+/* iginjaSlovo brand text replacing hamburger */
+.tb-iginja{
+  font-weight:900;font-size:.88rem;color:#c53580;
+  white-space:nowrap;flex-shrink:0;letter-spacing:-.01em;
 }
-#tb-menu-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.2;flex-shrink:0}
-body.dark #tb-menu-btn{color:#f8eef5}
+body.dark .tb-iginja{color:#ff8cc2}
 /* Center: verse reference pill (no hamburger inside) */
 #nav-pill{flex:none;display:flex;justify-content:center;min-width:0}
 #nav-pill button{
@@ -1701,12 +1697,10 @@ body.dark #panel-guide .guide-step-card{
 <body>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
 <div id="topbar">
-  <!-- Left: logo + hamburger -->
+  <!-- Left: logo + brand name -->
   <div class="tb-left">
     <div class="tb-logo"><img src="logo.png" alt="MYEShim"></div>
-    <button id="tb-menu-btn" onclick="openNav()" aria-label="Navigace" title="Navigace">
-      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-    </button>
+    <span class="tb-iginja">iginjaSlovo</span>
   </div>
   <!-- Center: verse reference pill -->
   <div id="nav-pill">
@@ -1715,12 +1709,11 @@ body.dark #panel-guide .guide-step-card{
       <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
   </div>
-  <!-- Right: Aa + streak + avatar -->
+    <!-- Right: streak + avatar -->
   <div class="tb-right-actions">
     <button id="tb-search-btn" onclick="openSearch()" aria-label="Hledat v bibli" title="Hledat">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
     </button>
-    <button id="display-settings-btn" onclick="openDisplaySettings()" aria-label="Nastavení zobrazení" title="Nastavení zobrazení">Aa</button>
     <div id="streak-badge" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="0" onclick="openStreakDetail()">
       <span class="sb-fire">🔥</span>
       <span class="sb-num" id="streak-num">0</span>
@@ -1862,7 +1855,14 @@ function hasFavorite(c,v){ return Array.isArray(state.favorites) && state.favori
 
 const GUIDE=[
   ['1','Podle slibu Jezíše jaké postavy a jaké události se objeví?',''],
-  ['2','Odpovědět na 5W1H a převypravět',''],
+  ['2','Odpovědět na 5W1H a převypravět','Kdo? Co? Kdy? Kde? Proč? Jak?',[
+    'KDO – Jaké postavy jsou v textu?',
+    'CO – Co se děje nebo co je řečeno?',
+    'KDY – V jakém čase nebo situaci?',
+    'KDE – Na jakém místě se to odehrává?',
+    'PROČ – Jaký je důvod nebo záměr?',
+    'JAK – Jakým způsobem se to děje?'
+  ]],
   ['3','Vymyslet otázky','',[
     'Otázky na porozumění verše a fyzické naplnění',
     'Otázky na srdce Boží a srdce postav'
