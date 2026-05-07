@@ -3992,17 +3992,16 @@ const FCM_SENDER_ID = '360259005980';
 
   window.forceAppUpdate = async function() {
     var btn = document.getElementById('ps-update-btn');
-    if (btn) {
-      if (btn.disabled) return;
-      btn.disabled = true;
-      btn.textContent = 'Aktualizuji…';
-    }
+    if (!btn) return;
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = 'Aktualizuji…';
     try {
       if ('serviceWorker' in navigator) {
         var regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(function(reg) {
           return reg.unregister().catch(function(err) {
-            reportNonCriticalError('Odregistrace service workeru selhala:', err);
+            reportNonCriticalError('Odregistrace service workera selhala:', err);
           });
         }));
       }
