@@ -1764,7 +1764,6 @@ render();
         return;
       }
       showUpdateToast();
-      hadController = true;
     });
     navigator.serviceWorker.addEventListener('message', function(event){
       if(event.data && event.data.type === 'SW_UPDATED') showUpdateToast();
