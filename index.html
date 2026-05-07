@@ -1563,11 +1563,15 @@ body.dark .ps-verse-chip{background:rgba(229,69,142,.1);border-color:rgba(229,69
 }
 .ps-note-item{padding:10px 2px;border-bottom:1px solid rgba(229,69,142,.12)}
 .ps-note-item:last-child{border-bottom:none}
+.ps-note-item.ps-note-item-clickable{cursor:pointer;transition:background .15s ease}
+.ps-note-item.ps-note-item-clickable:hover{background:rgba(229,69,142,.08)}
+.ps-note-item.ps-note-item-clickable:focus-visible{outline:2px solid rgba(123,62,244,.5);outline-offset:2px;border-radius:8px}
 .ps-note-ref{font-size:.8rem;font-weight:900;color:#c53580;margin-bottom:2px}
 .ps-note-text{font-size:.86rem;color:#6d5968;line-height:1.35}
 body.dark .ps-notes-list{background:#241d25;border-color:rgba(255,140,194,.2)}
 body.dark .ps-note-ref{color:#ff8cc2}
 body.dark .ps-note-text{color:#d8c0ce}
+body.dark .ps-note-item.ps-note-item-clickable:hover{background:rgba(255,140,194,.12)}
 #offline-banner{
   position:fixed;left:50%;top:max(10px,calc(10px + env(safe-area-inset-top)));
   transform:translateX(-50%) translateY(-12px);
@@ -3608,6 +3612,12 @@ const FCM_SENDER_ID = '360259005980';
   function renderProfileFavorites() {
     var host = document.getElementById('ps-favorites-list');
     if (!host) return;
+    var escapeHtml = function(value) {
+      return (value || '').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m] || m; });
+    };
+    var getFavoriteItemFromEvent = function(ev) {
+      return ev.target && ev.target.closest ? ev.target.closest('.ps-note-item-clickable') : null;
+    };
     var favs = [];
     try { favs = JSON.parse(localStorage.getItem('myeshim-favorites') || '[]') || []; } catch(e) { favs = []; }
     if (!Array.isArray(favs) || !favs.length) {
@@ -3618,13 +3628,42 @@ const FCM_SENDER_ID = '360259005980';
     if (Array.isArray(window.VERSES)) {
       window.VERSES.forEach(function(v) { versesMap[v.c + ':' + v.v] = v; });
     }
+    window.openFavoriteVerse = function(ref) {
+      if (!ref || typeof ref !== 'string') return;
+      var parts = ref.split(':');
+      var c = parseInt(parts[0], 10);
+      var v = parseInt(parts[1], 10);
+      if (!Number.isFinite(c) || !Number.isFinite(v)) return;
+      var idx = Array.isArray(window.VERSES) ? window.VERSES.findIndex(function(x){ return x.c === c && x.v === v; }) : -1;
+      if (idx < 0) return;
+      if (typeof window.closeProfile === 'function') window.closeProfile();
+      state.idx = idx;
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
     host.innerHTML = favs.map(function(ref) {
       var v = versesMap[ref];
       var text = v ? v.t : '';
       var short = text.length > 96 ? text.slice(0, 96) + '…' : text;
-      return '<div class="ps-note-item"><div class="ps-note-ref">Zj ' + ref.replace(':', ':') + '</div>'
-        + '<div class="ps-note-text">' + short.replace(/[&<>"]/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]; }) + '</div></div>';
+      var safeRef = escapeHtml(ref);
+      return '<div class="ps-note-item ps-note-item-clickable" role="button" tabindex="0" aria-label="Otevřít verš Zj ' + safeRef + '" data-ref="' + safeRef + '"><div class="ps-note-ref">Zj ' + safeRef + '</div>'
+        + '<div class="ps-note-text">' + escapeHtml(short) + '</div></div>';
     }).join('');
+    host.onclick = function(ev) {
+      var item = getFavoriteItemFromEvent(ev);
+      if (!item) return;
+      window.openFavoriteVerse(item.getAttribute('data-ref') || '');
+    };
+    host.onkeydown = function(ev) {
+      var item = getFavoriteItemFromEvent(ev);
+      if (!item) return;
+      var isEnter = ev.key === 'Enter';
+      var isSpace = ev.key === ' ' || ev.key === 'Spacebar' || ev.code === 'Space';
+      if (isEnter || isSpace) {
+        ev.preventDefault();
+        window.openFavoriteVerse(item.getAttribute('data-ref') || '');
+      }
+    };
   }
 
   window.openProfile = function() {
