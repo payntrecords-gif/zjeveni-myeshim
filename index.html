@@ -1251,12 +1251,13 @@ body.dark #bottomnav{
 /* ── LOGIN OVERLAY ── */
 #auth-overlay{
   position:fixed;inset:0;z-index:200;
-  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(229,69,142,.22) 0%,transparent 70%),
-             radial-gradient(ellipse 60% 40% at 80% 100%,rgba(123,62,244,.14) 0%,transparent 60%),
-             #0d0f14;
+  background:radial-gradient(ellipse 100% 55% at 50% 0%,rgba(229,69,142,.14) 0%,transparent 65%),
+             radial-gradient(ellipse 70% 45% at 90% 100%,rgba(123,62,244,.08) 0%,transparent 60%),
+             #f8f3f7;
   display:none;flex-direction:column;align-items:center;justify-content:center;
   padding:40px 24px 56px;
   overflow-y:auto;
+  color-scheme:light;
 }
 #auth-overlay.visible{display:flex}
 .auth-logo-wrap{
@@ -1264,7 +1265,7 @@ body.dark #bottomnav{
 }
 .auth-logo-wrap::before{
   content:'';position:absolute;inset:-20px;
-  background:radial-gradient(circle,rgba(229,69,142,.22) 0%,transparent 70%);
+  background:radial-gradient(circle,rgba(229,69,142,.18) 0%,transparent 70%);
   border-radius:50%;animation:auth-pulse 3s ease-in-out infinite;
 }
 @keyframes auth-pulse{
@@ -1273,24 +1274,24 @@ body.dark #bottomnav{
 }
 .auth-logo-wrap img{
   width:88px;height:88px;border-radius:24px;
-  box-shadow:0 18px 44px rgba(229,69,142,.35);
+  box-shadow:0 18px 44px rgba(229,69,142,.28);
   position:relative;display:block;
 }
 .auth-app-name{
   font-size:2.4rem;font-weight:900;letter-spacing:-.02em;
-  background:linear-gradient(135deg,#fff 0%,#f05ca2 100%);
+  background:linear-gradient(135deg,#7b3ef4 0%,#e5458e 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   margin-bottom:8px;text-align:center;
 }
 .auth-tagline{
-  font-size:1rem;color:#9088a0;text-align:center;
+  font-size:1rem;color:#7a6a76;text-align:center;
   line-height:1.5;margin-bottom:36px;max-width:260px;
 }
 .auth-card{
-  background:#15181f;border:1px solid #2a2d37;
+  background:#fff;border:1px solid rgba(229,69,142,.18);
   border-radius:24px;padding:26px 22px;
   width:100%;max-width:368px;
-  box-shadow:0 24px 56px rgba(0,0,0,.5);
+  box-shadow:0 16px 48px rgba(180,80,140,.12);
   animation:auth-slide-up .45s cubic-bezier(.22,1,.36,1) both;
   flex-shrink:0;
 }
@@ -1299,30 +1300,30 @@ body.dark #bottomnav{
   to{opacity:1;transform:translateY(0)}
 }
 .auth-card-title{
-  font-size:1.05rem;font-weight:800;margin-bottom:5px;color:#f0eaf4;
+  font-size:1.05rem;font-weight:800;margin-bottom:5px;color:#1c1820;
 }
 .auth-card-sub{
-  font-size:.88rem;color:#9088a0;margin-bottom:22px;line-height:1.45;
+  font-size:.88rem;color:#7a6a76;margin-bottom:22px;line-height:1.45;
 }
 .auth-btn-google{
   display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;padding:14px 20px;
-  background:#fff;border:none;border-radius:14px;
+  background:#fff;border:1.5px solid #ede4ea;border-radius:14px;
   font:inherit;font-size:.97rem;font-weight:700;color:#1f1f1f;
   cursor:pointer;
-  box-shadow:0 4px 18px rgba(0,0,0,.28);
+  box-shadow:0 4px 18px rgba(0,0,0,.10);
   transition:transform .14s,box-shadow .14s;
 }
-.auth-btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.38)}
+.auth-btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.16)}
 .auth-btn-google:active{transform:translateY(0)}
 .auth-btn-google svg{width:22px;height:22px;flex-shrink:0}
 .auth-privacy{
-  font-size:.77rem;color:#9088a0;margin-top:14px;line-height:1.4;text-align:center;
+  font-size:.77rem;color:#9a7fa0;margin-top:14px;line-height:1.4;text-align:center;
 }
 #auth-overlay-error{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:#2d1520;border:1px solid #5a2033;border-radius:12px;
-  padding:12px 20px;font-size:.88rem;color:#ffb0c8;max-width:90vw;
+  background:#fef0f4;border:1px solid #f5a5c0;border-radius:12px;
+  padding:12px 20px;font-size:.88rem;color:#b02060;max-width:90vw;
   opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
   z-index:210;
 }
@@ -3159,6 +3160,9 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   function showAuthOverlay() {
+    // Force light mode on the landing/login screen
+    document.documentElement.classList.remove('dark');
+    document.body.classList.remove('dark');
     var ov = document.getElementById('auth-overlay');
     if (ov) { ov.classList.add('visible'); document.body.style.overflow = 'hidden'; }
   }
@@ -3166,6 +3170,14 @@ const FCM_SENDER_ID = '360259005980';
   function hideAuthOverlay() {
     var ov = document.getElementById('auth-overlay');
     if (ov) { ov.classList.remove('visible'); document.body.style.overflow = ''; }
+    // Re-apply the user's saved theme now that we're past the login screen
+    try {
+      var savedTheme = localStorage.getItem('ux35-theme') || 'system';
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      var isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark && prefersDark.matches);
+      document.documentElement.classList.toggle('dark', isDark);
+      document.body.classList.toggle('dark', isDark);
+    } catch(e) {}
   }
 
   function getInitials(name) {
@@ -3409,6 +3421,61 @@ const FCM_SENDER_ID = '360259005980';
     window.go._readTracked = true;
   }
 
+  // ── Profile panel swipe-to-close ──
+  function wireProfileSwipe() {
+    var sheet = document.getElementById('profile-sheet');
+    if (!sheet || sheet.dataset.swipeWired) return;
+    sheet.dataset.swipeWired = '1';
+
+    var startY = 0;
+    var lastY = 0;
+    var tracking = false;
+
+    function startTracking() {
+      tracking = true;
+      sheet.style.transition = 'none';
+    }
+
+    sheet.addEventListener('touchstart', function(e) {
+      startY = e.touches[0].clientY;
+      lastY = startY;
+      if (sheet.scrollTop <= 0) startTracking();
+    }, {passive: true});
+
+    sheet.addEventListener('touchmove', function(e) {
+      lastY = e.touches[0].clientY;
+      var dy = lastY - startY;
+      if (!tracking && sheet.scrollTop <= 0 && dy > 0) {
+        startTracking();
+      }
+      if (tracking && dy > 0) {
+        e.preventDefault();
+        sheet.style.transform = 'translateY(' + dy + 'px)';
+      }
+    }, {passive: false});
+
+    function finishSwipe() {
+      if (!tracking) return;
+      tracking = false;
+      var dy = lastY - startY;
+      sheet.style.transition = 'transform .28s cubic-bezier(.22,1,.36,1)';
+      if (dy > 80) {
+        sheet.style.transform = 'translateY(120%)';
+        setTimeout(function() {
+          sheet.style.transform = '';
+          sheet.style.transition = '';
+          window.closeProfile();
+        }, 300);
+      } else {
+        sheet.style.transform = '';
+        setTimeout(function() { sheet.style.transition = ''; }, 300);
+      }
+    }
+
+    sheet.addEventListener('touchend', finishSwipe, {passive: true});
+    sheet.addEventListener('touchcancel', finishSwipe, {passive: true});
+  }
+
   // ── Bootstrap ──
   function bootstrap() {
     // Wire Google sign-in button
@@ -3417,6 +3484,7 @@ const FCM_SENDER_ID = '360259005980';
 
     wireDarkToggle();
     wireProfileFontSlider();
+    wireProfileSwipe();
     hookGoFunction();
 
     // Init Firebase Auth (wait for firebase SDK)
