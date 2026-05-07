@@ -1863,7 +1863,7 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
     <span class="tb-iginja">iginjaSlovo</span>
   </div>
   <!-- streak-badge kept hidden in DOM so JS streak script still works -->
-  <div id="streak-badge" style="display:none !important" title="Tvůj studijní streak" aria-label="Streak" role="button" tabindex="-1" onclick="openStreakDetail()">
+  <div id="streak-badge" style="display:none !important" title="Tvůj studijní streak" aria-label="Streak" tabindex="-1">
     <span class="sb-fire">🔥</span>
     <span class="sb-num" id="streak-num">0</span>
   </div>
@@ -1943,7 +1943,7 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
 <div id="ux35-toast" aria-live="polite"></div>
 <div id="sw-update-toast" role="status" aria-live="polite"></div>
 
-<nav id="bottomnav" role="navigation" aria-label="Hlavní navigace">
+<nav id="bottomnav" aria-label="Hlavní navigace">
   <button id="bn-search" onclick="window.openSearch()" aria-label="Hledat verš">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
     <span>Hledat</span>
@@ -2188,7 +2188,7 @@ function nsSearch(){
   const rawQ=document.getElementById('ns-input').value.trim();
   const q=rawQ.toLowerCase();
   if(q.length<1){ renderNavGrid(); return; }
-  // try to parse "6:9", "Zj 6:9", "Zjevení 6:9", "zj6:9" etc.
+  // try to parse "6:9", "Zj 6:9", "Zjevení 6:9", "zj6:9", "Zjev 6:9" etc.
   const refM=q.match(/^(?:zj(?:ev(?:en[íi])?)?\.?\s*)?(\d{1,2})\s*:\s*(\d{1,3})$/);
   let res;
   if(refM){
