@@ -4014,7 +4014,7 @@ const FCM_SENDER_ID = '360259005980';
       reportNonCriticalError('Vynucení aktualizace selhalo:', err);
     }
     var url = new URL(window.location.href);
-    url.searchParams.set('update', Date.now().toString());
+    url.searchParams.set('_cache_bust', Date.now().toString());
     window.location.href = url.toString();
   };
 
