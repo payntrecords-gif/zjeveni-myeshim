@@ -1738,10 +1738,10 @@ body.dark #panel-guide .guide-step-card{
 /* Hide leftover topbar elements that moved to bottom */
 #tb-search-btn,#streak-badge,.tb-right-actions,#nav-pill{display:none !important}
 
-/* === BOTTOM NAV: 5-item grid === */
+/* === BOTTOM NAV: centered verse navigation === */
 #bottomnav{
   display:grid !important;
-  grid-template-columns:1fr 1fr 1.7fr 1fr 1fr !important;
+  grid-template-columns:1fr 1fr 2fr 1fr 1fr !important;
   align-items:center !important;
   padding:6px 8px calc(6px + env(safe-area-inset-bottom)) !important;
   gap:3px !important;
@@ -1785,25 +1785,38 @@ body.dark #panel-guide .guide-step-card{
 /* Prev & Next: accent colour */
 #bn-prev,#bn-next{color:var(--pink,#e5458e) !important}
 body.dark #bn-prev,body.dark #bn-next{color:#ff8cc2 !important}
-/* Search button */
-#bn-search{color:var(--sub) !important}
+.bn-spacer{
+  width:100%;
+  min-height:52px;
+  pointer-events:none;
+}
 /* Centre navigation pill */
 #bn-nav{
-  background:rgba(229,69,142,.10) !important;
-  border:1.5px solid rgba(229,69,142,.25) !important;
+  background:rgba(229,69,142,.16) !important;
+  border:1.5px solid rgba(229,69,142,.42) !important;
   border-radius:20px !important;
   color:var(--pink,#e5458e) !important;
-  padding:6px 6px !important;
-  gap:1px !important;
+  padding:7px 8px !important;
+  gap:2px !important;
+  box-shadow:0 3px 10px rgba(229,69,142,.16) !important;
 }
 #bn-nav #nav-label{
-  font-size:.9rem;font-weight:900;line-height:1.25;display:block;
+  font-size:.9rem;font-weight:900;line-height:1.1;display:block;
+}
+#bn-nav .nav-hint{
+  font-size:.75rem;
+  font-weight:800;
+  line-height:1.2;
+  letter-spacing:.015em;
+  opacity:.88;
+  display:block;
 }
 #bn-nav svg{width:12px !important;height:12px !important;opacity:.75 !important}
 body.dark #bn-nav{
-  background:rgba(255,140,194,.10) !important;
-  border-color:rgba(255,140,194,.25) !important;
+  background:rgba(255,140,194,.14) !important;
+  border-color:rgba(255,140,194,.44) !important;
   color:#ff8cc2 !important;
+  box-shadow:0 3px 10px rgba(255,140,194,.15) !important;
 }
 /* Avatar / profile button */
 #tb-avatar-btn{
@@ -1944,16 +1957,14 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
 <div id="sw-update-toast" role="status" aria-live="polite"></div>
 
 <nav id="bottomnav" aria-label="Hlavní navigace">
-  <button id="bn-search" onclick="window.openSearch()" aria-label="Hledat verš">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="22" y2="22"/></svg>
-    <span>Hledat</span>
-  </button>
+  <div class="bn-spacer" aria-hidden="true"></div>
   <button id="bn-prev" onclick="go(-1)" aria-label="Předchozí verš">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     <span>Předchozí</span>
   </button>
-  <button id="bn-nav" onclick="focusCurrentVerse()" aria-label="Zvýraznit aktuální verš">
+  <button id="bn-nav" onclick="window.openSearch()" aria-label="Navigace a vyhledávání">
     <span id="nav-label">Zj 1:1</span>
+    <span class="nav-hint">Kapitoly • Verše • Hledat</span>
     <svg viewBox="0 0 24 24"><polyline points="6 14 12 8 18 14"/><line x1="12" y1="8" x2="12" y2="19"/></svg>
   </button>
   <button id="bn-next" onclick="go(1)" aria-label="Další verš">
