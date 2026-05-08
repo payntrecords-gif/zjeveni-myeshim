@@ -57,7 +57,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
 .cv-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
 .cv-left .cv-chapter{font-size:.78rem;font-weight:800;color:var(--sub);letter-spacing:.05em;text-transform:uppercase}
 .cv-left .cv-name{font-size:.96rem;font-weight:900;color:#b04c82;margin-top:2px;line-height:1.2}
-.cv-right{font-size:.78rem;font-weight:800;color:var(--sub);text-align:right;padding-top:3px}
+.cv-right{font-size:.78rem;font-weight:800;color:var(--sub);text-align:right;padding-top:3px;white-space:nowrap}
 
 .verse-card{
   background:linear-gradient(160deg,#f05ca2 0%,#de4089 100%);
@@ -2072,7 +2072,7 @@ function save(){
 }
 function esc(s){ return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 function chVS(ch){ return VERSES.filter(v=>v.c===ch); }
-function chName(ch){ return CHAPTERS[ch]||'Kapitola '+ch; }
+function chName(ch){ return CHAPTERS[ch]||'Zjevení '+ch; }
 function getQA(c,v){ return QA[c+':'+v]||[]; }
 function hasNote(c,v){ return !!(state.notes[c+':'+v]||'').trim(); }
 function hasFavorite(c,v){ return Array.isArray(state.favorites) && state.favorites.includes(c+':'+v); }
@@ -2093,7 +2093,7 @@ function render(){
   const vv=VERSES[state.idx];
   const cvs=chVS(vv.c);
   const pos=cvs.findIndex(x=>x.v===vv.v)+1;
-  document.getElementById('cv-ch').textContent='Kapitola '+vv.c;
+  document.getElementById('cv-ch').textContent='Zjevení '+vv.c;
   document.getElementById('cv-name').textContent=chName(vv.c);
   document.getElementById('cv-right').textContent='Verš '+pos+' z '+cvs.length;
   document.getElementById('vc-ref').textContent='Zj '+vv.c+':'+vv.v;
@@ -2200,7 +2200,7 @@ function renderNavGrid(){
     return;
   }
   // chapters
-  let h='<div class="ns-section-label">Kapitola</div><div class="ns-ch-grid">';
+  let h='<div class="ns-section-label">Zjevení</div><div class="ns-ch-grid">';
   for(let i=1;i<=22;i++){
     const a=i===state.navCh?' active':'';
     const short=chName(i).length>18?chName(i).slice(0,17)+'…':chName(i);
@@ -2406,7 +2406,7 @@ render();
     if(bar) bar.style.width = pct.toFixed(2) + '%';
     if(label){
       const ch = currentChapter();
-      label.textContent = idx >= 0 ? `Kapitola ${ch ?? '–'} · verš ${idx+1} z ${total}` : '';
+      label.textContent = idx >= 0 ? `Zjevení ${ch ?? '–'} · verš ${idx+1} z ${total}` : '';
     }
   }
   function openSearch(){
