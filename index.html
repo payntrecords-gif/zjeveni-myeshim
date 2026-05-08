@@ -1874,9 +1874,10 @@ body.dark #bn-nav:active{
   width:26px;height:26px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex-shrink:0;
+  border:1.5px solid transparent;
 }
 .bn-avatar-wrap.has-photo{
-  border:1.5px solid rgba(229,69,142,.55);
+  border-color:rgba(229,69,142,.55);
   background:linear-gradient(135deg,rgba(123,62,244,.15),rgba(229,69,142,.18));
 }
 .bn-avatar-wrap #tb-avatar-img{
@@ -4244,6 +4245,8 @@ const FCM_SENDER_ID = '360259005980';
   window.hideInstallOverlay = function() { hideInstallOverlay(false); };
   window.showInstallOverlay = function() { showInstallOverlay(); };
 
+  var AVATAR_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+
   function getInitials(name) {
     if (!name) return '?';
     var parts = name.trim().split(/\s+/);
@@ -4276,7 +4279,7 @@ const FCM_SENDER_ID = '360259005980';
     if (img) img.style.display = 'none';
     if (initials) {
       initials.style.display = '';
-      initials.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+      initials.innerHTML = AVATAR_ICON_SVG;
     }
     if (wrap) wrap.classList.remove('has-photo');
   }
