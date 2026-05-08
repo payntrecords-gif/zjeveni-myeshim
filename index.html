@@ -1738,94 +1738,132 @@ body.dark #panel-guide .guide-step-card{
 /* Hide leftover topbar elements that moved to bottom */
 #tb-search-btn,#streak-badge,.tb-right-actions,#nav-pill{display:none !important}
 
-/* === BOTTOM NAV: centered verse navigation === */
+/* ============================================================
+   BOTTOM NAV — Modern clean redesign
+   Layout (grid): [spacer] [Prev] [Pill] [Next] [Profile]
+   Spacer mirrors Profile so the Pill lands exactly in centre.
+   ============================================================ */
 #bottomnav{
   display:grid !important;
   grid-template-columns:1fr 1fr 2fr 1fr 1fr !important;
   align-items:center !important;
-  padding:6px 8px calc(6px + env(safe-area-inset-bottom)) !important;
-  gap:3px !important;
-  max-width:480px !important;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom)) !important;
+  gap:4px !important;
+  max-width:520px !important;
   margin-left:auto !important;
   margin-right:auto !important;
 }
-/* All bottom-nav buttons: icon + label column */
+
+/* ── All nav buttons: icon/avatar stacked above label ── */
 #bottomnav>button{
   display:flex !important;
   flex-direction:column !important;
   align-items:center !important;
   justify-content:center !important;
-  gap:3px !important;
+  gap:4px !important;
   border:none !important;
   background:none !important;
-  border-radius:14px !important;
-  padding:7px 3px !important;
+  border-radius:16px !important;
+  padding:8px 4px !important;
   font:inherit !important;
-  font-size:.67rem !important;
-  font-weight:800 !important;
+  font-size:.68rem !important;
+  font-weight:700 !important;
   color:var(--sub) !important;
   cursor:pointer !important;
-  min-height:52px !important;
+  min-height:56px !important;
   min-width:0 !important;
   width:100% !important;
   overflow:visible !important;
   box-shadow:none !important;
-  transform:none !important;
-  transition:opacity .14s !important;
-  letter-spacing:.01em !important;
+  letter-spacing:.02em !important;
+  text-transform:uppercase !important;
+  transition:opacity .15s ease,transform .12s ease !important;
+}
+#bottomnav>button:active{
+  opacity:.6 !important;
+  transform:scale(.92) !important;
 }
 #bottomnav>button svg{
-  width:20px !important;
-  height:20px !important;
+  width:22px !important;
+  height:22px !important;
   fill:none !important;
   stroke:currentColor !important;
-  stroke-width:2.2 !important;
+  stroke-width:2 !important;
+  stroke-linecap:round !important;
+  stroke-linejoin:round !important;
   flex-shrink:0 !important;
 }
-/* Prev & Next: accent colour */
-#bn-prev,#bn-next{color:var(--pink,#e5458e) !important}
-body.dark #bn-prev,body.dark #bn-next{color:#ff8cc2 !important}
+
+/* ── Prev & Next: neutral colour, icon prominent ── */
+#bn-prev,#bn-next{color:var(--text) !important}
+body.dark #bn-prev,body.dark #bn-next{color:rgba(245,247,255,.75) !important}
+
+/* ── Invisible spacer to balance Profile on the right ── */
 .bn-spacer{
   width:100%;
-  min-height:52px;
+  min-height:56px;
   pointer-events:none;
 }
-/* Centre navigation pill */
+
+/* ── Centre pill button ── */
 #bn-nav{
-  background:rgba(229,69,142,.16) !important;
-  border:1.5px solid rgba(229,69,142,.42) !important;
-  border-radius:20px !important;
+  background:rgba(229,69,142,.10) !important;
+  border:1.5px solid rgba(229,69,142,.32) !important;
+  border-radius:999px !important;           /* full pill */
   color:var(--pink,#e5458e) !important;
-  padding:7px 10px !important;
+  padding:10px 16px !important;
   gap:6px !important;
-  box-shadow:0 3px 10px rgba(229,69,142,.16) !important;
+  box-shadow:0 2px 10px rgba(229,69,142,.13) !important;
   flex-direction:row !important;
   align-items:center !important;
+  justify-content:center !important;
+  min-height:46px !important;
+  text-transform:none !important;           /* override uppercase from base */
+  letter-spacing:-.01em !important;
+  transition:background .15s ease,box-shadow .15s ease,transform .12s ease !important;
+}
+#bn-nav:active{
+  background:rgba(229,69,142,.18) !important;
+  box-shadow:0 1px 5px rgba(229,69,142,.18) !important;
 }
 #bn-nav #nav-label{
-  font-size:.92rem;font-weight:900;line-height:1.1;display:block;
+  font-size:1rem !important;
+  font-weight:800 !important;
+  line-height:1.1 !important;
+  display:block !important;
+  letter-spacing:-.01em !important;
 }
-#bn-nav .bn-nav-chev{width:14px !important;height:14px !important;opacity:.8 !important;flex-shrink:0 !important}
+#bn-nav .bn-nav-chev{
+  width:16px !important;
+  height:16px !important;
+  stroke-width:2.5 !important;
+  opacity:.72 !important;
+  flex-shrink:0 !important;
+  margin-top:1px !important;    /* optical alignment with text */
+}
 body.dark #bn-nav{
-  background:rgba(255,140,194,.14) !important;
-  border-color:rgba(255,140,194,.44) !important;
+  background:rgba(255,140,194,.13) !important;
+  border-color:rgba(255,140,194,.38) !important;
   color:#ff8cc2 !important;
-  box-shadow:0 3px 10px rgba(255,140,194,.15) !important;
+  box-shadow:0 2px 10px rgba(255,140,194,.13) !important;
 }
-/* Avatar / profile button */
+body.dark #bn-nav:active{
+  background:rgba(255,140,194,.22) !important;
+}
+
+/* ── Profile / avatar button ── */
 #tb-avatar-btn{
   width:100% !important;
   height:auto !important;
-  border-radius:14px !important;
+  border-radius:16px !important;
   border:none !important;
   background:none !important;
   box-shadow:none !important;
   flex-direction:column !important;
-  gap:3px !important;
+  gap:4px !important;
   overflow:visible !important;
-  padding:7px 3px !important;
-  min-height:52px !important;
-  transform:none !important;
+  padding:8px 4px !important;
+  min-height:56px !important;
   color:var(--sub) !important;
 }
 #tb-avatar-btn:hover,#tb-avatar-btn:focus{
@@ -1833,8 +1871,8 @@ body.dark #bn-nav{
   box-shadow:none !important;
 }
 .bn-avatar-wrap{
-  width:26px;height:26px;border-radius:50%;
-  border:2px solid rgba(229,69,142,.45);
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid rgba(229,69,142,.4);
   background:linear-gradient(135deg,#7b3ef4,#e5458e);
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex-shrink:0;
@@ -1843,20 +1881,23 @@ body.dark #bn-nav{
   width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;
 }
 .bn-avatar-wrap #tb-avatar-initials{
-  font-size:.72rem;font-weight:900;color:#fff;line-height:1;pointer-events:none;
+  font-size:.74rem;font-weight:900;color:#fff;line-height:1;pointer-events:none;
 }
 .bn-avatar-label{
-  font-size:.67rem;font-weight:800;color:var(--sub);line-height:1;
+  font-size:.68rem;font-weight:700;color:var(--sub);line-height:1;
+  text-transform:uppercase;letter-spacing:.02em;
 }
 body.dark #tb-avatar-btn{color:var(--sub) !important}
-body.dark .bn-avatar-wrap{border-color:rgba(255,140,194,.45)}
+body.dark .bn-avatar-wrap{border-color:rgba(255,140,194,.42)}
 body.dark .bn-avatar-label{color:var(--sub) !important}
-/* Fix content bottom padding for taller nav */
+
+/* ── Content bottom padding ── */
 #app-panels{padding-bottom:calc(88px + env(safe-area-inset-bottom)) !important}
 @media (max-width:420px){
   #app-panels{padding-bottom:calc(84px + env(safe-area-inset-bottom)) !important}
 }
-/* Print: hide bottomnav */
+
+/* ── Print ── */
 @media print{#bottomnav{display:none !important}}
 </style>
 
@@ -1957,9 +1998,8 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
     <span>Předchozí</span>
   </button>
   <button id="bn-nav" onclick="window.openSearch()" aria-label="Navigace a vyhledávání">
-    <svg class="bn-nav-chev" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     <span id="nav-label">Zj 1:1</span>
-    <svg class="bn-nav-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    <svg class="bn-nav-chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
   <button id="bn-next" onclick="go(1)" aria-label="Další verš">
     <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
