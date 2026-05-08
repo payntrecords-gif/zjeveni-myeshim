@@ -1921,6 +1921,142 @@ body.dark #topbar{
 }
 </style>
 
+<style id="ux51-ux-polish">
+/* ══════════════════════════════
+   1. TOPBAR – větší logo a brand, silnější oddělení od obsahu
+   ══════════════════════════════ */
+#topbar {
+  padding-top: max(16px, calc(16px + env(safe-area-inset-top))) !important;
+  padding-bottom: 16px !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  border-bottom: 2px solid rgba(229,69,142,.30) !important;
+  box-shadow: 0 4px 20px rgba(229,69,142,.10) !important;
+}
+.tb-logo img {
+  height: 36px !important;
+  width: auto !important;
+}
+.tb-iginja {
+  font-size: 1.12rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -.015em !important;
+}
+body.dark #topbar {
+  box-shadow: 0 4px 20px rgba(0,0,0,.22) !important;
+  border-bottom: 2px solid rgba(229,69,142,.38) !important;
+}
+
+/* ══════════════════════════════
+   2. METADATA – zesílit kontrast „ZJEVENÍ 9" a „Verš X z Y"
+   ══════════════════════════════ */
+.cv-left .cv-chapter {
+  font-size: .84rem !important;
+  font-weight: 900 !important;
+  color: #3d2e48 !important;
+  letter-spacing: .07em !important;
+}
+.cv-right {
+  font-size: .84rem !important;
+  font-weight: 900 !important;
+  color: #3d2e48 !important;
+}
+body.dark .cv-left .cv-chapter,
+body.dark .cv-right {
+  color: #d8bece !important;
+}
+
+/* ══════════════════════════════
+   3. VERSE CARD – větší padding a line-height
+   ══════════════════════════════ */
+.verse-card {
+  padding: 26px 22px 26px !important;
+  margin-bottom: 20px !important;
+}
+.vc-text {
+  line-height: 1.84 !important;
+}
+/* Vzduch mezi kartou, tlačítky a tab barem */
+.verse-actions {
+  margin-bottom: 20px !important;
+}
+.cv-row {
+  margin-bottom: 14px !important;
+}
+
+/* ══════════════════════════════
+   4. TABS – výraznější aktivní stav (pink fill + bílý text)
+   ══════════════════════════════ */
+.tabs button.active {
+  background: var(--pink, #e5458e) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(229,69,142,.32), 0 1px 4px rgba(229,69,142,.18) !important;
+}
+body.dark .tabs button.active {
+  background: var(--pink, #e5458e) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(229,69,142,.40) !important;
+}
+
+/* ══════════════════════════════
+   5. GHOST BUTTON „♡ Oblíbené" – čitelnost jako plnohodnotná akce
+   ══════════════════════════════ */
+.va-btn.ghost {
+  background: rgba(229,69,142,.07) !important;
+  color: var(--pink, #e5458e) !important;
+  border: 1.5px solid rgba(229,69,142,.55) !important;
+  font-weight: 900 !important;
+}
+.va-btn.ghost:hover,
+.va-btn.ghost:focus-visible {
+  background: rgba(229,69,142,.14) !important;
+  border-color: rgba(229,69,142,.78) !important;
+}
+.va-btn.ghost:active {
+  transform: scale(.975);
+  background: rgba(229,69,142,.20) !important;
+}
+body.dark .va-btn.ghost {
+  background: rgba(255,140,194,.10) !important;
+  color: #ff8cc2 !important;
+  border-color: rgba(255,140,194,.55) !important;
+}
+
+/* ══════════════════════════════
+   6. BOTTOM NAV – větší ikony, barevné Prev/Next, výraznější střed
+   ══════════════════════════════ */
+#bottomnav > button svg {
+  width: 26px !important;
+  height: 26px !important;
+}
+/* Prev a Next: brandová barva → jasná primární akce */
+#bn-prev,
+#bn-next {
+  color: var(--pink, #e5458e) !important;
+  font-size: .74rem !important;
+  font-weight: 800 !important;
+}
+body.dark #bn-prev,
+body.dark #bn-next {
+  color: #ff8cc2 !important;
+}
+/* Středový pill: výraznější fill + stín */
+#bn-nav {
+  background: linear-gradient(135deg, rgba(229,69,142,.18) 0%, rgba(229,69,142,.12) 100%) !important;
+  border: 1.5px solid rgba(229,69,142,.52) !important;
+  box-shadow: 0 4px 16px rgba(229,69,142,.22) !important;
+}
+#bn-nav #nav-label {
+  font-size: 1.06rem !important;
+  font-weight: 900 !important;
+}
+body.dark #bn-nav {
+  background: linear-gradient(135deg, rgba(255,140,194,.20) 0%, rgba(255,140,194,.13) 100%) !important;
+  border-color: rgba(255,140,194,.52) !important;
+  box-shadow: 0 4px 16px rgba(255,140,194,.20) !important;
+}
+</style>
+
 </head>
 <body>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
