@@ -2265,8 +2265,6 @@ function nsSearch(){
 
 window.openSearch=function(){
   openNav();
-  const input=document.getElementById('ns-input');
-  if(input){ setTimeout(()=>input.focus(),90); }
 };
 
 window.shareCurrentVerse=async function(){
@@ -2393,10 +2391,6 @@ render();
   }
   function openSearch(){
     if(typeof window.openNav === 'function') window.openNav();
-    setTimeout(()=>{
-      const input = $('#ns-input');
-      if(input){ input.focus(); input.select(); }
-    }, 90);
   }
   function wireNotes(){
     const ta = $('.note-ta');
