@@ -1871,9 +1871,9 @@ body.dark #bn-nav:active{
   box-shadow:none !important;
 }
 .bn-avatar-wrap{
-  width:28px;height:28px;border-radius:50%;
-  border:2px solid rgba(229,69,142,.4);
-  background:linear-gradient(135deg,#7b3ef4,#e5458e);
+  width:30px;height:30px;border-radius:50%;
+  border:2px solid rgba(229,69,142,.55);
+  background:linear-gradient(135deg,rgba(123,62,244,.15),rgba(229,69,142,.18));
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex-shrink:0;
 }
@@ -1881,14 +1881,15 @@ body.dark #bn-nav:active{
   width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;
 }
 .bn-avatar-wrap #tb-avatar-initials{
-  font-size:.74rem;font-weight:900;color:#fff;line-height:1;pointer-events:none;
+  font-size:.82rem;font-weight:900;color:var(--pink,#e5458e);line-height:1;pointer-events:none;
 }
 .bn-avatar-label{
-  font-size:.68rem;font-weight:700;color:var(--sub);line-height:1;
+  font-size:.78rem;font-weight:700;color:var(--sub);line-height:1;
   text-transform:uppercase;letter-spacing:.02em;
 }
 body.dark #tb-avatar-btn{color:var(--sub) !important}
-body.dark .bn-avatar-wrap{border-color:rgba(255,140,194,.42)}
+body.dark .bn-avatar-wrap{border-color:rgba(255,140,194,.55);background:linear-gradient(135deg,rgba(123,62,244,.25),rgba(255,140,194,.22))}
+body.dark .bn-avatar-wrap #tb-avatar-initials{color:#ff8cc2}
 body.dark .bn-avatar-label{color:var(--sub) !important}
 
 /* ── Content bottom padding ── */
@@ -1970,11 +1971,11 @@ body.dark .cv-right {
    3. VERSE CARD – větší padding a line-height
    ══════════════════════════════ */
 .verse-card {
-  padding: 26px 22px !important;
+  padding: 30px 24px !important;
   margin-bottom: 20px !important;
 }
 .vc-text {
-  line-height: 1.84 !important;
+  line-height: 1.92 !important;
 }
 /* Vzduch mezi kartou, tlačítky a tab barem */
 .verse-actions {
@@ -2025,15 +2026,19 @@ body.dark .va-btn.ghost {
 /* ══════════════════════════════
    6. BOTTOM NAV – větší ikony, barevné Prev/Next, výraznější střed
    ══════════════════════════════ */
+#bottomnav > button {
+  font-size: .78rem !important;
+}
 #bottomnav > button svg {
   width: 26px !important;
   height: 26px !important;
+  stroke-width: 2.2 !important;
 }
 /* Prev a Next: brandová barva → jasná primární akce */
 #bn-prev,
 #bn-next {
   color: var(--pink, #e5458e) !important;
-  font-size: .74rem !important;
+  font-size: .78rem !important;
   font-weight: 800 !important;
 }
 body.dark #bn-prev,
