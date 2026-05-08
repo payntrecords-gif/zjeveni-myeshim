@@ -1901,6 +1901,26 @@ body.dark .bn-avatar-label{color:var(--sub) !important}
 @media print{#bottomnav{display:none !important}}
 </style>
 
+<style id="ux47-brand-header">
+/* ── NAV: active chapter – title & number must be white on pink-gradient bg ── */
+.ns-ch-grid button.active .ch-num,
+.ns-ch-grid button.active .ch-title { color: #fff !important; }
+
+/* ── TOPBAR: subtle pink-blue gradient from logo (#7b3ef4 → #e5458e) ── */
+#topbar{
+  background:
+    linear-gradient(135deg, rgba(123,62,244,.08) 0%, rgba(229,69,142,.10) 100%),
+    rgba(255,255,255,.82) !important;
+  border-bottom: 1.5px solid rgba(229,69,142,.22) !important;
+}
+body.dark #topbar{
+  background:
+    linear-gradient(135deg, rgba(123,62,244,.22) 0%, rgba(229,69,142,.16) 100%),
+    rgba(18,14,20,.82) !important;
+  border-bottom: 1.5px solid rgba(229,69,142,.32) !important;
+}
+</style>
+
 </head>
 <body>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
