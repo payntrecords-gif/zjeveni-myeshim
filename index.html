@@ -2221,6 +2221,20 @@ let state=(function(){
 })();
 window.state=state;
 window.VERSES=VERSES;
+// Daily verse sequence: 2026-05-11 → Zj 9:16 (idx 158), +1 per day through Zj 9:21 (idx 163)
+(function(){
+  const ANCHOR='2026-05-11',A_IDX=158,MAX_IDX=163;
+  const today=new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('mye_daily_date')!==today){
+    const off=Math.floor((new Date(today).getTime()-new Date(ANCHOR).getTime())/86400000);
+    if(off>=0){
+      const di=Math.min(A_IDX+off,MAX_IDX);
+      state.idx=di;
+      localStorage.setItem('mye_idx',String(di));
+      localStorage.setItem('mye_daily_date',today);
+    }
+  }
+})();
 function save(){
   localStorage.setItem('mye_idx',state.idx);
   localStorage.setItem('mye_notes',JSON.stringify(state.notes));
@@ -2446,38 +2460,129 @@ window.openSearch=function(){
 window.shareCurrentVerse=async function(){
   const vv=VERSES[state.idx];
   if(!vv) return;
-  const ref='Zjevení '+vv.c+':'+vv.v;
-  const text=vv.t;
+  const chNum=vv.c;
+  const chName=(typeof CHAPTERS!=='undefined'&&CHAPTERS[chNum])||('Zjevení '+chNum);
+  const verseText=vv.t;
+  const W=1080,H=1920;
   const canvas=document.createElement('canvas');
-  canvas.width=1080; canvas.height=1080;
+  canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
-  const bg=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-  bg.addColorStop(0,'#7b3ef4'); bg.addColorStop(1,'#e5458e');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='rgba(255,255,255,.95)';
-  ctx.font='700 40px sans-serif';
-  const words=text.split(' ');
-  const lines=[]; let line='';
-  words.forEach(w=>{ const t=(line?line+' ':'')+w; if(ctx.measureText(t).width>860){ lines.push(line); line=w; } else line=t; });
-  if(line) lines.push(line);
-  ctx.font='700 52px sans-serif';
-  ctx.fillText('MYEShim',90,130);
-  ctx.font='500 48px sans-serif';
-  lines.slice(0,11).forEach((l,i)=>ctx.fillText(l,90,240+i*62));
-  ctx.font='700 42px sans-serif';
-  ctx.fillText(ref,90,960);
+  ctx.fillStyle='#f5f0ff';
+  ctx.fillRect(0,0,W,H);
+  const bgGrad=ctx.createLinearGradient(0,0,W,H);
+  bgGrad.addColorStop(0,'rgba(180,210,255,0.5)');
+  bgGrad.addColorStop(0.5,'rgba(255,255,255,0.1)');
+  bgGrad.addColorStop(1,'rgba(255,180,210,0.4)');
+  ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
+  const PINK='#e5458e',DPINK='#c93476';
+  const pad=72;
+  function rr(x,y,w,h,r,fill){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+    ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r);
+    ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h);
+    ctx.arcTo(x,y+h,x,y+h-r,r);
+    ctx.lineTo(x,y+r);
+    ctx.arcTo(x,y,x+r,y,r);
+    ctx.closePath();
+    ctx.fillStyle=fill; ctx.fill();
+  }
+  function wrap(text,maxW,font){
+    ctx.font=font;
+    const words=text.split(' '),ls=[];
+    let line='';
+    words.forEach(w=>{
+      const t=line?line+' '+w:w;
+      if(ctx.measureText(t).width>maxW){ls.push(line);line=w;}
+      else line=t;
+    });
+    if(line) ls.push(line);
+    return ls;
+  }
+  function pill(text,cx,y,font,bg,fg){
+    ctx.font=font;
+    const tw=ctx.measureText(text).width;
+    const ph=72,pr=36,pw=tw+80;
+    const px=cx-pw/2;
+    rr(px,y,pw,ph,pr,bg);
+    ctx.fillStyle=fg; ctx.font=font;
+    ctx.fillText(text,px+40,y+50);
+    return ph;
+  }
+  let curY=80;
+  ctx.fillStyle=PINK;
+  ctx.font='400 42px sans-serif';
+  ctx.fillText('iginja',pad,curY+50);
+  ctx.font='900 42px sans-serif';
+  ctx.fillText('SLOVO',pad+ctx.measureText('iginja').width+2,curY+50);
+  ctx.font='700 46px sans-serif';
+  const msW=ctx.measureText('MYE Shim').width;
+  ctx.fillText('MYE Shim',W-pad-msW,curY+50);
+  curY+=116;
+  ctx.fillStyle=PINK;
+  ctx.font='900 108px sans-serif';
+  ctx.fillText('Zjevení '+chNum,pad,curY+90);
+  curY+=148;
+  curY+=pill('Název',W/2,curY,'700 40px sans-serif',PINK,'#fff')+24;
+  const cW=W-2*pad;
+  const chLines=wrap(chName,cW-60,'700 48px sans-serif');
+  const cCardH=chLines.length*66+56;
+  rr(pad,curY,cW,cCardH,32,'rgba(255,255,255,0.95)');
+  ctx.fillStyle='#1a0a20'; ctx.font='700 48px sans-serif';
+  chLines.forEach((l,i)=>{
+    const lw=ctx.measureText(l).width;
+    ctx.fillText(l,pad+(cW-lw)/2,curY+54+i*66);
+  });
+  curY+=cCardH+44;
+  const vFont='500 44px sans-serif',vMaxW=cW-80;
+  const vLines=wrap(':'+vv.v+' '+verseText,vMaxW,vFont);
+  const vCardH=86+vLines.length*64+60;
+  rr(pad,curY,cW,vCardH,32,DPINK);
+  ctx.fillStyle='#fff'; ctx.font='800 58px sans-serif';
+  ctx.fillText('Zj '+vv.c+':'+vv.v,pad+36,curY+70);
+  ctx.font=vFont;
+  vLines.forEach((l,i)=>ctx.fillText(l,pad+36,curY+70+80+i*64));
+  curY+=vCardH+52;
+  curY+=pill('Návod na MYE Shim',W/2,curY,'700 42px sans-serif',PINK,'#fff')+48;
+  const STEPS=[
+    ['1','Podle slibu Ježíše jaké\npostavy a jaké události\nse objeví?'],
+    ['2','Odpovědět na 5W1H\na převypravět'],
+    ['3','Vymyslet otázky\n• otázky na porozumění verše\na fyzické naplnění\n• otázky na srdce Boží\na srdce postav'],
+    ['4','Odpovědět si na otázky'],
+    ['5','Speech'],
+    ['6','Sdílet uvědomění'],
+  ];
+  const colW=(cW-60)/2;
+  for(let i=0;i<STEPS.length;i+=2){
+    const lLines=STEPS[i][1].split('\n');
+    const rLines=i+1<STEPS.length?STEPS[i+1][1].split('\n'):[];
+    const rowH=Math.max(86+lLines.length*46,rLines.length?86+rLines.length*46:0)+20;
+    ctx.fillStyle=PINK; ctx.font='900 84px sans-serif';
+    ctx.fillText(STEPS[i][0],pad,curY+72);
+    ctx.fillStyle='#1a0a20'; ctx.font='400 36px sans-serif';
+    lLines.forEach((l,j)=>ctx.fillText(l,pad,curY+72+52+j*46));
+    if(i+1<STEPS.length){
+      ctx.fillStyle=PINK; ctx.font='900 84px sans-serif';
+      ctx.fillText(STEPS[i+1][0],pad+colW+60,curY+72);
+      ctx.fillStyle='#1a0a20'; ctx.font='400 36px sans-serif';
+      rLines.forEach((l,j)=>ctx.fillText(l,pad+colW+60,curY+72+52+j*46));
+    }
+    curY+=rowH;
+  }
   canvas.toBlob(async blob=>{
     const file=new File([blob],'myeshim-vers.png',{type:'image/png'});
     try{
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({title:'MYEShim verš',text:ref,files:[file]});
+        await navigator.share({title:'MYEShim verš',text:'Zj '+vv.c+':'+vv.v,files:[file]});
       } else {
-        await navigator.clipboard.writeText('„'+text+'“ — '+ref);
+        await navigator.clipboard.writeText('„'+verseText+'" — Zjevení '+vv.c+':'+vv.v);
         if(typeof window.toast==='function') window.toast('Verš zkopírován!');
       }
     }catch(e){
       try{
-        await navigator.clipboard.writeText('„'+text+'“ — '+ref);
+        await navigator.clipboard.writeText('„'+verseText+'" — Zjevení '+vv.c+':'+vv.v);
         if(typeof window.toast==='function') window.toast('Verš zkopírován!');
       }catch(_e){}
     }
