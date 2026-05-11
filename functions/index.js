@@ -1,8 +1,4 @@
-// functions/index.js
-// Firebase Cloud Functions v2 - MYEShim streak notifikace
-// Firestore struktura: users/{uid}/data/notifications -> { fcmToken, enabled, time }
-//                      users/{uid}/data/streak -> { count, lastDate, best }
-
+// functions/index.js - MYEShim streak notifikace v2
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { logger } = require('firebase-functions/v2');
 const admin = require('firebase-admin');
@@ -10,7 +6,6 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
-// --- ZPRAVY ---
 const STREAK_MESSAGES = {
   inactive_1: [
     { title: 'Chybis nam!', body: 'Vcera jsi nestudoval. Znovu zacni dnes - stale je cas!' },
@@ -56,40 +51,49 @@ async function sendToToken(token, msg, data = {}) {
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// --- CRON 1: Denni verze (kazdy den 8:00 Praha) ---
 exports.dailyVerse = onSchedule(
   { schedule: '0 8 * * *', timeZone: 'Europe/Prague', region: 'europe-west1' },
   async () => {
-    // Nacti vsechny uzivatele, kteri maji notifikace povolene
-    const usersSnap = await db.collection('users').get();
-    if (usersSnap.empty) { logger.info('dailyVerse: zadni uzivatele'); return; }
-    let sent = 0, stale = 0;
+    logger.info('dailyVerse: spoustim, nacitam users kolekci...');
+    let usersSnap;
+    try {
+      usersSnap = await db.collection('users').get();
+    } catch (e) {
+      logger.error('dailyVerse: chyba pri cteni users:', e.message);
+      return;
+    }
+    logger.info('dailyVerse: pocet users dokumentu=' + usersSnap.size);
+    if (usersSnap.empty) { logger.info('dailyVerse: zadni uzivatele v Firestore'); return; }
+    const msg = STREAK_MESSAGES.daily_verse;
+    let sent = 0, stale = 0, noToken = 0;
     for (const userDoc of usersSnap.docs) {
       try {
         const notifDoc = await db.collection('users').doc(userDoc.id)
           .collection('data').doc('notifications').get();
-        if (!notifDoc.exists) continue;
+        logger.info('dailyVerse: user=' + userDoc.id + ', notifDoc.exists=' + notifDoc.exists);
+        if (!notifDoc.exists) { noToken++; continue; }
         const notif = notifDoc.data();
-        if (!notif.fcmToken) continue;
-        if (notif.enabled === false) continue;
-        const result = await sendToToken(notif.fcmToken, STREAK_MESSAGES.daily_verse, { type: 'daily_verse' });
+        logger.info('dailyVerse: enabled=' + notif.enabled + ', hasToken=' + !!notif.fcmToken);
+        if (!notif.fcmToken) { noToken++; continue; }
+        if (notif.enabled === false) { noToken++; continue; }
+        const result = await sendToToken(notif.fcmToken, msg, { type: 'daily_verse' });
         if (result === 'stale') {
           await notifDoc.ref.update({ fcmToken: admin.firestore.FieldValue.delete() });
           stale++;
         } else if (result) sent++;
-      } catch(e) { logger.warn('dailyVerse user error:', e.message); }
+      } catch(e) { logger.warn('dailyVerse user error ' + userDoc.id + ':', e.message); }
     }
-    logger.info('dailyVerse: sent=' + sent + ', stale=' + stale);
+    logger.info('dailyVerse: sent=' + sent + ', stale=' + stale + ', noToken=' + noToken);
   }
 );
 
-// --- CRON 2: Streak inaktivita (kazdy den 9:00 Praha) ---
 exports.streakCheck = onSchedule(
   { schedule: '0 9 * * *', timeZone: 'Europe/Prague', region: 'europe-west1' },
   async () => {
     const now = Date.now();
     const DAY = 86400000;
     const usersSnap = await db.collection('users').get();
+    logger.info('streakCheck: pocet users=' + usersSnap.size);
     if (usersSnap.empty) { logger.info('streakCheck: zadni uzivatele'); return; }
     let sent = 0;
     for (const userDoc of usersSnap.docs) {
@@ -100,8 +104,7 @@ exports.streakCheck = onSchedule(
         ]);
         if (!notifDoc.exists) continue;
         const notif = notifDoc.data();
-        if (!notif.fcmToken) continue;
-        if (notif.enabled === false) continue;
+        if (!notif.fcmToken || notif.enabled === false) continue;
         const streak = streakDoc.exists ? (streakDoc.data() || {}) : {};
         const lastDate = streak.lastDate ? new Date(streak.lastDate).getTime() : 0;
         const count = streak.count || 0;
