@@ -2685,7 +2685,7 @@ render();
       const host = $('.note-save')?.parentElement || ta.parentElement;
       host && host.appendChild(meta);
     }
-    const update = ()=>{ meta.textContent = `${ta.value.length}; };
+    const update = ()=>{ meta.textContent = `${ta.value.length} znaků · lokální uložení v prohlížeči`; };
     ta.addEventListener('input', update);
     update();
   }
