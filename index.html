@@ -63,6 +63,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
   background:linear-gradient(160deg,#f05ca2 0%,#de4089 100%);
   border-radius:var(--r);padding:20px 18px;margin:0 0 16px;
   box-shadow:0 14px 30px rgba(222,64,137,.22);
+  touch-action:pan-y;
 }
 .vc-ref{font-size:1.9rem;font-weight:900;color:#fff;line-height:1;margin-bottom:10px}
 .vc-text{font-size:1.06rem;line-height:1.58;color:#fff}
@@ -2726,13 +2727,20 @@ render();
       if(!t) return;
       sx = t.clientX; sy = t.clientY; active = true;
     }, {passive:true});
+    card.addEventListener('touchmove', (e)=>{
+      if(!active) return;
+      const t = e.changedTouches && e.changedTouches[0];
+      if(!t) return;
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      if(Math.abs(dx) > Math.abs(dy)) e.preventDefault();
+    }, {passive:false});
     card.addEventListener('touchend', (e)=>{
       if(!active) return;
       active = false;
       const t = e.changedTouches && e.changedTouches[0];
       if(!t) return;
       const dx = t.clientX - sx, dy = t.clientY - sy;
-      if(Math.abs(dx) > 58 && Math.abs(dy) < 36){
+      if(Math.abs(dx) > 40 && Math.abs(dy) < 36){
         if(dx < 0 && typeof window.go === 'function') window.go(1);
         if(dx > 0 && typeof window.go === 'function') window.go(-1);
       }
@@ -3853,10 +3861,10 @@ const FCM_SENDER_ID = '360259005980';
 
   // ── SWIPE: VERSE CARD SCALE ANIMATION + ENHANCED THRESHOLDS ──
   (function() {
-    const MIN_SWIPE_PX = 50;
+    const MIN_SWIPE_PX = 40;
     const MAX_VERTICAL_PX = 80;
     const H_RATIO = 1.5;
-    const SWIPE_DEBOUNCE_MS = 350;
+    const SWIPE_DEBOUNCE_MS = 200;
 
     // Debounce window.go to prevent double-firing with existing ux35 swipe handler
     if (typeof window.go === 'function' && !window._goIsDebounced) {
@@ -3885,12 +3893,13 @@ const FCM_SENDER_ID = '360259005980';
       if (!t) return;
       const dx = t.clientX - sx, dy = t.clientY - sy;
       if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+        e.preventDefault();
         card.classList.toggle('swipe-left', dx < 0);
         card.classList.toggle('swipe-right', dx > 0);
       } else {
         card.classList.remove('swipe-left', 'swipe-right');
       }
-    }, {passive: true});
+    }, {passive: false});
     card.addEventListener('touchend', e => {
       if (!tracking) return;
       tracking = false;
