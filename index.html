@@ -3648,10 +3648,10 @@ const FCM_SENDER_ID = '360259005980';
     var _verse = null;
     try {
       if (Array.isArray(window.VERSES) && window.VERSES.length) {
-        var _startIdx = 158, _startMs = new Date('2026-05-11T00:00:00').getTime(), _count = 247;
+        var _startMs = new Date('2026-05-11T00:00:00').getTime();
         var _local = new Date(); _local.setHours(0,0,0,0);
         var _days = Math.max(0, Math.floor((_local.getTime() - _startMs) / 86400000));
-        _verse = window.VERSES[_startIdx + (_days % _count)];
+        _verse = _days < 247 ? window.VERSES[158 + _days] : window.VERSES[(_days - 247) % window.VERSES.length];
       }
     } catch(e2) {}
     var _body = _verse
@@ -4453,12 +4453,13 @@ const FCM_SENDER_ID = '360259005980';
   // ── Profile Panel ──
   function buildDailyVerse() {
     if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
-    var DAILY_START_IDX = 158; // Zj 9:16
     var DAILY_START_MS = new Date('2026-05-11T00:00:00').getTime();
-    var DAILY_COUNT = 247; // Zj 9:16 through Zj 22:21
     var local = new Date(); local.setHours(0,0,0,0);
     var daysSince = Math.max(0, Math.floor((local.getTime() - DAILY_START_MS) / 86400000));
-    return window.VERSES[DAILY_START_IDX + (daysSince % DAILY_COUNT)];
+    // Days 0–246: Zj 9:16 → Zj 22:21 (index 158–404)
+    // Days 247+: restart from Zj 1:1, cycle all 405 verses
+    if (daysSince < 247) return window.VERSES[158 + daysSince];
+    return window.VERSES[(daysSince - 247) % window.VERSES.length];
   }
 
   function animateProfileCount(el, target) {
