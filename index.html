@@ -2306,7 +2306,7 @@ function setTab(t){
     document.getElementById('panel-note').innerHTML=
       `<p class="note-hint">Krátká poznámka — vlastní shrnutí, klíčové slovo nebo otázka.</p>`+
       `<textarea class="note-ta" id="note-ta" placeholder="Co sis dnes zapamatoval nebo co tě zaujalo?">${esc(val)}</textarea>`+
-      `<button class="note-save" onclick="saveNote()">Uložit poznámku</button><div id="ux36-note-tip" style="margin-top:8px;font-size:.82rem;color:var(--sub);text-align:center">Poznámky se ukládají i automaticky během psaní.</div>`;
+      `<button class="note-save" onclick="saveNote()">Uložit poznámku</button><div id="ux36-note-tip" style="margin-top:8px;font-size:.82rem;color:var(--sub);text-align:center"></div>`;
   }
 }
 
@@ -2684,7 +2684,7 @@ render();
       const host = $('.note-save')?.parentElement || ta.parentElement;
       host && host.appendChild(meta);
     }
-    const update = ()=>{ meta.textContent = `${ta.value.length} znaků · lokální uložení v prohlížeči`; };
+    const update = ()=>{ meta.textContent = `${ta.value.length}; };
     ta.addEventListener('input', update);
     update();
   }
