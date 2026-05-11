@@ -24,7 +24,7 @@ messaging.onBackgroundMessage(function(payload) {
     tag: data.tag || 'myeshim-daily',
     data: {
       ref: data.ref || '',
-      url: self.registration && self.registration.scope ? self.registration.scope : './'
+            url: data.url || 'https://payntrecords-gif.github.io/zjeveni-myeshim/'
     }
   };
   return self.registration.showNotification(title, options);
