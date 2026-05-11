@@ -121,10 +121,15 @@ self.addEventListener('push', event => {
   const payloadData = data.data || {};
   const notification = data.notification || payloadData.notification || {};
   const title = notification.title || data.title || payloadData.title || 'MYEShim – dnešní verš 📖';
-  const body = notification.body || data.body || payloadData.body || data.verse || payloadData.verse || 'Otevři appku a přečti si dnešní verš.';
+  const body = notification.body
+    || data.body
+    || payloadData.body
+    || data.verse
+    || payloadData.verse
+    || 'Otevři appku a přečti si dnešní verš.';
   const ref = data.ref || payloadData.ref || '';
-  const link = (data.fcmOptions && data.fcmOptions.link)
-    || (payloadData.fcmOptions && payloadData.fcmOptions.link)
+  const link = data.fcmOptions?.link
+    || payloadData.fcmOptions?.link
     || data.url
     || payloadData.url
     || self.registration.scope;
