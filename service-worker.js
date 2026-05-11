@@ -131,3 +131,29 @@ self.addEventListener('periodicsync', event => {
     });
   })());
 });
+
+// — FCM PUSH HANDLER — receives push notifications from Firebase Cloud Messaging
+self.addEventListener('push', event => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch(e) {
+    data = { notification: { title: 'MYEShim', body: event.data ? event.data.text() : '' } };
+  }
+
+  const notification = data.notification || {};
+  const title = notification.title || data.title || 'MYEShim';
+  const body = notification.body || data.body || 'Otevri si aplikaci a prectis dnesni cast Zjeveni.';
+  const link = (data.fcmOptions && data.fcmOptions.link) || self.registration.scope;
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: body,
+      icon: './icon-192.png',
+      badge: './icon-96.png',
+      tag: 'myeshim-push',
+      renotify: true,
+      data: { url: link }
+    })
+  );
+});
