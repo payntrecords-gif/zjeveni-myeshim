@@ -4350,7 +4350,7 @@ const FCM_SENDER_ID = '360259005980';
     var entries = Object.keys(notes).filter(function(ref){ return (notes[ref] || '').trim(); });
     if (!entries.length) {
       host.classList.add('ps-notes-list-empty');
-      host.innerHTML = '<span class="ps-empty-icon">📝</span><div class="ps-note-text">Zatím nemáš žádné zápisky.</div>';
+      host.innerHTML = '<span class="ps-empty-icon" role="img" aria-label="zápisník">📝</span><div class="ps-note-text">Zatím nemáš žádné zápisky.</div>';
       return;
     }
     entries.sort(function(a,b){
@@ -4474,7 +4474,7 @@ const FCM_SENDER_ID = '360259005980';
     try { favs = JSON.parse(localStorage.getItem('myeshim-favorites') || '[]') || []; } catch(e) { favs = []; }
     if (!Array.isArray(favs) || !favs.length) {
       host.classList.add('ps-notes-list-empty');
-      host.innerHTML = '<span class="ps-empty-icon">🤍</span><div class="ps-note-text">Zatím nemáš žádné oblíbené verše.</div>';
+      host.innerHTML = '<span class="ps-empty-icon" role="img" aria-label="srdce">🤍</span><div class="ps-note-text">Zatím nemáš žádné oblíbené verše.</div>';
       return;
     }
     var versesMap = {};
