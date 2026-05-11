@@ -1,4 +1,6 @@
-// functions/index.js - MYEShim streak notifikace v2
+// functions/index.js - MYEShim streak notifikace v3
+// Oprava: notifications je dokument v users/{uid}/data/notifications
+// Proto pouzivame collectionGroup('data') a filtrujeme doc ID = 'notifications'
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const { logger } = require('firebase-functions/v2');
 const admin = require('firebase-admin');
@@ -51,28 +53,43 @@ async function sendToToken(token, msg, data = {}) {
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
+// Nacte vsechny notifications dokumenty z users/{uid}/data/notifications
+// Struktura: users (kolekce) -> {uid} (dokument, neexistuje) -> data (subkolekce) -> notifications (dokument)
+async function getAllNotifications() {
+  // collectionGroup('data') najde vsechny 'data' subkolekce a jejich dokumenty
+  const dataSnap = await db.collectionGroup('data').get();
+  logger.info('getAllNotifications: celkem data dokumentu=' + dataSnap.size);
+  const notifs = [];
+  for (const doc of dataSnap.docs) {
+    if (doc.id === 'notifications') {
+      notifs.push(doc);
+    }
+  }
+  logger.info('getAllNotifications: notifications dokumentu=' + notifs.length);
+  return notifs;
+}
+
 exports.dailyVerse = onSchedule(
   { schedule: '0 8 * * *', timeZone: 'Europe/Prague', region: 'europe-west1' },
   async () => {
-    logger.info('dailyVerse: spoustim, nacitam notifications pres collectionGroup...');
-    let notifSnap;
+    logger.info('dailyVerse: spoustim...');
+    let notifs;
     try {
-      notifSnap = await db.collectionGroup('notifications').get();
+      notifs = await getAllNotifications();
     } catch (e) {
-      logger.error('dailyVerse: chyba pri cteni notifications:', e.message);
+      logger.error('dailyVerse: chyba pri cteni:', e.message);
       return;
     }
-    logger.info('dailyVerse: pocet notifications dokumentu=' + notifSnap.size);
-    if (notifSnap.empty) {
-      logger.info('dailyVerse: zadne notifications dokumenty v Firestore');
+    if (notifs.length === 0) {
+      logger.info('dailyVerse: zadne notifications dokumenty');
       return;
     }
     const msg = STREAK_MESSAGES.daily_verse;
     let sent = 0, stale = 0, noToken = 0;
-    for (const notifDoc of notifSnap.docs) {
+    for (const notifDoc of notifs) {
       try {
         const notif = notifDoc.data();
-        logger.info('dailyVerse: notifDoc path=' + notifDoc.ref.path + ', enabled=' + notif.enabled + ', hasToken=' + !!notif.fcmToken);
+        logger.info('dailyVerse: path=' + notifDoc.ref.path + ', enabled=' + notif.enabled + ', hasToken=' + !!notif.fcmToken);
         if (!notif.fcmToken) { noToken++; continue; }
         if (notif.enabled === false) { noToken++; continue; }
         const result = await sendToToken(notif.fcmToken, msg, { type: 'daily_verse' });
@@ -81,7 +98,7 @@ exports.dailyVerse = onSchedule(
           stale++;
         } else if (result) sent++;
       } catch(e) {
-        logger.warn('dailyVerse notif error ' + notifDoc.ref.path + ':', e.message);
+        logger.warn('dailyVerse error ' + notifDoc.ref.path + ':', e.message);
       }
     }
     logger.info('dailyVerse: sent=' + sent + ', stale=' + stale + ', noToken=' + noToken);
@@ -93,23 +110,22 @@ exports.streakCheck = onSchedule(
   async () => {
     const now = Date.now();
     const DAY = 86400000;
-    let notifSnap;
+    let notifs;
     try {
-      notifSnap = await db.collectionGroup('notifications').get();
+      notifs = await getAllNotifications();
     } catch (e) {
-      logger.error('streakCheck: chyba pri cteni notifications:', e.message);
+      logger.error('streakCheck: chyba pri cteni:', e.message);
       return;
     }
-    logger.info('streakCheck: pocet notifications=' + notifSnap.size);
-    if (notifSnap.empty) { logger.info('streakCheck: zadne notifications'); return; }
+    if (notifs.length === 0) { logger.info('streakCheck: zadne notifications'); return; }
     let sent = 0;
-    for (const notifDoc of notifSnap.docs) {
+    for (const notifDoc of notifs) {
       try {
         const notif = notifDoc.data();
         if (!notif.fcmToken || notif.enabled === false) continue;
-        // streak doc je na users/{uid}/data/streak
-        const userId = notifDoc.ref.parent.parent.id;
-        const streakDoc = await db.collection('users').doc(userId).collection('data').doc('streak').get();
+        // streak doc je na stejne urovni: users/{uid}/data/streak
+        const streakRef = notifDoc.ref.parent.doc('streak');
+        const streakDoc = await streakRef.get();
         const streak = streakDoc.exists ? (streakDoc.data() || {}) : {};
         const lastDate = streak.lastDate ? new Date(streak.lastDate).getTime() : 0;
         const count = streak.count || 0;
@@ -127,7 +143,7 @@ exports.streakCheck = onSchedule(
           } else if (result) sent++;
         }
       } catch(e) {
-        logger.warn('streakCheck notif error:', e.message);
+        logger.warn('streakCheck error:', e.message);
       }
     }
     logger.info('streakCheck: sent=' + sent);
