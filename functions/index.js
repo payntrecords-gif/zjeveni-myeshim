@@ -54,26 +54,25 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 exports.dailyVerse = onSchedule(
   { schedule: '0 8 * * *', timeZone: 'Europe/Prague', region: 'europe-west1' },
   async () => {
-    logger.info('dailyVerse: spoustim, nacitam users kolekci...');
-    let usersSnap;
+    logger.info('dailyVerse: spoustim, nacitam notifications pres collectionGroup...');
+    let notifSnap;
     try {
-      usersSnap = await db.collection('users').get();
+      notifSnap = await db.collectionGroup('notifications').get();
     } catch (e) {
-      logger.error('dailyVerse: chyba pri cteni users:', e.message);
+      logger.error('dailyVerse: chyba pri cteni notifications:', e.message);
       return;
     }
-    logger.info('dailyVerse: pocet users dokumentu=' + usersSnap.size);
-    if (usersSnap.empty) { logger.info('dailyVerse: zadni uzivatele v Firestore'); return; }
+    logger.info('dailyVerse: pocet notifications dokumentu=' + notifSnap.size);
+    if (notifSnap.empty) {
+      logger.info('dailyVerse: zadne notifications dokumenty v Firestore');
+      return;
+    }
     const msg = STREAK_MESSAGES.daily_verse;
     let sent = 0, stale = 0, noToken = 0;
-    for (const userDoc of usersSnap.docs) {
+    for (const notifDoc of notifSnap.docs) {
       try {
-        const notifDoc = await db.collection('users').doc(userDoc.id)
-          .collection('data').doc('notifications').get();
-        logger.info('dailyVerse: user=' + userDoc.id + ', notifDoc.exists=' + notifDoc.exists);
-        if (!notifDoc.exists) { noToken++; continue; }
         const notif = notifDoc.data();
-        logger.info('dailyVerse: enabled=' + notif.enabled + ', hasToken=' + !!notif.fcmToken);
+        logger.info('dailyVerse: notifDoc path=' + notifDoc.ref.path + ', enabled=' + notif.enabled + ', hasToken=' + !!notif.fcmToken);
         if (!notif.fcmToken) { noToken++; continue; }
         if (notif.enabled === false) { noToken++; continue; }
         const result = await sendToToken(notif.fcmToken, msg, { type: 'daily_verse' });
@@ -81,7 +80,9 @@ exports.dailyVerse = onSchedule(
           await notifDoc.ref.update({ fcmToken: admin.firestore.FieldValue.delete() });
           stale++;
         } else if (result) sent++;
-      } catch(e) { logger.warn('dailyVerse user error ' + userDoc.id + ':', e.message); }
+      } catch(e) {
+        logger.warn('dailyVerse notif error ' + notifDoc.ref.path + ':', e.message);
+      }
     }
     logger.info('dailyVerse: sent=' + sent + ', stale=' + stale + ', noToken=' + noToken);
   }
@@ -92,19 +93,23 @@ exports.streakCheck = onSchedule(
   async () => {
     const now = Date.now();
     const DAY = 86400000;
-    const usersSnap = await db.collection('users').get();
-    logger.info('streakCheck: pocet users=' + usersSnap.size);
-    if (usersSnap.empty) { logger.info('streakCheck: zadni uzivatele'); return; }
+    let notifSnap;
+    try {
+      notifSnap = await db.collectionGroup('notifications').get();
+    } catch (e) {
+      logger.error('streakCheck: chyba pri cteni notifications:', e.message);
+      return;
+    }
+    logger.info('streakCheck: pocet notifications=' + notifSnap.size);
+    if (notifSnap.empty) { logger.info('streakCheck: zadne notifications'); return; }
     let sent = 0;
-    for (const userDoc of usersSnap.docs) {
+    for (const notifDoc of notifSnap.docs) {
       try {
-        const [notifDoc, streakDoc] = await Promise.all([
-          db.collection('users').doc(userDoc.id).collection('data').doc('notifications').get(),
-          db.collection('users').doc(userDoc.id).collection('data').doc('streak').get()
-        ]);
-        if (!notifDoc.exists) continue;
         const notif = notifDoc.data();
         if (!notif.fcmToken || notif.enabled === false) continue;
+        // streak doc je na users/{uid}/data/streak
+        const userId = notifDoc.ref.parent.parent.id;
+        const streakDoc = await db.collection('users').doc(userId).collection('data').doc('streak').get();
         const streak = streakDoc.exists ? (streakDoc.data() || {}) : {};
         const lastDate = streak.lastDate ? new Date(streak.lastDate).getTime() : 0;
         const count = streak.count || 0;
@@ -121,7 +126,9 @@ exports.streakCheck = onSchedule(
             await notifDoc.ref.update({ fcmToken: admin.firestore.FieldValue.delete() });
           } else if (result) sent++;
         }
-      } catch(e) { logger.warn('streakCheck user error:', e.message); }
+      } catch(e) {
+        logger.warn('streakCheck notif error:', e.message);
+      }
     }
     logger.info('streakCheck: sent=' + sent);
   }
