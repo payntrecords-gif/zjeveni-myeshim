@@ -59,29 +59,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-self.addEventListener('push', event => {
-  let data = {};
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch(e) {
-    data = { body: event.data ? event.data.text() : '' };
-  }
-  const title = data.title || 'MYEShim – dnešní verš 📖';
-  const body = data.body || data.verse || 'Otevři appku a přečti si dnešní verš.';
-  const ref = data.ref || '';
-  const tag = data.tag || 'myeshim-daily';
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body: body,
-      icon: './icon-192.png',
-      badge: './icon-96.png',
-      tag: tag,
-      renotify: false,
-      data: { ref: ref, url: self.registration.scope }
-    })
-  );
-});
-
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   const ref = event.notification.data && event.notification.data.ref ? event.notification.data.ref : '';
@@ -138,22 +115,33 @@ self.addEventListener('push', event => {
   try {
     data = event.data ? event.data.json() : {};
   } catch(e) {
-    data = { notification: { title: 'MYEShim', body: event.data ? event.data.text() : '' } };
+    data = { body: event.data ? event.data.text() : '' };
   }
 
-  const notification = data.notification || {};
-  const title = notification.title || data.title || 'MYEShim';
-  const body = notification.body || data.body || 'Otevri si aplikaci a prectis dnesni cast Zjeveni.';
-  const link = (data.fcmOptions && data.fcmOptions.link) || self.registration.scope;
+  const payloadData = data.data || {};
+  const notification = data.notification || payloadData.notification || {};
+  const title = notification.title || data.title || payloadData.title || 'MYEShim – dnešní verš 📖';
+  const body = notification.body
+    || data.body
+    || payloadData.body
+    || data.verse
+    || payloadData.verse
+    || 'Otevři appku a přečti si dnešní verš.';
+  const ref = data.ref || payloadData.ref || '';
+  const link = data.fcmOptions?.link
+    || payloadData.fcmOptions?.link
+    || data.url
+    || payloadData.url
+    || self.registration.scope;
 
   event.waitUntil(
     self.registration.showNotification(title, {
       body: body,
       icon: './icon-192.png',
       badge: './icon-96.png',
-      tag: 'myeshim-push',
-      renotify: true,
-      data: { url: link }
+      tag: 'myeshim-daily',
+      renotify: false,
+      data: { ref: ref, url: link }
     })
   );
 });
