@@ -3452,6 +3452,17 @@ const FCM_SENDER_ID = '360259005980';
     }
   }
 
+  async function registerPeriodicSync(registration) {
+    if (!('periodicSync' in registration)) return;
+    try {
+      const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+      if (status.state !== 'granted') return;
+      await registration.periodicSync.register('myeshim-daily-verse', { minInterval: 24 * 60 * 60 * 1000 });
+    } catch(e) {
+      reportNonCriticalError('Periodic sync selhal:', e);
+    }
+  }
+
   function updateNotifBtn() {
     const btn = document.getElementById('ws-notif-btn');
     if (!btn) return;
@@ -3478,7 +3489,7 @@ const FCM_SENDER_ID = '360259005980';
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
     if (!isUserAuthenticated()) return;
     if (Notification.permission === 'granted') {
-      navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+      navigator.serviceWorker.ready.then(reg => { subscribeToPush(reg); registerPeriodicSync(reg); });
       ensureFcmToken();
       scheduleWelcomeNotification();
       return;
@@ -3487,7 +3498,7 @@ const FCM_SENDER_ID = '360259005980';
     // Ask after a short delay so as not to interrupt first visit UX
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      navigator.serviceWorker.ready.then(reg => subscribeToPush(reg));
+      navigator.serviceWorker.ready.then(reg => { subscribeToPush(reg); registerPeriodicSync(reg); });
       ensureFcmToken();
       scheduleWelcomeNotification();
     }
@@ -3634,13 +3645,26 @@ const FCM_SENDER_ID = '360259005980';
     const minute = parts ? parseInt(parts[2], 10) : 0;
     if (now.getHours() < hour || (now.getHours() === hour && now.getMinutes() < minute)) return;
     safeLSSet('notif_last_shown', today);
+    var _verse = null;
+    try {
+      if (Array.isArray(window.VERSES) && window.VERSES.length) {
+        var _startMs = new Date('2026-05-11T00:00:00').getTime();
+        var _local = new Date(); _local.setHours(0,0,0,0);
+        var _days = Math.max(0, Math.floor((_local.getTime() - _startMs) / 86400000));
+        _verse = _days < 247 ? window.VERSES[158 + _days] : window.VERSES[(_days - 247) % window.VERSES.length];
+      }
+    } catch(e2) {}
+    var _body = _verse
+      ? '\u201e' + _verse.t.slice(0, 140) + (_verse.t.length > 140 ? '\u2026' : '') + '\u201c \u2014 Zj\u00a0' + _verse.c + ':' + _verse.v + '\n\nUdělej dnes MYEShim! 🙏'
+      : 'Dnešní verš tě čeká — udělej MYEShim! 🙏';
+    var _ref = _verse ? _verse.c + ':' + _verse.v : '';
     navigator.serviceWorker.ready.then(reg => {
       reg.showNotification('MYEShim 📖', {
-        body: 'Dnešní verš tě čeká — otevři a přečti si ho!',
+        body: _body,
         icon: './icon-192.png',
         badge: './icon-96.png',
         tag: 'myeshim-daily',
-        data: { url: reg.scope }
+        data: { url: reg.scope, ref: _ref }
       });
     }).catch(() => {});
   }
@@ -4429,9 +4453,13 @@ const FCM_SENDER_ID = '360259005980';
   // ── Profile Panel ──
   function buildDailyVerse() {
     if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
+    var DAILY_START_MS = new Date('2026-05-11T00:00:00').getTime();
     var local = new Date(); local.setHours(0,0,0,0);
-    var day = Math.floor(local.getTime() / 86400000);
-    return window.VERSES[day % window.VERSES.length];
+    var daysSince = Math.max(0, Math.floor((local.getTime() - DAILY_START_MS) / 86400000));
+    // Days 0–246: Zj 9:16 → Zj 22:21 (index 158–404)
+    // Days 247+: restart from Zj 1:1, cycle all 405 verses
+    if (daysSince < 247) return window.VERSES[158 + daysSince];
+    return window.VERSES[(daysSince - 247) % window.VERSES.length];
   }
 
   function animateProfileCount(el, target) {
