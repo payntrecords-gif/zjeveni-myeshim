@@ -3192,7 +3192,7 @@ window.shareCurrentVerse=async function(){
     const clean = (word || '').trim();
     if (!clean) return '';
     if (clean.length <= 1) return clean;
-    return clean.charAt(0) + ' ' + '_ '.repeat(Math.max(0, clean.length - 1)).trim();
+    return clean.charAt(0) + ' ' + '_'.repeat(Math.max(0, clean.length - 1));
   }
   function buildPeekButton(){
     return '<button type="button" class="mm-btn mm-btn-peek" data-action="peek-verse">👁️ Nakouknout (2s)</button>';
@@ -3310,7 +3310,7 @@ window.shareCurrentVerse=async function(){
           if (iq.cursor < iq.total){
             const hint = iq.tokens.words[iq.cursor] ? iq.tokens.words[iq.cursor].charAt(0) : '';
             el.footer.innerHTML =
-              '<div class="mm-quiz-prompt">Napiš další slovo začínající na <strong style="color:var(--pink,#e5458e)">' + esc(hint) + '</strong>: <span style="color:var(--sub);font-weight:400">(' + iq.cursor + '/' + iq.total + ')</span></div>' +
+              '<div class="mm-quiz-prompt">Napiš slovo začínající na <strong style="color:var(--pink,#e5458e)">' + esc(hint) + '</strong>: <span style="color:var(--sub);font-weight:400">(' + iq.cursor + '/' + iq.total + ')</span></div>' +
               '<div class="mm-type-wrap">' +
               '<input id="mm-initials-input" class="mm-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false">' +
               '<button type="button" class="mm-btn" data-action="initials-submit" style="margin-top:4px">Potvrdit ↵</button>' +
