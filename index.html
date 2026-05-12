@@ -3213,12 +3213,19 @@ window.shareCurrentVerse=async function(){
     if (clean.length <= 1) return clean;
     return clean.charAt(0) + '_'.repeat(Math.max(0, clean.length - 1));
   }
+  function isStaticWordToken(word){
+    const normalizedWord = (word || '').trim();
+    return normalizedWord.length <= 1 || !/[\p{L}\p{N}]/u.test(normalizedWord);
+  }
   function nextUnsolvedWordIndex(quiz, startIndex){
     /* move cursor over auto-solved/static tokens in level 4 */
     if (!quiz || !Array.isArray(quiz.solved)) return startIndex;
     var cursor = Number(startIndex) || 0;
     while (cursor < quiz.solved.length && quiz.solved[cursor]) cursor += 1;
     return cursor;
+  }
+  function scrollBehaviorForInputFocus(){
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   }
   function buildPeekButton(){
     return '<button type="button" class="mm-btn mm-btn-peek" data-action="peek-verse">👁️ Nakouknout (2s)</button>';
@@ -3407,10 +3414,7 @@ window.shareCurrentVerse=async function(){
       if (mm.level === 4){
         const tk4 = tokenData(mm.verse.t || '');
         if (!mm.quiz){
-          const solved = tk4.words.map(function(word){
-            const normalizedWord = (word || '').trim();
-            return normalizedWord.length <= 1 || !/[\p{L}\p{N}]/u.test(normalizedWord);
-          });
+          const solved = tk4.words.map(function(word){ return isStaticWordToken(word); });
           mm.quiz = {
             tokens: tk4,
             solved: solved,
@@ -3434,7 +3438,7 @@ window.shareCurrentVerse=async function(){
             }
             const wi = part.index;
             const correct = q4.solved[wi];
-            const staticWord = (part.clean || '').length <= 1;
+            const staticWord = isStaticWordToken(part.clean);
             const placeholder = initialsMask(part.clean);
             const wordLen = Math.max(2, part.clean.length);
             const pre = renderStaticToken(part.pre, true);
@@ -3793,7 +3797,7 @@ window.shareCurrentVerse=async function(){
       if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
         const elInput = target;
         setTimeout(function(){
-          elInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          elInput.scrollIntoView({ behavior: scrollBehaviorForInputFocus(), block: 'center' });
         }, MM_KEYBOARD_SCROLL_DELAY); /* wait for mobile keyboard open animation */
       }
     });
