@@ -68,7 +68,9 @@ self.addEventListener('pushsubscriptionchange', function(event) {
       clientList.forEach(function(client) {
         client.postMessage({ type: 'PUSH_SUBSCRIPTION_CHANGED' });
       });
-    }).catch(function() {})
+    }).catch(function(err) {
+      console.warn('[firebase-messaging-sw] pushsubscriptionchange: failed to re-subscribe or notify clients:', err);
+    })
   );
 });
 

@@ -4800,8 +4800,8 @@ const FCM_SENDER_ID = '360259005980';
         if (toast) {
           toast.classList.add('show');
           const btn = document.getElementById('sw-update-btn');
-          if (btn) btn.addEventListener('click', function() { window.location.reload(true); });
-          else toast.addEventListener('click', function() { window.location.reload(true); });
+          if (btn) btn.addEventListener('click', function() { window.location.reload(); });
+          else toast.addEventListener('click', function() { window.location.reload(); });
         }
       } else if (event.data && event.data.type === 'PUSH_SUBSCRIPTION_CHANGED') {
         if (typeof refreshFcmTokenSilently === 'function') refreshFcmTokenSilently();
