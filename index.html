@@ -3185,7 +3185,7 @@ window.shareCurrentVerse=async function(){
     const inWords = (input || '').trim().toLowerCase().split(/\s+/);
     const origWords = (original || '').trim().split(/\s+/);
     return origWords.map(function(w, i){
-      return { word: w, ok: (inWords[i] || '').replace(/[^a-zá-ž]/gi,'') === w.toLowerCase().replace(/[^a-zá-ž]/gi,'') };
+      return { word: w, ok: (inWords[i] || '').replace(/[^a-záčďéěíňóřšťůúýž]/gi,'') === w.toLowerCase().replace(/[^a-záčďéěíňóřšťůúýž]/gi,'') };
     });
   }
   function initialsMask(word){
