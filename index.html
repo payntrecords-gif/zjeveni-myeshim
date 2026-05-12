@@ -2080,17 +2080,16 @@ body.dark #bn-nav {
 
 <style id="memorize-mode-style">
 /* === MEMORIZE MODE === */
-.memorize-btn{flex:0 0 auto;min-width:46px;min-height:44px;font-size:1.1rem;padding:10px}
 #memorize-overlay{
-  position:fixed;inset:0;z-index:140;background:rgba(10,8,14,.36);
+  position:fixed;inset:0;z-index:1000;background:rgba(10,8,14,.36);
   backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
   display:none;align-items:flex-end;justify-content:center;
-  padding-bottom:env(safe-area-inset-bottom);
+  padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:contain;
 }
 #memorize-overlay.open{display:flex;animation:wov-in .22s ease}
 #memorize-sheet{
-  width:100%;max-width:480px;background:#fff;border-radius:28px 28px 0 0;
-  padding:16px 16px 20px;position:relative;touch-action:pan-y;transform:translateY(100%);
+  width:100%;max-width:480px;max-height:85vh;background:#fff;border-radius:28px 28px 0 0;
+  padding:16px 16px 12px;position:fixed;bottom:0;left:0;right:0;margin:0 auto;display:flex;flex-direction:column;touch-action:pan-y;transform:translateY(100%);
   transition:transform .4s ease,box-shadow .3s ease;background-image:linear-gradient(180deg,#fff 0%,#fdf9fc 100%);
   box-shadow:0 20px 40px rgba(22,14,24,.22);overflow:hidden;
 }
@@ -2103,7 +2102,7 @@ body.dark .mm-handle{background:rgba(255,255,255,.18)}
   position:absolute;right:14px;top:14px;border:none;background:transparent;color:var(--sub);
   font-size:1.3rem;line-height:1;padding:8px;border-radius:10px;cursor:pointer;min-width:44px;min-height:44px;
 }
-.mm-head{padding-right:52px;margin-bottom:10px}
+.mm-head{padding-right:52px;margin-bottom:10px;flex-shrink:0}
 .mm-title{font-size:1.1rem;font-weight:900;color:var(--pink,#e5458e)}
 body.dark .mm-title{color:#ff8cc2}
 .mm-sub{font-size:.84rem;color:var(--sub);margin-top:2px}
@@ -2112,11 +2111,11 @@ body.dark .mm-title{color:#ff8cc2}
   font-weight:900;font-size:.82rem;background:rgba(255,140,50,.14);color:#d06408;border:1px solid rgba(208,100,8,.18)
 }
 body.dark .mm-streak{background:rgba(255,140,50,.16);color:#ffbe7f;border-color:rgba(255,190,127,.22)}
-.mm-progress-wrap{margin:10px 0 12px}
+.mm-progress-wrap{margin:10px 0 12px;flex-shrink:0}
 .mm-progress-label{font-size:.8rem;font-weight:800;color:var(--sub);margin-bottom:6px}
 .mm-progress-track{height:9px;border-radius:999px;background:rgba(229,69,142,.14);overflow:hidden}
 #mm-progress-bar{height:100%;width:16.666%;background:linear-gradient(90deg,#7b3ef4,#e5458e);border-radius:999px;transition:width .4s ease}
-.mm-level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}
+.mm-level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px;flex-shrink:0}
 .mm-level-chip{
   border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:10px 8px;min-height:44px;
   font:inherit;font-size:.78rem;font-weight:900;color:var(--sub);cursor:pointer
@@ -2127,11 +2126,11 @@ body.dark .mm-level-chip{background:#281f2a;border-color:#3d3040;color:#d8bfd0}
 body.dark .mm-level-chip.active{background:rgba(255,140,194,.14);border-color:#ff8cc2;color:#ff8cc2}
 .mm-message{
   min-height:24px;font-size:.88rem;font-weight:800;color:#7a6a76;margin-bottom:9px;
-  transition:opacity .22s ease,transform .22s ease;opacity:1
+  transition:opacity .22s ease,transform .22s ease;opacity:1;flex-shrink:0
 }
 body.dark .mm-message{color:#d4becb}
 .mm-content{
-  min-height:220px;border:1px solid var(--line);border-radius:18px;padding:14px;overflow:auto;max-height:min(48vh,420px);
+  min-height:0;flex:1;border:1px solid var(--line);border-radius:18px;padding:14px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   background:rgba(255,255,255,.72);transition:transform .28s ease,opacity .28s ease;
 }
 body.dark .mm-content{background:rgba(34,26,35,.66);border-color:#3c2f3f}
@@ -2157,7 +2156,11 @@ body.dark .mm-option{background:#2a202b;color:#f8eef5;border-color:#57435b}
   background:#fff;color:var(--text)
 }
 body.dark .mm-input{background:#251d27;color:#f8eef5;border-color:#4b3b50}
-.mm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.mm-actions{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;flex-shrink:0;
+  position:sticky;bottom:0;z-index:3;padding:8px 0 calc(env(safe-area-inset-bottom, 0px) + 2px);
+  background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.94) 28%,rgba(255,255,255,.98) 100%);
+}
 .mm-btn{
   border:none;border-radius:16px;padding:12px;min-height:44px;cursor:pointer;font:inherit;font-size:.95rem;font-weight:900;
   background:linear-gradient(135deg,#f05ca2,#de4089);color:#fff
@@ -2165,6 +2168,7 @@ body.dark .mm-input{background:#251d27;color:#f8eef5;border-color:#4b3b50}
 .mm-btn:disabled{opacity:.6;cursor:not-allowed}
 .mm-btn-ghost{background:#fff;color:#c43d7f;border:1.5px solid rgba(229,69,142,.28)}
 body.dark .mm-btn-ghost{background:#271f29;color:#ff9dcf;border-color:#624a66}
+body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba(28,22,29,.94) 28%,rgba(28,22,29,.98) 100%)}
 .mm-correct-flash{animation:mm-flash .42s ease}
 .mm-wrong-flash{animation:mm-wrong .45s ease}
 .mm-shake{animation:mm-shake .34s ease}
@@ -2219,7 +2223,7 @@ body.dark .mm-btn-ghost{background:#271f29;color:#ff9dcf;border-color:#624a66}
   <div class="verse-actions">
     <button class="va-btn" id="verse-share-btn" onclick="shareCurrentVerse()">Sdílet verš</button>
     <button class="va-btn ghost" id="verse-fav-btn" onclick="toggleFavoriteVerse()">♡ Oblíbené</button>
-    <button class="va-btn ghost memorize-btn" id="verse-memorize-btn" aria-label="Spustit memorovací režim"><span aria-hidden="true">🧠</span> Memorovat</button>
+    <button class="va-btn ghost" id="verse-memorize-btn" aria-label="Spustit memorovací režim">Memorovat</button>
   </div>
 </div>
 <div id="app-tabs-outer">
@@ -3016,7 +3020,7 @@ window.shareCurrentVerse=async function(){
     el.label.textContent = 'Úroveň ' + mm.level + ' / 6';
     el.bar.style.width = ((mm.level / 6) * 100) + '%';
     if (el.streak) el.streak.textContent = '🔥 ' + (mm.progress.streak || 0);
-    setButtons(false);
+    setButtons((mm.progress.level || 0) >= mm.level);
     transitionContent(function(){
       if (mm.level === 1){
         el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
@@ -3079,6 +3083,8 @@ window.shareCurrentVerse=async function(){
     if (!el.overlay) return;
     el.overlay.classList.remove('open');
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
   }
   function open(){
     const vv = VERSES[state.idx];
@@ -3095,6 +3101,8 @@ window.shareCurrentVerse=async function(){
     renderLevel();
     el.overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
     if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('memorize-overlay');
   }
   window.openMemorizeMode = open;
@@ -3158,8 +3166,14 @@ window.shareCurrentVerse=async function(){
       if (target && target.id === 'mm-type-word') { e.preventDefault(); submitTyped('mm-type-word'); }
     });
   }
-  if (el.retry) el.retry.addEventListener('click', resetCurrentLevel);
-  if (el.next) el.next.addEventListener('click', goNextLevel);
+  if (el.sheet){
+    el.sheet.addEventListener('click', function(e){
+      const target = e.target && e.target.closest ? e.target.closest('button') : null;
+      if (!target) return;
+      if (target.id === 'mm-retry-btn') resetCurrentLevel();
+      if (target.id === 'mm-next-btn') goNextLevel();
+    });
+  }
   if (el.sheet){
     const DRAG_CLOSE = 110;
     let startY = 0;
@@ -3168,6 +3182,8 @@ window.shareCurrentVerse=async function(){
     el.sheet.addEventListener('touchstart', function(e){
       const t = e.changedTouches && e.changedTouches[0];
       if (!t) return;
+      const dragHandle = e.target && e.target.closest ? e.target.closest('.mm-handle, .mm-head, .mm-progress-wrap') : null;
+      if (!dragHandle) return;
       startY = t.clientY;
       dragY = 0;
       dragging = true;
