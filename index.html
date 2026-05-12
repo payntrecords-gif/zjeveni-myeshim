@@ -2933,6 +2933,8 @@ window.shareCurrentVerse=async function(){
   const MAX_HINT_UNDERSCORE_COUNT = 8;
   const DRAG_FADE_DISTANCE = 420;
   const MM_KEYBOARD_SCROLL_DELAY = 350;
+  const MM_HAPTIC_OK = [12];
+  const MM_HAPTIC_ERROR = [30, 50, 30];
   const LEVEL4_INPUT_ID = 'mm-level4-inline-input';
   const el = {
     overlay: document.getElementById('memorize-overlay'),
@@ -2949,6 +2951,12 @@ window.shareCurrentVerse=async function(){
   };
   function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
   function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+  function vibrateIfSupported(pattern){
+    try{
+      if (navigator.vibrate) navigator.vibrate(pattern);
+    }catch(e){}
+  }
+  function forceReflow(node){ if (node) void node.offsetWidth; }
   function parseLocalISODate(isoDate){
     const parts = (isoDate || '').split('-');
     const y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
@@ -3201,10 +3209,10 @@ window.shareCurrentVerse=async function(){
     mm.quiz.typed = inputValue;
     const correct = matchesNormalizedAnswer(item.answer, inputValue);
     if (correct){
-      if (navigator && navigator.vibrate) navigator.vibrate([12]);
+      vibrateIfSupported(MM_HAPTIC_OK);
       advanceLevel4Word();
     } else {
-      if (navigator && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+      vibrateIfSupported(MM_HAPTIC_ERROR);
       handleLevel4WrongAnswer();
     }
   }
@@ -3414,7 +3422,7 @@ window.shareCurrentVerse=async function(){
   }
   function configureLevel4Input(input, quiz, wordParts){
     if (!input) return;
-    var length = Math.max(wordParts && wordParts.length ? wordParts.length : 1, 1);
+    var length = wordParts && wordParts.length ? wordParts.length : 1;
     input.value = quiz && typeof quiz.typed === 'string' ? quiz.typed : '';
     input.placeholder = wordParts && wordParts.mask ? wordParts.mask : '';
     input.size = length;
@@ -3516,7 +3524,7 @@ window.shareCurrentVerse=async function(){
     if (quiz.wrongTimer) clearTimeout(quiz.wrongTimer);
     if (token){
       token.classList.remove('mm-l4-wrong-token');
-      void token.offsetWidth;
+      forceReflow(token);
       token.classList.add('mm-l4-wrong-token');
       quiz.wrongTimer = setTimeout(function(){
         token.classList.remove('mm-l4-wrong-token');
@@ -3861,6 +3869,8 @@ window.shareCurrentVerse=async function(){
     el.sheet.addEventListener('pointerdown', function(e){
       const target = e.target && e.target.closest ? e.target.closest('button[data-action="submit-level4-word"]') : null;
       if (!target || mm.level !== 4) return;
+      if (e.pointerType !== 'touch') return;
+      /* keep focus on the inline input so the mobile keyboard stays open during touch submission */
       e.preventDefault();
     });
     el.sheet.addEventListener('click', function(e){
