@@ -2745,7 +2745,8 @@ window.shareCurrentVerse=async function(){
     verse: null,
     storageKey: '',
     progress: { level: 0, completedAt: '', streak: 0 },
-    quiz: null
+    quiz: null,
+    attempts: 0
   };
   const GENERIC_OPTIONS = ['Slovo','Amen','Duch','Život','Pravda','Světlo'];
   const MIN_HINT_UNDERSCORE_COUNT = 1;
@@ -2950,6 +2951,13 @@ window.shareCurrentVerse=async function(){
     setMessage('❌ Správně je: ' + answer);
     setTimeout(function(){ el.content && el.content.classList.remove('mm-shake'); }, 360);
   }
+  function restartCurrentLevel(){
+    mm.attempts += 1;
+    mm.quiz = null;
+    const attemptLabel = mm.attempts >= 1 ? ' (Pokus ' + (mm.attempts + 1) + ')' : '';
+    setMessage('Téměř! Zkus to od začátku 💪' + attemptLabel);
+    setTimeout(function(){ renderLevel(); }, 400);
+  }
   function nextQuizItem(){
     if (!mm.quiz) return;
     mm.quiz.cursor += 1;
@@ -2971,7 +2979,7 @@ window.shareCurrentVerse=async function(){
       setTimeout(nextQuizItem, 260);
     } else {
       wrongFeedback(item.answer);
-      setTimeout(renderLevel, 1500);
+      setTimeout(restartCurrentLevel, 1500);
     }
   }
   function submitTyped(inputId){
@@ -2987,7 +2995,7 @@ window.shareCurrentVerse=async function(){
       setTimeout(nextQuizItem, 260);
     } else {
       wrongFeedback(item.answer);
-      setTimeout(renderLevel, 1500);
+      setTimeout(restartCurrentLevel, 1500);
     }
   }
   function buildQuiz(level){
@@ -3061,6 +3069,7 @@ window.shareCurrentVerse=async function(){
   }
   function resetCurrentLevel(){
     mm.quiz = null;
+    mm.attempts = 0;
     renderLevel();
   }
   function goNextLevel(){
@@ -3068,12 +3077,14 @@ window.shareCurrentVerse=async function(){
       completeLevel();
       mm.level = Math.min(mm.unlocked, 2);
       mm.quiz = null;
+      mm.attempts = 0;
       renderLevel();
       return;
     }
     if (mm.progress.level >= mm.level && mm.level < mm.unlocked){
       mm.level += 1;
       mm.quiz = null;
+      mm.attempts = 0;
       renderLevelGrid();
       renderLevel();
     }
@@ -3116,7 +3127,7 @@ window.shareCurrentVerse=async function(){
       renderLevel();
     } else {
       wrongFeedback(mm.verse.t);
-      setTimeout(renderLevel, 1500);
+      setTimeout(restartCurrentLevel, 1500);
     }
   }
   function submitLevel6(){
@@ -3128,7 +3139,7 @@ window.shareCurrentVerse=async function(){
       renderLevel();
     } else {
       wrongFeedback(mm.verse.t);
-      setTimeout(renderLevel, 1500);
+      setTimeout(restartCurrentLevel, 1500);
     }
   }
   if (el.levels){
@@ -3139,6 +3150,7 @@ window.shareCurrentVerse=async function(){
       if (!next || next > mm.unlocked) return;
       mm.level = next;
       mm.quiz = null;
+      mm.attempts = 0;
       renderLevelGrid();
       renderLevel();
     });
@@ -3837,11 +3849,12 @@ const FCM_SENDER_ID = '360259005980';
 
   function pickDailyVerse() {
     if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
-    // Use local midnight-based day index to avoid UTC timezone mismatch
-    const localMidnight = new Date();
-    localMidnight.setHours(0, 0, 0, 0);
-    const day = Math.floor(localMidnight.getTime() / 86400000);
-    return window.VERSES[day % window.VERSES.length];
+    // Use same anchor-based logic as buildDailyVerse() in auth-profile-script
+    var DAILY_START_MS = new Date('2026-05-11T00:00:00').getTime();
+    var local = new Date(); local.setHours(0, 0, 0, 0);
+    var daysSince = Math.max(0, Math.floor((local.getTime() - DAILY_START_MS) / 86400000));
+    if (daysSince < 247) return window.VERSES[158 + daysSince];
+    return window.VERSES[(daysSince - 247) % window.VERSES.length];
   }
 
   function updateStreakBadge(streak) {
@@ -3976,6 +3989,18 @@ const FCM_SENDER_ID = '360259005980';
     if (overlay) overlay.classList.remove('open');
     document.body.style.overflow = '';
   };
+
+  // Swipe-down to close streak detail sheet
+  (function() {
+    var sheet = document.getElementById('streak-detail-sheet');
+    if (!sheet) return;
+    var touchStartY = 0;
+    sheet.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; }, { passive: true });
+    sheet.addEventListener('touchend', function(e) {
+      var delta = e.changedTouches[0].clientY - touchStartY;
+      if (delta > 60) window.closeStreakDetail();
+    }, { passive: true });
+  })();
 
   document.getElementById('streak-detail-overlay')?.addEventListener('click', function(e) {
     if (e.target === this) window.closeStreakDetail();
