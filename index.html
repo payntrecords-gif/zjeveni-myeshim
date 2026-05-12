@@ -2115,7 +2115,7 @@ body.dark .mm-streak{background:rgba(255,140,50,.16);color:#ffbe7f;border-color:
 .mm-progress-label{font-size:.8rem;font-weight:800;color:var(--sub);margin-bottom:6px}
 .mm-progress-track{height:9px;border-radius:999px;background:rgba(229,69,142,.14);overflow:hidden}
 #mm-progress-bar{height:100%;width:16.666%;background:linear-gradient(90deg,#7b3ef4,#e5458e);border-radius:999px;transition:width .4s ease}
-.mm-level-grid{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;margin-bottom:10px;padding-bottom:2px}
+.mm-level-grid{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;margin-bottom:10px;padding-bottom:2px;-webkit-mask-image:linear-gradient(to right,#000 80%,transparent 100%);mask-image:linear-gradient(to right,#000 80%,transparent 100%)}
 .mm-level-grid::-webkit-scrollbar{display:none}
 .mm-level-chip{
   flex-shrink:0;white-space:nowrap;border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:8px 12px;min-height:40px;
@@ -3133,7 +3133,7 @@ window.shareCurrentVerse=async function(){
       renderLevel();
       return;
     }
-    if (mm.level === 6 && (mm.progress.level || 0) >= 6){
+    if (mm.level === 6){
       close();
       return;
     }
