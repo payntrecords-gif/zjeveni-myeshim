@@ -2172,6 +2172,12 @@ body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba
 .mm-correct-flash{animation:mm-flash .42s ease}
 .mm-wrong-flash{animation:mm-wrong .45s ease}
 .mm-shake{animation:mm-shake .34s ease}
+.mm-diff-ok{color:#2a7d37;font-weight:700}
+.mm-diff-err{color:#c0392b;font-weight:700;text-decoration:underline wavy #e74c3c}
+body.dark .mm-diff-ok{color:#4aba6c}
+body.dark .mm-diff-err{color:#ff6b6b}
+.mm-diff-legend{font-size:.78rem;color:var(--sub);margin-top:8px;text-align:center}
+.mm-diff-wrap{line-height:1.8;font-size:1rem}
 .mm-word-bounce{display:inline-block;animation:mm-bounce .35s ease}
 .mm-success-mark{font-size:1.25rem;margin-left:6px;display:inline-block;animation:mm-bounce .38s ease}
 #mm-confetti{
@@ -2944,6 +2950,25 @@ window.shareCurrentVerse=async function(){
     setButtons(true);
     renderLevelGrid();
   }
+  function buildTypingDiff(expected, typed){
+    // Returns HTML: expected words colored green (correct) or red (wrong/missing).
+    var expParts = expected.split(/(\s+)/);
+    // filter(Boolean) ensures empty strings don't produce a spurious [''] entry
+    var expNorm = normalize(expected).split(/\s+/).filter(Boolean);
+    var typNorm = normalize(typed || '').split(/\s+/).filter(Boolean);
+    var wi = 0;
+    return expParts.map(function(part){
+      if (/^\s+$/.test(part)) return part;
+      var expW = expNorm[wi] || '';
+      var typW = typNorm[wi] || '';
+      wi++;
+      var ok = expW.length > 0 && expW === typW;
+      // Color + icon so correct/wrong is clear for color-blind users too
+      return ok
+        ? '<span class="mm-diff-ok">' + esc(part) + '<sup>✓</sup></span>'
+        : '<span class="mm-diff-err">' + esc(part) + '<sup>✗</sup></span>';
+    }).join('');
+  }
   function wrongFeedback(answer){
     flash(false);
     if (!el.content) return;
@@ -3118,28 +3143,39 @@ window.shareCurrentVerse=async function(){
   }
   window.openMemorizeMode = open;
   window.closeMemorizeMode = close;
+  function showTypingDiff(typed){
+    flash(false);
+    if (!el.content) return;
+    el.content.classList.add('mm-shake');
+    setTimeout(function(){ el.content && el.content.classList.remove('mm-shake'); }, 360);
+    const diffHtml = buildTypingDiff(mm.verse.t, typed);
+    el.content.innerHTML =
+      '<div class="mm-verse mm-diff-wrap">' + diffHtml + '</div>' +
+      '<div class="mm-diff-legend" aria-label="Legenda: zelená správně, červená špatně nebo chybí">🟢 správně &nbsp;🔴 špatně / chybí — klepni <strong>Zkusit znovu</strong></div>';
+    setMessage('❌ Oprav červeně označená slova.');
+  }
   function submitLevel5(){
     const input = document.getElementById('mm-level5-input');
-    if (matchesNormalizedAnswer(mm.verse.t, input ? input.value : '')) {
+    const typed = input ? input.value : '';
+    if (matchesNormalizedAnswer(mm.verse.t, typed)) {
       flash(true);
       setMessage('✅ Perfektní! Verš držíš skvěle.');
       completeLevel();
       renderLevel();
     } else {
-      wrongFeedback(mm.verse.t);
-      setTimeout(restartCurrentLevel, 1500);
+      showTypingDiff(typed);
     }
   }
   function submitLevel6(){
     const input = document.getElementById('mm-level6-input');
-    if (matchesNormalizedAnswer(mm.verse.t, input ? input.value : '')) {
+    const typed = input ? input.value : '';
+    if (matchesNormalizedAnswer(mm.verse.t, typed)) {
       flash(true);
       setMessage('✅ Nádhera! Máš to zpaměti.');
       completeLevel();
       renderLevel();
     } else {
-      wrongFeedback(mm.verse.t);
-      setTimeout(restartCurrentLevel, 1500);
+      showTypingDiff(typed);
     }
   }
   if (el.levels){
@@ -4018,7 +4054,7 @@ const FCM_SENDER_ID = '360259005980';
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.openStreakDetail(); }
   });
 
-  function initStreak() {
+  function initStreak(skipModal) {
     const today = new Date().toISOString().slice(0, 10);
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
     const lastDate = safeLS('streak_last_date', '');
@@ -4044,8 +4080,8 @@ const FCM_SENDER_ID = '360259005980';
       const cell = document.getElementById('ps-streak-cell');
       if (cell) { cell.classList.remove('streak-pulse'); void cell.offsetWidth; cell.classList.add('streak-pulse'); }
     }
-    // Show welcome modal on first open of day
-    showWelcomeModal(streak, isNewDay);
+    // Show welcome modal on first open of day (skip when called from background sync)
+    if (!skipModal) showWelcomeModal(streak, isNewDay);
   }
 
   window.shareStreakCard = function() {
@@ -4222,6 +4258,13 @@ const FCM_SENDER_ID = '360259005980';
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+
+  // Re-run initStreak after Firestore sync overwrites localStorage streak values,
+  // so the badge and profile panel always show the same up-to-date streak.
+  // skipModal=true: welcome screen was already shown on initial page load.
+  window.addEventListener('myeshim-data-synced', function() {
+    initStreak(true);
+  });
 })();
 </script>
 
@@ -5665,6 +5708,7 @@ const FCM_SENDER_ID = '360259005980';
 <script id="firestore-sync-script">
 (function(){
   var syncingFromRemote = false;
+  var loadInProgress = false;
   var db = null;
   var TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
   var cachedTimezone = (typeof Intl !== 'undefined' && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '';
@@ -5766,9 +5810,11 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   async function loadFirestoreData() {
+    if (loadInProgress) return;
+    loadInProgress = true;
     var uid = getUid();
     var _db = getDb();
-    if (!uid || !_db) return;
+    if (!uid || !_db) { loadInProgress = false; return; }
     try {
       var refs = ['streak', 'notes', 'favorites', 'preferences', 'notifications'];
       var docs = await Promise.all(refs.map(function(name){
@@ -5812,6 +5858,8 @@ const FCM_SENDER_ID = '360259005980';
       window.dispatchEvent(new CustomEvent('myeshim-data-synced'));
     } catch(e) {
       syncingFromRemote = false;
+    } finally {
+      loadInProgress = false;
     }
   }
 
@@ -5839,6 +5887,9 @@ const FCM_SENDER_ID = '360259005980';
 
   document.addEventListener('myeshim-auth-ready', function(event) {
     if (event && event.detail && event.detail.loggedIn) {
+      // Immediately write locally-incremented streak to Firestore so it is not
+      // lost if the user closes the app before loadFirestoreData completes.
+      syncCurrentWatchedValues();
       loadFirestoreData().then(syncCurrentWatchedValues);
     }
   });
@@ -5847,6 +5898,13 @@ const FCM_SENDER_ID = '360259005980';
       loadFirestoreData().then(syncCurrentWatchedValues);
     }
   }, 900);
+
+  // Safety net: flush streak to Firestore whenever the app goes to background.
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden' && getUid()) {
+      syncCurrentWatchedValues();
+    }
+  });
 })();
 </script>
 </body>
