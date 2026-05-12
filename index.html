@@ -2782,12 +2782,12 @@ window.shareCurrentVerse=async function(){
 /* === MEMORIZE MODE === */
 (function(){
   const LEVELS = [
-    { id: 1, name: 'Skenování' },
-    { id: 2, name: 'Jedno slovo' },
-    { id: 3, name: 'Ementál' },
-    { id: 4, name: 'První písmena' },
-    { id: 5, name: 'Skládačka' },
-    { id: 6, name: 'Mistrovství' }
+    { id: 1, name: '👁️ Čtení' },
+    { id: 2, name: '🔑 První slovo' },
+    { id: 3, name: '🕳️ Díry ve větách' },
+    { id: 4, name: '🔤 Jen iniciály' },
+    { id: 5, name: '🧩 Skládejte verš' },
+    { id: 6, name: '🏆 Mistrovství' }
   ];
   const MESSAGES = [
     'Skvěle! Jsi o krok blíž k zapamatování. 🎯',
@@ -3210,6 +3210,11 @@ window.shareCurrentVerse=async function(){
       }
       /* ── LEVEL 3: EMENTÁL ── */
       if (mm.level === 3){
+        if (mm.completedThisView){
+          el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
+          if (el.footer) el.footer.innerHTML = '';
+          return;
+        }
         if (!mm.quiz) buildBankQuiz();
         const bq = mm.quiz;
         const verseHtml = bq.tokens.parts.map(function(part){
