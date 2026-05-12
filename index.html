@@ -2853,6 +2853,7 @@ window.shareCurrentVerse=async function(){
   const MIN_HINT_UNDERSCORE_COUNT = 1;
   const MAX_HINT_UNDERSCORE_COUNT = 8;
   const DRAG_FADE_DISTANCE = 420;
+  const MM_KEYBOARD_SCROLL_DELAY = 350;
   const el = {
     overlay: document.getElementById('memorize-overlay'),
     sheet: document.getElementById('memorize-sheet'),
@@ -3793,7 +3794,7 @@ window.shareCurrentVerse=async function(){
         const elInput = target;
         setTimeout(function(){
           elInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 350); /* wait for mobile keyboard open animation */
+        }, MM_KEYBOARD_SCROLL_DELAY); /* wait for mobile keyboard open animation */
       }
     });
   }
