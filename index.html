@@ -2268,10 +2268,10 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 .mm-peek-flash{animation:mm-peek-in .2s ease;background:rgba(229,69,142,.06);border-radius:12px;padding:10px}
 @keyframes mm-peek-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 /* === LEVEL 4: LIVE WORD INPUTS === */
-.mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;overflow:visible}
+.mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;overflow:visible;display:block}
 body.dark .mm-word-quiz-container{background:#1e1e2e}
-.mm-word-quiz{font-size:1.1rem;line-height:2.6;font-weight:700;color:var(--text);display:inline!important;white-space:normal!important}
-.mm-wi-wrap{display:inline!important;position:relative;vertical-align:baseline;white-space:nowrap}
+.mm-word-quiz{font-size:1.1rem;line-height:2.6;font-weight:700;color:var(--text);display:block!important;white-space:normal!important;text-align:left}
+.mm-wi-wrap{display:inline!important;position:relative;vertical-align:baseline;white-space:nowrap;width:auto;min-width:0;margin:0;padding:0}
 .mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
 .mm-wi-hint.mm-wi-hint-on{opacity:1}
 .mm-word-input{display:inline-block;border:none!important;border-bottom:2px solid #e5458e!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:center;outline:none!important;padding:0 2px;min-width:2ch;box-sizing:content-box;vertical-align:baseline;transition:color .15s,border-color .15s}
@@ -3450,19 +3450,19 @@ window.shareCurrentVerse=async function(){
               return pre + esc(part.clean) + post;
             }
             if (correct){
-              return pre +
-                '<span class="mm-wi-wrap">' +
+              return '<span class="mm-wi-wrap">' +
+                  pre +
                   '<input class="mm-word-input mm-wi-correct" id="mm-wi-' + wi + '"' +
                   ' value="' + esc(part.clean) + '"' +
                   ' size="' + wordLen + '"' +
                   ' readonly tabindex="-1">' +
-                '</span>' +
-                post;
+                  post +
+                '</span>';
             }
             const isCurrent = wi === q4.cursor;
             var wiCls = 'mm-word-input' + (isCurrent ? '' : ' mm-wi-inactive');
-            return pre +
-              '<span class="mm-wi-wrap" id="mm-wi-wrap-' + wi + '">' +
+            return '<span class="mm-wi-wrap" id="mm-wi-wrap-' + wi + '">' +
+                pre +
                 '<span class="mm-wi-hint" id="mm-wi-hint-' + wi + '"></span>' +
                 '<input class="' + wiCls + '" id="mm-wi-' + wi + '"' +
                 ' data-word-idx="' + wi + '"' +
@@ -3472,8 +3472,8 @@ window.shareCurrentVerse=async function(){
                 ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"' +
                 (isCurrent ? '' : ' tabindex="-1"') +
                 '>' +
-              '</span>' +
-              post;
+                post +
+              '</span>';
           }).join('');
           el.content.innerHTML = '<div class="mm-word-quiz-container"><div class="mm-word-quiz">' + verseHtml + '</div></div>';
           if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end">' + buildPeekButton() + '</div>';
