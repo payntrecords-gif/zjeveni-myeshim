@@ -2288,14 +2288,16 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
   background:rgba(229,69,142,.12);color:var(--pink,#e5458e);font-size:.76rem;font-weight:900;letter-spacing:.04em
 }
 .mm-level4-token-flow{
+  --mm-l4-sticky-offset:68px;
   display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-start;overflow:auto;max-height:clamp(92px,24vh,176px);
   padding:2px 2px 4px;scrollbar-width:thin
 }
 .mm-l4-token{
   display:inline-flex;align-items:center;justify-content:center;min-width:0;max-width:100%;padding:7px 10px;border-radius:14px;
   background:rgba(0,0,0,.045);border:1.5px solid transparent;color:var(--text);font-size:.98rem;font-weight:800;
-  line-height:1.35;box-shadow:0 1px 0 rgba(255,255,255,.65) inset;scroll-margin:68px 16px 16px
+  line-height:1.35;box-shadow:0 1px 0 rgba(255,255,255,.65) inset;scroll-margin:var(--mm-l4-sticky-offset) 16px 16px
 }
+.mm-l4-static-token{background:rgba(0,0,0,.04)}
 .mm-l4-token .mm-level4-mask,.mm-l4-token .mm-reveal{min-width:0;padding:0;background:transparent;box-shadow:none;border-radius:0}
 .mm-l4-hidden-token{color:var(--sub)}
 .mm-l4-solved-token{background:rgba(76,175,80,.12);color:#2f7b37}
@@ -2336,6 +2338,7 @@ body.dark .mm-level4-context{
 }
 body.dark .mm-level4-hint-badge{background:rgba(255,140,194,.14);color:#ff8cc2}
 body.dark .mm-l4-token{background:rgba(255,255,255,.06);color:#f8eef5;box-shadow:none}
+body.dark .mm-l4-static-token{background:rgba(255,255,255,.05)}
 body.dark .mm-l4-hidden-token{color:#d8bfd0}
 body.dark .mm-l4-solved-token{background:rgba(76,175,80,.18);color:#9be0a6}
 body.dark .mm-l4-active-token{
@@ -3327,7 +3330,7 @@ window.shareCurrentVerse=async function(){
   function renderLevel4Verse(quiz, currentIndex){
     if (!quiz || !quiz.tokens) return '';
     return quiz.tokens.parts.map(function(part){
-      if (part.t === 'space') return '';
+      if (part.t === 'space') return part.text;
       const isHidden = quiz.hiddenSet.has(part.index);
       const isSolved = !!quiz.solved[part.index];
       const isActive = part.index === currentIndex;
