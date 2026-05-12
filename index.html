@@ -2953,8 +2953,8 @@ window.shareCurrentVerse=async function(){
   function buildTypingDiff(expected, typed){
     // Returns HTML: expected words colored green (correct) or red (wrong/missing).
     var expParts = expected.split(/(\s+)/);
-    var expNorm = normalize(expected).split(/\s+/);
-    // filter(Boolean) ensures an empty typed string yields [] instead of ['']
+    // filter(Boolean) ensures empty strings don't produce a spurious [''] entry
+    var expNorm = normalize(expected).split(/\s+/).filter(Boolean);
     var typNorm = normalize(typed || '').split(/\s+/).filter(Boolean);
     var wi = 0;
     return expParts.map(function(part){
@@ -3151,7 +3151,7 @@ window.shareCurrentVerse=async function(){
     const diffHtml = buildTypingDiff(mm.verse.t, typed);
     el.content.innerHTML =
       '<div class="mm-verse mm-diff-wrap">' + diffHtml + '</div>' +
-      '<div class="mm-diff-legend">🟢 správně &nbsp;🔴 špatně / chybí — klepni <strong>Zkusit znovu</strong></div>';
+      '<div class="mm-diff-legend" aria-label="Legenda: zelená správně, červená špatně nebo chybí">🟢 správně &nbsp;🔴 špatně / chybí — klepni <strong>Zkusit znovu</strong></div>';
     setMessage('❌ Oprav červeně označená slova.');
   }
   function submitLevel5(){
@@ -5855,10 +5855,10 @@ const FCM_SENDER_ID = '360259005980';
         }
       }
       syncingFromRemote = false;
-      loadInProgress = false;
       window.dispatchEvent(new CustomEvent('myeshim-data-synced'));
     } catch(e) {
       syncingFromRemote = false;
+    } finally {
       loadInProgress = false;
     }
   }
