@@ -3213,6 +3213,7 @@ window.shareCurrentVerse=async function(){
     return clean.charAt(0) + '_'.repeat(Math.max(0, clean.length - 1));
   }
   function nextUnsolvedWordIndex(quiz, startIndex){
+    /* move cursor over auto-solved/static tokens in level 4 */
     if (!quiz || !Array.isArray(quiz.solved)) return startIndex;
     var cursor = Number(startIndex) || 0;
     while (cursor < quiz.solved.length && quiz.solved[cursor]) cursor += 1;
@@ -3792,7 +3793,7 @@ window.shareCurrentVerse=async function(){
         const elInput = target;
         setTimeout(function(){
           elInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 350);
+        }, 350); /* wait for mobile keyboard open animation */
       }
     });
   }
