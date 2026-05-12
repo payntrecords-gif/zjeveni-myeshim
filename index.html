@@ -2203,6 +2203,44 @@ body.dark .mm-diff-err{color:#ff6b6b}
 .mm-quiz-prompt{font-size:.88rem;font-weight:900;color:var(--sub);margin-bottom:8px}
 body.dark #mm-quiz-footer{border-color:#3c2f3f}
 @media(max-width:375px){.mm-level-chip{font-size:.73rem;padding:7px 10px}}
+/* === LEVEL 1 – SKENOVÁNÍ === */
+.mm-scan-word{display:inline;cursor:pointer;padding:1px 3px;border-radius:5px;transition:background .12s,color .12s,outline .12s}
+.mm-scan-word:hover{background:rgba(229,69,142,.14)}
+.mm-scan-word.mm-scan-active{background:rgba(229,69,142,.22);color:var(--pink,#e5458e);outline:2px solid var(--pink,#e5458e);animation:mm-bounce .25s ease}
+.mm-scan-word.mm-scan-done{background:rgba(76,175,80,.16);color:#2a7d37}
+body.dark .mm-scan-word.mm-scan-done{color:#4aba6c}
+/* active blank slot for level 3 */
+.mm-blank-static.mm-scan-active{background:rgba(229,69,142,.22);outline:2px solid var(--pink,#e5458e);color:var(--pink,#e5458e)}
+/* === LEVEL 3 – EMENTÁL WORD BANK === */
+.mm-bank{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding:10px 12px;background:rgba(0,0,0,.04);border-radius:12px;min-height:40px}
+body.dark .mm-bank{background:rgba(255,255,255,.06)}
+.mm-bank-word{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(229,69,142,.45);background:#fff;color:#2d1f2d;font-weight:700;font-size:.9rem;cursor:pointer;transition:opacity .2s,transform .15s,background .15s}
+.mm-bank-word:active{transform:scale(.95)}
+.mm-bank-word.mm-bw-used{opacity:.25;pointer-events:none;background:#f0eaf3}
+.mm-bank-word.mm-opt-wrong{animation:mm-opt-shake .34s ease}
+body.dark .mm-bank-word{background:#2a202b;color:#f8eef5;border-color:#57435b}
+/* === LEVEL 5 – SKLÁDAČKA === */
+.mm-puzzle-area{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:rgba(229,69,142,.06);border-radius:12px;min-height:44px;align-items:flex-start;margin-bottom:8px}
+body.dark .mm-puzzle-area{background:rgba(255,140,194,.07)}
+.mm-puzzle-word{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(229,69,142,.6);background:#fff0f7;color:#2d1f2d;font-weight:700;font-size:.9rem;cursor:pointer;transition:transform .15s,background .15s}
+.mm-puzzle-word:hover{background:#ffe0f0}
+.mm-puzzle-word:active{transform:scale(.95)}
+body.dark .mm-puzzle-word{background:rgba(255,140,194,.14);color:#f8eef5;border-color:#ff8cc2}
+.mm-puzzle-pool{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:rgba(0,0,0,.04);border-radius:12px;min-height:40px}
+body.dark .mm-puzzle-pool{background:rgba(255,255,255,.06)}
+.mm-puzzle-placeholder{color:var(--sub);font-size:.85rem;padding:4px;font-style:italic}
+/* === LEVEL 6 – MISTROVSTVÍ === */
+.mm-self-report{display:flex;gap:10px;margin-top:14px}
+.mm-self-btn{flex:1;padding:13px 8px;border-radius:14px;font-weight:900;font-size:.92rem;cursor:pointer;border:1.5px solid transparent;transition:transform .15s,box-shadow .15s}
+.mm-self-btn:active{transform:scale(.97)}
+.mm-self-yes{background:rgba(76,175,80,.15);color:#2a7d37;border-color:#4caf50}
+.mm-self-no{background:rgba(229,57,53,.10);color:#c0392b;border-color:#e53935}
+body.dark .mm-self-yes{background:rgba(76,175,80,.22);color:#4aba6c;border-color:#4caf50}
+body.dark .mm-self-no{background:rgba(229,57,53,.18);color:#ff6b6b;border-color:#e53935}
+.mm-reveal-btn{width:100%;padding:13px;border-radius:14px;background:var(--pink,#e5458e);color:#fff;font-weight:900;font-size:.95rem;cursor:pointer;border:none;margin-top:12px;box-shadow:0 3px 12px rgba(229,69,142,.35)}
+.mm-reveal-btn:active{transform:scale(.98)}
+.mm-blank-box{min-height:72px;border-radius:12px;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;color:var(--sub);font-style:italic;font-size:.9rem}
+body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 </style>
 
 </head>
@@ -2744,12 +2782,12 @@ window.shareCurrentVerse=async function(){
 /* === MEMORIZE MODE === */
 (function(){
   const LEVELS = [
-    { id: 1, name: 'Přečti si' },
+    { id: 1, name: 'Skenování' },
     { id: 2, name: 'Jedno slovo' },
-    { id: 3, name: 'Každé třetí' },
-    { id: 4, name: 'Polovina' },
-    { id: 5, name: 'První písmena' },
-    { id: 6, name: 'Zpaměti' }
+    { id: 3, name: 'Ementál' },
+    { id: 4, name: 'První písmena' },
+    { id: 5, name: 'Skládačka' },
+    { id: 6, name: 'Mistrovství' }
   ];
   const MESSAGES = [
     'Skvěle! Jsi o krok blíž k zapamatování. 🎯',
@@ -2757,6 +2795,8 @@ window.shareCurrentVerse=async function(){
     'Paráda! Tohle už máš v srdci. 💖',
     'Jen tak dál, jde ti to výborně! 🚀'
   ];
+  // Levels where the user reads/advances freely without active quiz completion
+  const FREE_ADVANCE_LEVELS = [1, 4];
   const mm = {
     open: false,
     level: 1,
@@ -2961,13 +3001,14 @@ window.shareCurrentVerse=async function(){
   function setButtons(done){
     if (!el.next || !el.retry) return;
     const finalLevel = mm.level === 6;
+    const freeAdvance = FREE_ADVANCE_LEVELS.includes(mm.level);
     if (done) {
       el.next.disabled = false;
       el.next.textContent = finalLevel ? 'Hotovo 🎉' : 'Další úroveň';
       el.next.classList.add('mm-next-ready');
     } else {
-      el.next.disabled = mm.level !== 1;
-      el.next.textContent = mm.level === 1 ? 'Úroveň splněna' : 'Pokračovat';
+      el.next.disabled = !freeAdvance;
+      el.next.textContent = freeAdvance ? 'Úroveň splněna' : 'Pokračovat';
       el.next.classList.remove('mm-next-ready');
     }
     el.retry.textContent = 'Zkusit znovu';
@@ -3069,15 +3110,41 @@ window.shareCurrentVerse=async function(){
     const hiddenSet = {};
     const solved = {};
     hidden.forEach(function(i){ hiddenSet[i] = true; solved[i] = false; });
-    const items = hidden.map(function(i, idx){
+    const items = hidden.map(function(i){
       return {
         index: i,
         answer: tk.words[i],
-        mode: (level === 4 && (idx % 2 === 1)) ? 'type' : 'pick',
+        mode: 'pick',
         options: alternatives(tk.words, tk.words[i])
       };
     });
     mm.quiz = { tokens: tk, hiddenSet: hiddenSet, solved: solved, items: items, cursor: 0 };
+  }
+  function buildScanQuiz(){
+    const tk = tokenData(mm.verse.t || '');
+    mm.quiz = { tokens: tk, cursor: 0, total: tk.words.length };
+  }
+  function buildBankQuiz(){
+    const tk = tokenData(mm.verse.t || '');
+    const hidden = hiddenIndices(tk.words, 3);
+    const hiddenSet = {};
+    hidden.forEach(function(i){ hiddenSet[i] = true; });
+    const bankWords = shuffle(hidden.map(function(i){ return { i: i, w: tk.words[i] }; }));
+    mm.quiz = { tokens: tk, hiddenSet: hiddenSet, hidden: hidden, filled: {}, bankWords: bankWords, cursor: 0 };
+  }
+  function buildPuzzleQuiz(){
+    const words = (mm.verse.t || '').split(/\s+/).filter(Boolean);
+    const n = words.length;
+    // 3–7 chunks; target ~3 words per chunk for comfortable tap-able tiles
+    const PUZZLE_WORDS_PER_CHUNK = 3;
+    const chunkCount = Math.min(7, Math.max(3, Math.ceil(n / PUZZLE_WORDS_PER_CHUNK)));
+    const size = Math.ceil(n / chunkCount);
+    const chunks = [];
+    for (var i = 0; i < n; i += size){
+      chunks.push({ id: chunks.length, text: words.slice(i, i + size).join(' ') });
+    }
+    const poolIds = shuffle(chunks.map(function(c){ return c.id; }));
+    mm.quiz = { chunks: chunks, pool: poolIds, answer: [] };
   }
   function renderLevelGrid(){
     if (!el.levels) return;
@@ -3089,7 +3156,6 @@ window.shareCurrentVerse=async function(){
   }
   function renderLevel(){
     if (!mm.verse || !el.content) return;
-    const levelMeta = LEVELS[mm.level - 1];
     el.label.textContent = 'Úroveň ' + mm.level + ' / 6';
     el.bar.style.width = ((mm.level / 6) * 100) + '%';
     el.bar.classList.remove('mm-progress-sheen');
@@ -3098,57 +3164,130 @@ window.shareCurrentVerse=async function(){
     setTimeout(function(){ el.bar && el.bar.classList.remove('mm-progress-sheen'); }, 1200);
     setButtons((mm.progress.level || 0) >= mm.level);
     transitionContent(function(){
+      /* ── LEVEL 1: SKENOVÁNÍ ── */
       if (mm.level === 1){
-        el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
-        if (el.footer) el.footer.innerHTML = '';
-        setMessage('Úroveň 1: Jen si verš v klidu přečti.');
+        if (!mm.quiz) buildScanQuiz();
+        if (mm.completedThisView || mm.quiz.cursor >= mm.quiz.total){
+          el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
+          if (el.footer) el.footer.innerHTML = '';
+          setMessage('✅ Skvěle! Verš jsi aktivně přečetl/a.');
+        } else {
+          const tk = mm.quiz.tokens;
+          const cursor = mm.quiz.cursor;
+          const wordsHtml = tk.parts.map(function(part){
+            if (part.t === 'space') return part.text;
+            var wi = part.index;
+            var cls = 'mm-scan-word';
+            if (wi < cursor) cls += ' mm-scan-done';
+            else if (wi === cursor) cls += ' mm-scan-active';
+            return '<button type="button" class="' + cls + '" data-action="scan-word" data-word-idx="' + wi + '">' + esc(part.original) + '</button>';
+          }).join('');
+          el.content.innerHTML = '<div class="mm-verse">' + wordsHtml + '</div>';
+          if (el.footer) el.footer.innerHTML = '<div class="mm-quiz-prompt">Klepej na slova v pořadí: ' + cursor + '\u00a0/\u00a0' + mm.quiz.total + '</div>';
+          setMessage('Úroveň 1: Klepni na každé zvýrazněné slovo.');
+          if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
+        }
         return;
       }
-      if (mm.level >= 2 && mm.level <= 4){
-        if (!mm.quiz) buildQuiz(mm.level);
+      /* ── LEVEL 2: JEDNO SLOVO ── */
+      if (mm.level === 2){
+        if (!mm.quiz) buildQuiz(2);
         const item = mm.quiz.items[mm.quiz.cursor];
         el.content.innerHTML = '<div class="mm-verse">' + renderVerseMasked(mm.quiz.tokens, item ? item.index : -1) + '</div>';
         if (el.footer) {
           if (!item) {
             el.footer.innerHTML = '';
           } else {
-            const prompt = item.mode === 'type' ? 'Dopiš chybějící slovo:' : 'Vyber správné chybějící slovo:';
-            let fhtml = '<div class="mm-quiz-prompt">' + prompt + '</div>';
-            if (item.mode === 'type') {
-              fhtml += '<input class="mm-input" id="mm-type-word" placeholder="Napiš slovo" autocomplete="off">';
-              fhtml += '<button type="button" class="mm-option" data-action="submit-word">Potvrdit</button>';
-            } else {
-              fhtml += '<div class="mm-options">' + item.options.map(function(opt, choiceIndex){
-                return '<button type="button" class="mm-option" data-choice-index="' + choiceIndex + '">' + esc(opt) + '</button>';
-              }).join('') + '</div>';
-            }
+            var fhtml = '<div class="mm-quiz-prompt">Vyber správné chybějící slovo:</div>';
+            fhtml += '<div class="mm-options">' + item.options.map(function(opt, ci){
+              return '<button type="button" class="mm-option" data-choice-index="' + ci + '">' + esc(opt) + '</button>';
+            }).join('') + '</div>';
             el.footer.innerHTML = fhtml;
           }
         }
-        setMessage('Úroveň ' + mm.level + ': ' + levelMeta.name);
+        setMessage('Úroveň 2: Vyber chybějící klíčové slovo.');
         return;
       }
+      /* ── LEVEL 3: EMENTÁL ── */
+      if (mm.level === 3){
+        if (!mm.quiz) buildBankQuiz();
+        const bq = mm.quiz;
+        const verseHtml = bq.tokens.parts.map(function(part){
+          if (part.t === 'space') return part.text;
+          if (!bq.hiddenSet[part.index]) return esc(part.original);
+          if (bq.filled[part.index]){
+            return part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
+          }
+          var isNext = bq.cursor < bq.hidden.length && bq.hidden[bq.cursor] === part.index;
+          return part.pre + '<span class="mm-blank-static' + (isNext ? ' mm-scan-active' : '') + '">_____</span>' + part.post;
+        }).join('');
+        var bankHtml = bq.bankWords.map(function(b){
+          var used = !!bq.filled[b.i];
+          return '<button type="button" class="mm-bank-word' + (used ? ' mm-bw-used' : '') + '" data-action="bank-word" data-word-id="' + b.i + '">' + esc(b.w) + '</button>';
+        }).join('');
+        el.content.innerHTML = '<div class="mm-verse">' + verseHtml + '</div>';
+        if (el.footer) el.footer.innerHTML = '<div class="mm-quiz-prompt">Vyber správné slovo do označené mezery:</div><div class="mm-bank">' + bankHtml + '</div>';
+        setMessage('Úroveň 3: Doplň slova do mezer.');
+        if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
+        return;
+      }
+      /* ── LEVEL 4: PRVNÍ PÍSMENA ── */
+      if (mm.level === 4){
+        const tk4 = tokenData(mm.verse.t || '');
+        const hint = initialsHint(tk4.words);
+        el.content.innerHTML = '<div class="mm-verse">' + esc(hint) + '</div>';
+        if (el.footer) el.footer.innerHTML = '';
+        setMessage('Úroveň 4: Vidíš jen první písmena. Čti v mysli celý verš.');
+        return;
+      }
+      /* ── LEVEL 5: SKLÁDAČKA ── */
       if (mm.level === 5){
-        if (mm.completedThisView) {
+        if (mm.completedThisView){
           el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
           if (el.footer) el.footer.innerHTML = '';
-        } else {
-          const tk = tokenData(mm.verse.t || '');
-          const hint = initialsHint(tk.words);
-          el.content.innerHTML = '<div class="mm-verse">' + esc(hint) + '</div>';
-          if (el.footer) el.footer.innerHTML = '<textarea id="mm-level5-input" class="mm-input" rows="3" placeholder="Dopiš celý verš podle prvních písmen"></textarea><button type="button" class="mm-option" data-action="submit-level5">Zkontrolovat</button>';
+          return;
         }
-        setMessage('Úroveň 5: Vidíš jen první písmena.');
+        if (!mm.quiz) buildPuzzleQuiz();
+        const pq = mm.quiz;
+        var answerHtml = pq.answer.map(function(id){
+          return '<button type="button" class="mm-puzzle-word" data-action="puzzle-remove" data-chunk-id="' + id + '">' + esc(pq.chunks[id].text) + '</button>';
+        }).join('');
+        var poolHtml = pq.pool.map(function(id){
+          return '<button type="button" class="mm-bank-word" data-action="puzzle-add" data-chunk-id="' + id + '">' + esc(pq.chunks[id].text) + '</button>';
+        }).join('');
+        var canCheck = pq.answer.length === pq.chunks.length;
+        el.content.innerHTML =
+          '<div style="font-size:.78rem;font-weight:900;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Tvoje odpověď:</div>' +
+          '<div class="mm-puzzle-area">' + (answerHtml || '<span class="mm-puzzle-placeholder">Klepni na části níže…</span>') + '</div>';
+        if (el.footer) el.footer.innerHTML =
+          '<div style="font-size:.78rem;font-weight:900;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Části verše:</div>' +
+          '<div class="mm-puzzle-pool">' + (poolHtml || '<span class="mm-puzzle-placeholder">Všechny části jsou použity</span>') + '</div>' +
+          (canCheck ? '<button type="button" class="mm-option" data-action="puzzle-check" style="margin-top:10px">Zkontrolovat ✓</button>' : '');
+        setMessage('Úroveň 5: Seřaď části verše ve správném pořadí.');
+        if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
         return;
       }
-      if (mm.completedThisView) {
+      /* ── LEVEL 6: MISTROVSTVÍ ── */
+      if (mm.completedThisView){
         el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
         if (el.footer) el.footer.innerHTML = '';
-      } else {
-        el.content.innerHTML = '<div class="mm-verse mm-instruction">Napiš celý verš zpaměti:</div>';
-        if (el.footer) el.footer.innerHTML = '<textarea id="mm-level6-input" class="mm-input" rows="3" placeholder="Sem napiš celý verš"></textarea><button type="button" class="mm-option" data-action="submit-level6">Vyhodnotit</button>';
+        return;
       }
-      setMessage('Úroveň 6: Teď už úplně zpaměti.');
+      if (!mm.quiz) mm.quiz = { revealed: false };
+      if (!mm.quiz.revealed){
+        el.content.innerHTML = '<div class="mm-blank-box">Zkus si verš odříkat nahlas nebo v mysli.</div>';
+        if (el.footer) el.footer.innerHTML = '<button type="button" class="mm-reveal-btn" data-action="reveal-verse">Ukaž text 👁</button>';
+      } else {
+        el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
+        if (el.footer) el.footer.innerHTML =
+          '<div class="mm-quiz-prompt">Jak ti to šlo?</div>' +
+          '<div class="mm-self-report">' +
+            '<button type="button" class="mm-self-btn mm-self-yes" data-action="self-yes">✅ Dal jsem to!</button>' +
+            '<button type="button" class="mm-self-btn mm-self-no" data-action="self-no">❌ Měl jsem chyby</button>' +
+          '</div>';
+      }
+      setMessage('Úroveň 6: Zkus to zpaměti – buď k sobě upřímný/á.');
+      if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
     });
   }
   function resetCurrentLevel(){
@@ -3158,12 +3297,14 @@ window.shareCurrentVerse=async function(){
     renderLevel();
   }
   function goNextLevel(){
-    if (mm.level === 1){
-      completeLevel();
-      mm.level = Math.min(mm.unlocked, 2);
+    const freeAdvance = FREE_ADVANCE_LEVELS.includes(mm.level);
+    if (freeAdvance){
+      if (!mm.completedThisView) completeLevel();
+      mm.level = Math.min(Math.max(mm.unlocked, mm.level + 1), 6);
       mm.quiz = null;
       mm.attempts = 0;
       mm.completedThisView = false;
+      renderLevelGrid();
       renderLevel();
       return;
     }
@@ -3221,28 +3362,84 @@ window.shareCurrentVerse=async function(){
     if (el.footer) el.footer.innerHTML = '';
     setMessage('❌ Oprav červeně označená slova.');
   }
-  function submitLevel5(){
-    const input = document.getElementById('mm-level5-input');
-    const typed = input ? input.value : '';
-    if (matchesNormalizedAnswer(mm.verse.t, typed)) {
-      flash(true);
-      setMessage('✅ Perfektní! Verš držíš skvěle.');
+  function clickScanWord(wordIdx){
+    if (!mm.quiz) return;
+    const idx = Number(wordIdx);
+    if (idx !== mm.quiz.cursor) {
+      if (el.content) {
+        el.content.classList.add('mm-shake');
+        setTimeout(function(){ el.content && el.content.classList.remove('mm-shake'); }, 360);
+      }
+      setMessage('❌ Klepni na zvýrazněné slovo!');
+      if (navigator && navigator.vibrate) navigator.vibrate([25, 40, 25]);
+      return;
+    }
+    if (navigator && navigator.vibrate) navigator.vibrate([8]);
+    mm.quiz.cursor += 1;
+    if (mm.quiz.cursor >= mm.quiz.total){
       completeLevel();
+    }
+    renderLevel();
+  }
+  function clickBankWord(wordId, btnEl){
+    if (!mm.quiz || mm.quiz.cursor >= mm.quiz.hidden.length) return;
+    const targetIndex = mm.quiz.hidden[mm.quiz.cursor];
+    const bankItem = mm.quiz.bankWords.find(function(b){ return b.i === Number(wordId); });
+    if (!bankItem) return;
+    if (bankItem.i === targetIndex){
+      mm.quiz.filled[targetIndex] = true;
+      mm.quiz.cursor += 1;
+      flash(true);
+      if (navigator && navigator.vibrate) navigator.vibrate([12]);
+      if (mm.quiz.cursor >= mm.quiz.hidden.length){
+        completeLevel();
+      } else {
+        setMessage('✅ Správně!');
+      }
       renderLevel();
     } else {
-      showTypingDiff(typed);
+      flash(false);
+      if (navigator && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+      if (btnEl){ btnEl.classList.add('mm-opt-wrong'); setTimeout(function(){ btnEl && btnEl.classList.remove('mm-opt-wrong'); }, 400); }
+      setMessage('❌ Toto slovo sem nepatří. Zkus jiné!');
     }
   }
-  function submitLevel6(){
-    const input = document.getElementById('mm-level6-input');
-    const typed = input ? input.value : '';
-    if (matchesNormalizedAnswer(mm.verse.t, typed)) {
+  function puzzleAdd(chunkId){
+    if (!mm.quiz) return;
+    const id = Number(chunkId);
+    const poolIdx = mm.quiz.pool.indexOf(id);
+    if (poolIdx === -1) return;
+    mm.quiz.pool.splice(poolIdx, 1);
+    mm.quiz.answer.push(id);
+    if (navigator && navigator.vibrate) navigator.vibrate([8]);
+    renderLevel();
+  }
+  function puzzleRemove(chunkId){
+    if (!mm.quiz) return;
+    const id = Number(chunkId);
+    const ansIdx = mm.quiz.answer.indexOf(id);
+    if (ansIdx === -1) return;
+    mm.quiz.answer.splice(ansIdx, 1);
+    mm.quiz.pool.push(id);
+    renderLevel();
+  }
+  function puzzleCheck(){
+    if (!mm.quiz) return;
+    const ordered = mm.quiz.answer.map(function(id){ return mm.quiz.chunks[id].text; }).join(' ');
+    const original = (mm.verse.t || '').replace(/\s+/g, ' ').trim();
+    if (normalize(ordered) === normalize(original)){
       flash(true);
-      setMessage('✅ Nádhera! Máš to zpaměti.');
+      if (navigator && navigator.vibrate) navigator.vibrate([12, 30, 12]);
       completeLevel();
       renderLevel();
     } else {
-      showTypingDiff(typed);
+      flash(false);
+      if (navigator && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+      if (el.content) {
+        el.content.classList.add('mm-shake');
+        setTimeout(function(){ el.content && el.content.classList.remove('mm-shake'); }, 360);
+      }
+      setMessage('❌ Pořadí není správné. Zkus to znovu!');
     }
   }
   if (el.levels){
@@ -3270,11 +3467,32 @@ window.shareCurrentVerse=async function(){
       if (!target) return;
       if (target.id === 'mm-retry-btn') { resetCurrentLevel(); return; }
       if (target.id === 'mm-next-btn') { goNextLevel(); return; }
+      const action = target.getAttribute('data-action');
+      if (action === 'scan-word') { clickScanWord(target.getAttribute('data-word-idx')); return; }
+      if (action === 'bank-word') { clickBankWord(target.getAttribute('data-word-id'), target); return; }
+      if (action === 'puzzle-add') { puzzleAdd(target.getAttribute('data-chunk-id')); return; }
+      if (action === 'puzzle-remove') { puzzleRemove(target.getAttribute('data-chunk-id')); return; }
+      if (action === 'puzzle-check') { puzzleCheck(); return; }
+      if (action === 'reveal-verse') {
+        if (mm.quiz) mm.quiz.revealed = true;
+        setMessage('Přečti verš a upřímně zhodnoť.');
+        renderLevel();
+        return;
+      }
+      if (action === 'self-yes') {
+        flash(true);
+        if (navigator && navigator.vibrate) navigator.vibrate([12, 30, 12]);
+        setMessage('🎉 Výborně! Verš máš v hlavě!');
+        completeLevel();
+        renderLevel();
+        return;
+      }
+      if (action === 'self-no') {
+        if (navigator && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+        restartCurrentLevel();
+        return;
+      }
       if (target.classList.contains('mm-option')) {
-        const action = target.getAttribute('data-action');
-        if (action === 'submit-word') { submitTyped('mm-type-word'); return; }
-        if (action === 'submit-level5') { submitLevel5(); return; }
-        if (action === 'submit-level6') { submitLevel6(); return; }
         const choiceIndex = Number(target.getAttribute('data-choice-index'));
         const item = mm.quiz && mm.quiz.items ? mm.quiz.items[mm.quiz.cursor] : null;
         if (item && Number.isInteger(choiceIndex) && item.options && item.options[choiceIndex] != null) answerOption(item.options[choiceIndex], target);
