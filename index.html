@@ -2954,7 +2954,8 @@ window.shareCurrentVerse=async function(){
     // Returns HTML: expected words colored green (correct) or red (wrong/missing).
     var expParts = expected.split(/(\s+)/);
     var expNorm = normalize(expected).split(/\s+/);
-    var typNorm = normalize(typed || '').split(/\s+/);
+    // filter(Boolean) ensures an empty typed string yields [] instead of ['']
+    var typNorm = normalize(typed || '').split(/\s+/).filter(Boolean);
     var wi = 0;
     return expParts.map(function(part){
       if (/^\s+$/.test(part)) return part;
@@ -2962,9 +2963,10 @@ window.shareCurrentVerse=async function(){
       var typW = typNorm[wi] || '';
       wi++;
       var ok = expW.length > 0 && expW === typW;
+      // Color + icon so correct/wrong is clear for color-blind users too
       return ok
-        ? '<span class="mm-diff-ok">' + esc(part) + '</span>'
-        : '<span class="mm-diff-err">' + esc(part) + '</span>';
+        ? '<span class="mm-diff-ok">' + esc(part) + '<sup>✓</sup></span>'
+        : '<span class="mm-diff-err">' + esc(part) + '<sup>✗</sup></span>';
     }).join('');
   }
   function wrongFeedback(answer){
