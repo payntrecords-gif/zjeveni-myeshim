@@ -2209,6 +2209,8 @@ body.dark #mm-quiz-footer{border-color:#3c2f3f}
 .mm-scan-word.mm-scan-active{background:rgba(229,69,142,.22);color:var(--pink,#e5458e);outline:2px solid var(--pink,#e5458e);animation:mm-bounce .25s ease}
 .mm-scan-word.mm-scan-done{background:rgba(76,175,80,.16);color:#2a7d37}
 body.dark .mm-scan-word.mm-scan-done{color:#4aba6c}
+/* active blank slot for level 3 */
+.mm-blank-static.mm-scan-active{background:rgba(229,69,142,.22);outline:2px solid var(--pink,#e5458e);color:var(--pink,#e5458e)}
 /* === LEVEL 3 – EMENTÁL WORD BANK === */
 .mm-bank{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding:10px 12px;background:rgba(0,0,0,.04);border-radius:12px;min-height:40px}
 body.dark .mm-bank{background:rgba(255,255,255,.06)}
@@ -2793,6 +2795,8 @@ window.shareCurrentVerse=async function(){
     'Paráda! Tohle už máš v srdci. 💖',
     'Jen tak dál, jde ti to výborně! 🚀'
   ];
+  // Levels where the user reads/advances freely without active quiz completion
+  const FREE_ADVANCE_LEVELS = [1, 4];
   const mm = {
     open: false,
     level: 1,
@@ -2997,7 +3001,7 @@ window.shareCurrentVerse=async function(){
   function setButtons(done){
     if (!el.next || !el.retry) return;
     const finalLevel = mm.level === 6;
-    const freeAdvance = mm.level === 1 || mm.level === 4;
+    const freeAdvance = FREE_ADVANCE_LEVELS.includes(mm.level);
     if (done) {
       el.next.disabled = false;
       el.next.textContent = finalLevel ? 'Hotovo 🎉' : 'Další úroveň';
@@ -3131,7 +3135,9 @@ window.shareCurrentVerse=async function(){
   function buildPuzzleQuiz(){
     const words = (mm.verse.t || '').split(/\s+/).filter(Boolean);
     const n = words.length;
-    const chunkCount = Math.min(7, Math.max(3, Math.ceil(n / 3)));
+    // 3–7 chunks; target ~3 words per chunk for comfortable tap-able tiles
+    const PUZZLE_WORDS_PER_CHUNK = 3;
+    const chunkCount = Math.min(7, Math.max(3, Math.ceil(n / PUZZLE_WORDS_PER_CHUNK)));
     const size = Math.ceil(n / chunkCount);
     const chunks = [];
     for (var i = 0; i < n; i += size){
@@ -3213,7 +3219,7 @@ window.shareCurrentVerse=async function(){
             return part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
           }
           var isNext = bq.cursor < bq.hidden.length && bq.hidden[bq.cursor] === part.index;
-          return part.pre + '<span class="mm-blank-btn' + (isNext ? ' mm-scan-active' : '') + '" style="pointer-events:none;min-width:52px;display:inline-block;text-align:center">_____</span>' + part.post;
+          return part.pre + '<span class="mm-blank-static' + (isNext ? ' mm-scan-active' : '') + '">_____</span>' + part.post;
         }).join('');
         var bankHtml = bq.bankWords.map(function(b){
           var used = !!bq.filled[b.i];
@@ -3291,7 +3297,7 @@ window.shareCurrentVerse=async function(){
     renderLevel();
   }
   function goNextLevel(){
-    const freeAdvance = mm.level === 1 || mm.level === 4;
+    const freeAdvance = FREE_ADVANCE_LEVELS.includes(mm.level);
     if (freeAdvance){
       if (!mm.completedThisView) completeLevel();
       mm.level = Math.min(Math.max(mm.unlocked, mm.level + 1), 6);
