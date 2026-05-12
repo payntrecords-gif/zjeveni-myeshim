@@ -3419,7 +3419,7 @@ window.shareCurrentVerse=async function(){
         const okCount = diff.filter(function(d){ return d.ok; }).length;
         const score = diff.length > 0 ? Math.round(okCount / diff.length * 100) : 0;
         const diffHtml = diff.map(function(d){
-          return '<span class="' + (d.ok ? 'mm-diff-ok' : 'mm-diff-err') + '" style="color:' + (d.ok ? '#22c55e' : '#ef4444') + '">' + esc(d.word) + '</span>';
+          return '<span class="' + (d.ok ? 'mm-diff-ok' : 'mm-diff-err') + '" style="color:' + (d.ok ? '#22c55e' : '#ef4444') + '">' + esc(d.word) + '<sup>' + (d.ok ? '✓' : '✗') + '</sup></span>';
         }).join(' ');
         el.content.innerHTML =
           '<div class="mm-verse mm-diff-wrap">' + diffHtml + '</div>' +
