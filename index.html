@@ -2275,9 +2275,75 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 .mm-level4-mask.mm-scan-active{background:rgba(229,69,142,.16);color:var(--pink,#e5458e);box-shadow:inset 0 0 0 2px rgba(229,69,142,.28)}
 .mm-level4-current{display:grid;gap:10px;padding:14px;border-radius:16px;background:rgba(0,0,0,.04);margin-top:12px}
 .mm-level4-progress{font-size:.82rem;font-weight:800;color:var(--sub)}
+.mm-content.mm-level4-layout{padding:0;border:none;background:transparent;box-shadow:none}
+.mm-level4-context{
+  position:sticky;top:0;z-index:3;display:grid;gap:10px;padding:12px 12px 10px;margin:-2px 0 0;
+  background:linear-gradient(180deg,#fff 0%,#fdf9fc 100%);border-bottom:1px solid rgba(122,106,118,.14);
+  box-shadow:0 10px 22px rgba(22,14,24,.08)
+}
+.mm-level4-context-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mm-level4-context-copy{font-size:.82rem;color:var(--sub);font-weight:700}
+.mm-level4-hint-badge{
+  display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border-radius:999px;
+  background:rgba(229,69,142,.12);color:var(--pink,#e5458e);font-size:.76rem;font-weight:900;letter-spacing:.04em
+}
+.mm-level4-token-flow{
+  display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-start;overflow:auto;max-height:clamp(92px,24vh,176px);
+  padding:2px 2px 4px;scrollbar-width:thin
+}
+.mm-l4-token{
+  display:inline-flex;align-items:center;justify-content:center;min-width:0;max-width:100%;padding:7px 10px;border-radius:14px;
+  background:rgba(0,0,0,.045);border:1.5px solid transparent;color:var(--text);font-size:.98rem;font-weight:800;
+  line-height:1.35;box-shadow:0 1px 0 rgba(255,255,255,.65) inset;scroll-margin:68px 16px 16px
+}
+.mm-l4-token .mm-level4-mask,.mm-l4-token .mm-reveal{min-width:0;padding:0;background:transparent;box-shadow:none;border-radius:0}
+.mm-l4-hidden-token{color:var(--sub)}
+.mm-l4-solved-token{background:rgba(76,175,80,.12);color:#2f7b37}
+.mm-l4-active-token{
+  background:rgba(229,69,142,.14);border-color:rgba(229,69,142,.48);color:var(--pink,#e5458e);
+  box-shadow:0 0 0 3px rgba(229,69,142,.12),0 10px 20px rgba(229,69,142,.12)
+}
+.mm-l4-active-token .mm-level4-mask{color:inherit}
+#mm-quiz-footer.mm-level4-footer{border-top:none;margin-top:0;padding:10px 0 2px}
+.mm-level4-input-card{
+  position:relative;display:grid;gap:10px;padding:12px;border-radius:18px;border:1px solid rgba(229,69,142,.18);
+  background:rgba(255,255,255,.92);box-shadow:0 10px 26px rgba(22,14,24,.10)
+}
+.mm-level4-input-card::before{
+  content:'';position:absolute;top:-8px;left:24px;width:46px;height:16px;border-radius:999px;
+  background:linear-gradient(180deg,rgba(229,69,142,.28),rgba(229,69,142,0))
+}
+.mm-level4-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mm-level4-card-copy{font-size:.82rem;color:var(--sub);font-weight:700}
+.mm-level4-card-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.mm-level4-submit{flex:1;min-width:148px}
+@media (max-height:700px){
+  .mm-level4-context{padding-top:10px}
+  .mm-level4-token-flow{max-height:clamp(82px,21vh,132px)}
+  .mm-level4-input-card{padding:10px}
+}
+@media (max-width:420px){
+  .mm-level4-context{padding-left:10px;padding-right:10px}
+  .mm-l4-token{font-size:.93rem;padding:6px 9px}
+}
 body.dark .mm-level4-mask{background:rgba(255,255,255,.08);color:#d8bfd0}
 body.dark .mm-level4-mask.mm-scan-active{background:rgba(255,140,194,.14);color:#ff8cc2;box-shadow:inset 0 0 0 2px rgba(255,140,194,.25)}
 body.dark .mm-level4-current{background:rgba(255,255,255,.05)}
+body.dark .mm-content.mm-level4-layout{background:transparent}
+body.dark .mm-level4-context{
+  background:linear-gradient(180deg,#231b24 0%,#1a151d 100%);border-bottom-color:rgba(255,255,255,.08);
+  box-shadow:0 10px 24px rgba(0,0,0,.24)
+}
+body.dark .mm-level4-hint-badge{background:rgba(255,140,194,.14);color:#ff8cc2}
+body.dark .mm-l4-token{background:rgba(255,255,255,.06);color:#f8eef5;box-shadow:none}
+body.dark .mm-l4-hidden-token{color:#d8bfd0}
+body.dark .mm-l4-solved-token{background:rgba(76,175,80,.18);color:#9be0a6}
+body.dark .mm-l4-active-token{
+  background:rgba(255,140,194,.16);border-color:rgba(255,140,194,.48);color:#ff9dcf;
+  box-shadow:0 0 0 3px rgba(255,140,194,.10),0 12px 24px rgba(0,0,0,.22)
+}
+body.dark .mm-level4-input-card{background:rgba(34,26,35,.94);border-color:rgba(255,140,194,.22)}
+body.dark .mm-level4-input-card::before{background:linear-gradient(180deg,rgba(255,140,194,.34),rgba(255,140,194,0))}
 </style>
 
 </head>
@@ -3212,6 +3278,21 @@ window.shareCurrentVerse=async function(){
   function buildPeekButton(){
     return '<button type="button" class="mm-btn mm-btn-peek" data-action="peek-verse">👁️ Nakouknout (2s)</button>';
   }
+  function scrollLevel4ActiveToken(wordIndex){
+    if (!Number.isInteger(wordIndex)) return;
+    const token = document.getElementById('mm-l4-token-' + wordIndex);
+    if (!token) return;
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    token.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' });
+  }
+  function syncLevel4Viewport(){
+    if (!mm.quiz || !mm.quiz.items || mm.level !== 4) return;
+    const item = mm.quiz.items[mm.quiz.cursor];
+    if (!item) return;
+    requestAnimationFrame(function(){
+      scrollLevel4ActiveToken(item.index);
+    });
+  }
   function peekVerse(verseText, contentEl, btn){
     if (!contentEl || !btn) return;
     btn.disabled = true;
@@ -3220,6 +3301,7 @@ window.shareCurrentVerse=async function(){
     setTimeout(function() {
       contentEl.innerHTML = orig;
       btn.disabled = false;
+      syncLevel4Viewport();
     }, 2000);
   }
   function clickTapWord(wordIdx, btnEl){
@@ -3245,18 +3327,28 @@ window.shareCurrentVerse=async function(){
   function renderLevel4Verse(quiz, currentIndex){
     if (!quiz || !quiz.tokens) return '';
     return quiz.tokens.parts.map(function(part){
-      if (part.t === 'space') return part.text;
-      if (!quiz.hiddenSet.has(part.index)) return esc(part.original);
-      if (quiz.solved[part.index]){
-        return part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
+      if (part.t === 'space') return '';
+      const isHidden = quiz.hiddenSet.has(part.index);
+      const isSolved = !!quiz.solved[part.index];
+      const isActive = part.index === currentIndex;
+      var tokenClass = 'mm-l4-token';
+      if (isActive) tokenClass += ' mm-l4-active-token';
+      if (!isHidden) tokenClass += ' mm-l4-static-token';
+      else if (isSolved) tokenClass += ' mm-l4-solved-token';
+      else tokenClass += ' mm-l4-hidden-token';
+      var tokenText = esc(part.original);
+      if (isHidden && isSolved){
+        tokenText = part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
+      } else if (isHidden){
+        tokenText = part.pre + '<span class="mm-level4-mask' + (isActive ? ' mm-scan-active' : '') + '">' + esc(level4WordParts(part.clean).mask) + '</span>' + part.post;
       }
-      const mask = level4WordParts(part.clean).mask;
-      const activeClass = part.index === currentIndex ? ' mm-scan-active' : '';
-      return part.pre + '<span class="mm-level4-mask' + activeClass + '">' + esc(mask) + '</span>' + part.post;
+      return '<span id="mm-l4-token-' + part.index + '" class="' + tokenClass + '"' + (isActive ? ' aria-current="true"' : '') + '>' + tokenText + '</span>';
     }).join('');
   }
   function renderLevel(){
     if (!mm.verse || !el.content) return;
+    el.content.classList.remove('mm-level4-layout');
+    if (el.footer) el.footer.classList.remove('mm-level4-footer');
     el.label.textContent = 'Úroveň ' + mm.level + ' / 5';
     el.bar.style.width = ((mm.level / 5) * 100) + '%';
     el.bar.classList.remove('mm-progress-sheen');
@@ -3347,21 +3439,38 @@ window.shareCurrentVerse=async function(){
           if (el.footer) el.footer.innerHTML = '';
         } else {
           const item = q4.items[q4.cursor];
-          el.content.innerHTML = '<div class="mm-verse">' + renderLevel4Verse(q4, item.index) + '</div>';
+          el.content.classList.add('mm-level4-layout');
+          if (el.footer) el.footer.classList.add('mm-level4-footer');
+          el.content.innerHTML =
+            '<div class="mm-level4-context" id="mm-level4-context">' +
+              '<div class="mm-level4-context-head">' +
+                '<div>' +
+                  '<div class="mm-level4-progress">Právě doplňuješ: slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length + '</div>' +
+                  '<div class="mm-level4-context-copy">Aktivní slovo zůstává nahoře viditelné i při psaní.</div>' +
+                '</div>' +
+                '<span class="mm-level4-hint-badge">Nápověda: ' + esc(item.hint) + '</span>' +
+              '</div>' +
+              '<div class="mm-level4-token-flow mm-verse">' + renderLevel4Verse(q4, item.index) + '</div>' +
+            '</div>';
           if (el.footer) el.footer.innerHTML =
-            '<div class="mm-quiz-prompt">Doplň zvýrazněné slovo s nápovědou prvního písmena.</div>' +
-            '<div class="mm-level4-current">' +
-              '<div class="mm-level4-progress">Slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length + '</div>' +
-              '<span class="mm-level4-mask mm-scan-active">' + esc(item.hint) + '</span>' +
+            '<div class="mm-level4-input-card">' +
+              '<div class="mm-level4-card-top">' +
+                '<div>' +
+                  '<div class="mm-level4-progress">Právě doplňuješ: slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length + '</div>' +
+                  '<div class="mm-level4-card-copy">Napiš zvýrazněné slovo z panelu nahoře.</div>' +
+                '</div>' +
+                '<span class="mm-level4-hint-badge">' + esc(item.hint) + '</span>' +
+              '</div>' +
               '<div class="mm-type-wrap" style="margin-top:0">' +
                 '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(item.hint) + '">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
+                '<div class="mm-level4-card-actions">' +
                   buildPeekButton() +
-                  '<button type="button" class="mm-btn" data-action="submit-level4-word" style="flex:1;min-width:150px">Potvrdit slovo</button>' +
+                  '<button type="button" class="mm-btn mm-level4-submit" data-action="submit-level4-word">Potvrdit slovo</button>' +
                 '</div>' +
               '</div>' +
             '</div>';
           setTimeout(function(){
+            syncLevel4Viewport();
             const inp = document.getElementById('mm-type-word');
             if (inp){ inp.focus({ preventScroll: true }); }
           }, 80);
