@@ -8,10 +8,15 @@
 <title>MYEShim – Zjevení</title>
 <meta name="description" content="MYEShim – mobilní studijní aplikace pro knihu Zjevení">
 <meta property="og:title" content="MYEShim – Zjevení">
-<meta property="og:description" content="Studuj Zjevení každý den.">
+<meta property="og:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s MYEShim.">
 <meta property="og:image" content="https://payntrecords-gif.github.io/zjeveni-myeshim/icon-512.png">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="cs_CZ">
+<meta property="og:url" content="https://payntrecords-gif.github.io/zjeveni-myeshim/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MYEShim – Zjevení">
+<meta name="twitter:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s MYEShim.">
+<meta name="twitter:image" content="https://payntrecords-gif.github.io/zjeveni-myeshim/icon-512.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -2286,7 +2291,7 @@ body.dark .mm-word-input.mm-wi-wrong{color:#ff6b6b;background:transparent}
 <div id="topbar">
   <!-- Only logo + brand name remain at the top -->
   <div class="tb-left">
-    <div class="tb-logo"><img src="logo.png" alt="MYEShim"></div>
+    <div class="tb-logo"><img src="logo.png" alt="MYEShim" width="121" height="50" loading="lazy"></div>
     <span class="tb-iginja">iginjaSlovo</span>
   </div>
   <!-- streak-badge kept hidden in DOM so JS streak script still works -->
@@ -2394,7 +2399,7 @@ body.dark .mm-word-input.mm-wi-wrong{color:#ff6b6b;background:transparent}
   </div>
 </div>
 <div id="ux35-toast" aria-live="polite"></div>
-<div id="sw-update-toast" role="status" aria-live="polite"></div>
+<div id="sw-update-toast" role="status" aria-live="polite">Nová verze je připravena. <button id="sw-update-btn" style="background:none;border:none;color:#e5458e;font:inherit;font-weight:800;cursor:pointer;padding:0 4px;text-decoration:underline">Obnovit</button></div>
 
 <nav id="bottomnav" aria-label="Hlavní navigace">
   <div class="bn-spacer" aria-hidden="true"></div>
@@ -4775,7 +4780,7 @@ const FCM_SENDER_ID = '360259005980';
     }, 180000); // 3 minutes
   }
 
-  // Listen for messages from SW (navigate to verse)
+  // Listen for messages from SW (navigate to verse, update toast, token refresh)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', function(event) {
       if (event.data && event.data.type === 'NAVIGATE_TO_REF') {
@@ -4790,6 +4795,16 @@ const FCM_SENDER_ID = '360259005980';
             }
           }
         }
+      } else if (event.data && event.data.type === 'SW_UPDATED') {
+        const toast = document.getElementById('sw-update-toast');
+        if (toast) {
+          toast.classList.add('show');
+          const btn = document.getElementById('sw-update-btn');
+          if (btn) btn.addEventListener('click', function() { window.location.reload(true); });
+          else toast.addEventListener('click', function() { window.location.reload(true); });
+        }
+      } else if (event.data && event.data.type === 'PUSH_SUBSCRIPTION_CHANGED') {
+        if (typeof refreshFcmTokenSilently === 'function') refreshFcmTokenSilently();
       }
     });
   }
@@ -5326,7 +5341,7 @@ const FCM_SENDER_ID = '360259005980';
 <!-- ── LOGIN OVERLAY ── -->
 <div id="auth-overlay" role="dialog" aria-modal="true" aria-label="Přihlásit se">
   <div class="auth-logo-wrap">
-    <img src="logo.png" alt="MYEShim logo">
+    <img src="logo.png" alt="MYEShim logo" width="242" height="100" loading="lazy">
   </div>
   <div class="auth-app-name">MYEShim</div>
   <div class="auth-tagline">„Studuj Zjevení každý den."</div>
@@ -5351,7 +5366,7 @@ const FCM_SENDER_ID = '360259005980';
 <!-- ── INSTALL OVERLAY (step 2 of onboarding) ── -->
 <div id="install-overlay" role="dialog" aria-modal="true" aria-label="Nainstalovat aplikaci">
   <div class="iov-logo-wrap">
-    <img src="logo.png" alt="MYEShim logo">
+    <img src="logo.png" alt="MYEShim logo" width="242" height="100" loading="lazy">
   </div>
   <div class="iov-app-name">MYEShim</div>
   <div class="iov-tagline">Jeden krok k označování</div>

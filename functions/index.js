@@ -123,7 +123,7 @@ async function getLastOpenDateForNotifDoc(notifDoc) {
 }
 
 exports.dailyReminder = onSchedule(
-  { schedule: '0 17 * * *', timeZone: 'Europe/Prague', region: 'europe-west1' },
+  { schedule: '0 17 * * *', timeZone: 'Europe/Prague', region: 'europe-west1', timeoutSeconds: 540 },
   async () => {
     const todayYmd = getPragueYmd();
     const reminderMessage = pickReminderMessage(todayYmd);
@@ -142,29 +142,40 @@ exports.dailyReminder = onSchedule(
     let skippedNoToken = 0;
     let stale = 0;
 
-    for (const notifDoc of notifDocs) {
-      try {
-        const notif = notifDoc.data() || {};
-        if (!notif.fcmToken || notif.enabled === false) {
-          skippedNoToken++;
-          continue;
-        }
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < notifDocs.length; i += BATCH_SIZE) {
+      const batch = notifDocs.slice(i, i + BATCH_SIZE);
+      const results = await Promise.all(batch.map(async (notifDoc) => {
+        try {
+          const notif = notifDoc.data() || {};
+          if (!notif.fcmToken || notif.enabled === false) {
+            return { type: 'skippedNoToken' };
+          }
 
-        const lastOpenDate = await getLastOpenDateForNotifDoc(notifDoc);
-        if (lastOpenDate === todayYmd) {
-          skippedOpenedToday++;
-          continue;
-        }
+          const lastOpenDate = await getLastOpenDateForNotifDoc(notifDoc);
+          if (lastOpenDate === todayYmd) {
+            return { type: 'skippedOpenedToday' };
+          }
 
-        const result = await sendReminderToToken(notif.fcmToken, reminderMessage);
-        if (result === 'stale') {
-          await notifDoc.ref.update({ fcmToken: admin.firestore.FieldValue.delete() });
-          stale++;
-        } else if (result) {
-          sent++;
+          const result = await sendReminderToToken(notif.fcmToken, reminderMessage);
+          if (result === 'stale') {
+            await notifDoc.ref.update({ fcmToken: admin.firestore.FieldValue.delete() });
+            return { type: 'stale' };
+          } else if (result) {
+            return { type: 'sent' };
+          }
+          return { type: 'failed' };
+        } catch (error) {
+          logger.warn(`dailyReminder: failed for ${notifDoc.ref.path}:`, error.message);
+          return { type: 'failed' };
         }
-      } catch (error) {
-        logger.warn(`dailyReminder: failed for ${notifDoc.ref.path}:`, error.message);
+      }));
+
+      for (const r of results) {
+        if (r.type === 'sent') sent++;
+        else if (r.type === 'skippedOpenedToday') skippedOpenedToday++;
+        else if (r.type === 'skippedNoToken') skippedNoToken++;
+        else if (r.type === 'stale') stale++;
       }
     }
 
