@@ -3185,7 +3185,7 @@ window.shareCurrentVerse=async function(){
     const first = chars[0];
     const restChars = chars.slice(1);
     return {
-      first: first,
+      first,
       rest: restChars.join(''),
       restMask: '_'.repeat(restChars.length),
       restLength: restChars.length
@@ -3396,7 +3396,7 @@ window.shareCurrentVerse=async function(){
             const staticWord = isStaticWordToken(part.clean);
             const wordParts = level4WordParts(part.clean);
             const placeholder = wordParts.restMask;
-            const wordLen = Math.max(1, wordParts.restLength);
+            const wordLen = wordParts.restLength;
             const pre = punct(part.pre);
             const post = punct(part.post);
             if (staticWord){
