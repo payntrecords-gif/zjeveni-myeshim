@@ -3439,16 +3439,18 @@ window.shareCurrentVerse=async function(){
           if (el.footer) el.footer.innerHTML = '';
         } else {
           const item = q4.items[q4.cursor];
+          const progressText = 'Právě doplňuješ: slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length;
+          const hintText = 'Nápověda: ' + esc(item.hint);
           el.content.classList.add('mm-level4-layout');
           if (el.footer) el.footer.classList.add('mm-level4-footer');
           el.content.innerHTML =
             '<div class="mm-level4-context" id="mm-level4-context">' +
               '<div class="mm-level4-context-head">' +
                 '<div>' +
-                  '<div class="mm-level4-progress">Právě doplňuješ: slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length + '</div>' +
+                  '<div class="mm-level4-progress">' + progressText + '</div>' +
                   '<div class="mm-level4-context-copy">Aktivní slovo zůstává nahoře viditelné i při psaní.</div>' +
                 '</div>' +
-                '<span class="mm-level4-hint-badge">Nápověda: ' + esc(item.hint) + '</span>' +
+                '<span class="mm-level4-hint-badge">' + hintText + '</span>' +
               '</div>' +
               '<div class="mm-level4-token-flow mm-verse">' + renderLevel4Verse(q4, item.index) + '</div>' +
             '</div>';
@@ -3456,10 +3458,10 @@ window.shareCurrentVerse=async function(){
             '<div class="mm-level4-input-card">' +
               '<div class="mm-level4-card-top">' +
                 '<div>' +
-                  '<div class="mm-level4-progress">Právě doplňuješ: slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length + '</div>' +
+                  '<div class="mm-level4-progress">' + progressText + '</div>' +
                   '<div class="mm-level4-card-copy">Napiš zvýrazněné slovo z panelu nahoře.</div>' +
                 '</div>' +
-                '<span class="mm-level4-hint-badge">' + esc(item.hint) + '</span>' +
+                '<span class="mm-level4-hint-badge">' + hintText + '</span>' +
               '</div>' +
               '<div class="mm-type-wrap" style="margin-top:0">' +
                 '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(item.hint) + '">' +
