@@ -2230,21 +2230,21 @@ body.dark .mm-scan-word.mm-scan-done{color:#4aba6c}
 /* active blank slot for level 3 */
 .mm-blank-static.mm-scan-active{background:rgba(229,69,142,.22);outline:2px solid var(--pink,#e5458e);color:var(--pink,#e5458e)}
 /* === LEVEL 2 – DÍRY VE VĚTÁCH (WORD BANK) === */
-.mm-bank{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding:10px 12px;background:rgba(0,0,0,.04);border-radius:12px;min-height:40px}
+.mm-bank{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;padding:8px 10px;background:rgba(0,0,0,.04);border-radius:12px;min-height:40px}
 body.dark .mm-bank{background:rgba(255,255,255,.06)}
-.mm-bank-word{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(229,69,142,.45);background:#fff;color:#2d1f2d;font-weight:700;font-size:.9rem;cursor:pointer;transition:opacity .2s,transform .15s,background .15s}
+.mm-bank-word{padding:4px 10px;border-radius:18px;border:1.5px solid rgba(229,69,142,.45);background:#fff;color:#2d1f2d;font-weight:700;font-size:.9rem;cursor:pointer;transition:opacity .2s,transform .15s,background .15s}
 .mm-bank-word:active{transform:scale(.95)}
 .mm-bank-word.mm-bw-used{opacity:.25;pointer-events:none;background:#f0eaf3}
 .mm-bank-word.mm-opt-wrong{animation:mm-opt-shake .34s ease}
 body.dark .mm-bank-word{background:#2a202b;color:#f8eef5;border-color:#57435b}
 /* === LEVEL 3 – SKLÁDEJ VERŠ === */
-.mm-puzzle-area{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:rgba(229,69,142,.06);border-radius:12px;min-height:44px;align-items:flex-start;margin-bottom:8px}
+.mm-puzzle-area{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;background:rgba(229,69,142,.06);border-radius:12px;min-height:44px;align-items:flex-start;margin-bottom:8px}
 body.dark .mm-puzzle-area{background:rgba(255,140,194,.07)}
-.mm-puzzle-word{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(229,69,142,.6);background:#fff0f7;color:#2d1f2d;font-weight:700;font-size:.9rem;cursor:pointer;transition:transform .15s,background .15s}
+.mm-puzzle-word{padding:4px 10px;border-radius:18px;border:1.5px solid rgba(229,69,142,.6);background:#fff0f7;color:#2d1f2d;font-weight:700;font-size:.9rem;cursor:pointer;transition:transform .15s,background .15s}
 .mm-puzzle-word:hover{background:#ffe0f0}
 .mm-puzzle-word:active{transform:scale(.95)}
 body.dark .mm-puzzle-word{background:rgba(255,140,194,.14);color:#f8eef5;border-color:#ff8cc2}
-.mm-puzzle-pool{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:rgba(0,0,0,.04);border-radius:12px;min-height:40px}
+.mm-puzzle-pool{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;background:rgba(0,0,0,.04);border-radius:12px;min-height:40px}
 body.dark .mm-puzzle-pool{background:rgba(255,255,255,.06)}
 .mm-puzzle-placeholder{color:var(--sub);font-size:.85rem;padding:4px;font-style:italic}
 /* === LEVEL 5 – MISTROVSTVÍ === */
@@ -2270,7 +2270,7 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 /* === LEVEL 4: LIVE WORD INPUTS === */
 .mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;overflow:visible;display:block}
 body.dark .mm-word-quiz-container{background:#1e1e2e}
-.mm-word-quiz{font-size:1.1rem;line-height:2.2;font-weight:700;color:var(--text);display:block!important;white-space:normal!important;text-align:left}
+.mm-word-quiz{font-size:1.1rem;line-height:2.0;font-weight:700;color:var(--text);display:block!important;white-space:normal!important;text-align:left}
 .mm-wi-wrap{display:inline!important;position:relative;vertical-align:baseline;white-space:normal;margin:0;padding:0}
 .mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
 .mm-wi-hint.mm-wi-hint-on{opacity:1}
@@ -3184,7 +3184,7 @@ window.shareCurrentVerse=async function(){
     if (!chars.length) return { value: '', mask: '', length: 0 };
     return {
       value: chars.join(''),
-      mask: '_'.repeat(chars.length),
+      mask: chars[0] + '_'.repeat(Math.max(chars.length - 1, 0)),
       length: chars.length
     };
   }
