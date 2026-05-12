@@ -4398,7 +4398,7 @@ const FCM_SENDER_ID = '360259005980';
         fcmToken: token,
         updatedAt: notifNow
       }, { merge: true });
-    } catch(e) {}
+    } catch(e) { reportNonCriticalError('FCM Firestore sync selhal:', e); }
   }
 
   async function ensureFcmToken() {
