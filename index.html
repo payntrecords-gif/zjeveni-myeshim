@@ -2959,18 +2959,7 @@ window.shareCurrentVerse=async function(){
       for(let i=2;i<len;i+=3) out.push(i);
       return out.length ? out : [Math.min(2, len-1)];
     }
-    if (level === 4){
-      const out = [];
-      for(let i=1;i<len;i+=2) out.push(i);
-      return out.length ? out : [Math.min(1, len-1)];
-    }
     return [];
-  }
-  function initialsHint(words){
-    return words.map(function(w){
-      const ch = w.charAt(0) || '';
-      return ch ? ch + '_'.repeat(clamp(w.length - 1, MIN_HINT_UNDERSCORE_COUNT, MAX_HINT_UNDERSCORE_COUNT)) : '';
-    }).join(' ');
   }
   function setMessage(text){
     if (!el.msg) return;
@@ -3139,22 +3128,6 @@ window.shareCurrentVerse=async function(){
       setTimeout(restartCurrentLevel, 1500);
     }
   }
-  function buildQuiz(level){
-    const tk = tokenData(mm.verse.t || '');
-    const hidden = hiddenIndices(tk.words, level);
-    const hiddenSet = {};
-    const solved = {};
-    hidden.forEach(function(i){ hiddenSet[i] = true; solved[i] = false; });
-    const items = hidden.map(function(i){
-      return {
-        index: i,
-        answer: tk.words[i],
-        mode: 'pick',
-        options: alternatives(tk.words, tk.words[i])
-      };
-    });
-    mm.quiz = { tokens: tk, hiddenSet: hiddenSet, solved: solved, items: items, cursor: 0 };
-  }
   function buildScanQuiz(){
     const tk = tokenData(mm.verse.t || '');
     mm.quiz = { tokens: tk, cursor: 0, total: tk.words.length };
@@ -3185,11 +3158,6 @@ window.shareCurrentVerse=async function(){
     const tk = tokenData(mm.verse.t || '');
     mm.quiz = { tokens: tk, cursor: 0, total: tk.words.length };
   }
-  function buildInitialsQuiz(){
-    const tk = tokenData(mm.verse.t || '');
-    const solved = { 0: true };
-    mm.quiz = { tokens: tk, cursor: Math.min(1, tk.words.length), total: tk.words.length, solved: solved };
-  }
   function renderLevelGrid(){
     if (!el.levels) return;
     el.levels.innerHTML = LEVELS.map(function(level){
@@ -3219,6 +3187,15 @@ window.shareCurrentVerse=async function(){
   function isStaticWordToken(word){
     const normalizedWord = (word || '').trim();
     return normalizedWord.length <= 1 || !/[\p{L}\p{N}]/u.test(normalizedWord);
+  }
+  function buildLevel4Quiz(){
+    const tk = tokenData(mm.verse.t || '');
+    const solved = tk.words.map(function(word){ return isStaticWordToken(word); });
+    mm.quiz = {
+      tokens: tk,
+      solved: solved,
+      cursor: nextUnsolvedWordIndex({ solved: solved }, 0)
+    };
   }
   function nextUnsolvedWordIndex(quiz, startIndex){
     /* move cursor over auto-solved/static tokens in level 4 */
@@ -3261,30 +3238,6 @@ window.shareCurrentVerse=async function(){
     if (mm.quiz.cursor >= mm.quiz.total){
       completeLevel();
       renderLevel();
-    }
-  }
-  function submitInitials(){
-    if (!mm.quiz) return;
-    const input = document.getElementById('mm-initials-input');
-    const value = input ? input.value.trim() : '';
-    const currentWord = mm.quiz.tokens.words[mm.quiz.cursor];
-    if (!currentWord) return;
-    if (matchesNormalizedAnswer(currentWord, value)){
-      mm.quiz.solved[mm.quiz.cursor] = true;
-      mm.quiz.cursor += 1;
-      flash(true);
-      if (navigator && navigator.vibrate) navigator.vibrate([12]);
-      if (mm.quiz.cursor >= mm.quiz.total){
-        completeLevel();
-      } else {
-        setMessage('✅ Správně! Doplň další slovo. (' + mm.quiz.cursor + '/' + mm.quiz.total + ')');
-      }
-      renderLevel();
-    } else {
-      flash(false);
-      if (navigator && navigator.vibrate) navigator.vibrate([30, 50, 30]);
-      setMessage('❌ Správně je: ' + currentWord);
-      if (input){ input.value = ''; input.classList.add('mm-shake'); setTimeout(function(){ input && input.classList.remove('mm-shake'); }, 360); }
     }
   }
   function submitWordInput(idx){
@@ -3415,15 +3368,7 @@ window.shareCurrentVerse=async function(){
       }
       /* ── LEVEL 4: PRVNÍ PÍSMENO (live word inputs) ── */
       if (mm.level === 4){
-        const tk4 = tokenData(mm.verse.t || '');
-        if (!mm.quiz){
-          const solved = tk4.words.map(function(word){ return isStaticWordToken(word); });
-          mm.quiz = {
-            tokens: tk4,
-            solved: solved,
-            cursor: nextUnsolvedWordIndex({ solved: solved }, 0)
-          };
-        }
+        if (!mm.quiz) buildLevel4Quiz();
         const q4 = mm.quiz;
         if (q4.cursor >= q4.tokens.words.length){
           /* all words solved – show complete verse */
@@ -3713,7 +3658,6 @@ window.shareCurrentVerse=async function(){
       if (action === 'puzzle-add') { puzzleAdd(target.getAttribute('data-chunk-id')); return; }
       if (action === 'puzzle-remove') { puzzleRemove(target.getAttribute('data-chunk-id')); return; }
       if (action === 'puzzle-check') { puzzleCheck(); return; }
-      if (action === 'initials-submit') { submitInitials(); return; }
       if (action === 'check-verse') {
         const inp = document.getElementById('mm-master-input');
         if (mm.quiz && inp){
@@ -3771,7 +3715,6 @@ window.shareCurrentVerse=async function(){
       if (e.key !== 'Enter') return;
       const target = e.target;
       if (target && target.id === 'mm-type-word') { e.preventDefault(); submitTyped('mm-type-word'); }
-      if (target && target.id === 'mm-initials-input') { e.preventDefault(); submitInitials(); }
       if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
         e.preventDefault();
         submitWordInput(target.getAttribute('data-word-idx'));
