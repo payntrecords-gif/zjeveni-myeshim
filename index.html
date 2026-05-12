@@ -2078,6 +2078,110 @@ body.dark #bn-nav {
 }
 </style>
 
+<style id="memorize-mode-style">
+/* === MEMORIZE MODE === */
+.memorize-btn{flex:0 0 auto;min-width:46px;min-height:44px;font-size:1.1rem;padding:10px}
+#memorize-overlay{
+  position:fixed;inset:0;z-index:140;background:rgba(10,8,14,.36);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  display:none;align-items:flex-end;justify-content:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#memorize-overlay.open{display:flex;animation:wov-in .22s ease}
+#memorize-sheet{
+  width:100%;max-width:480px;background:#fff;border-radius:28px 28px 0 0;
+  padding:16px 16px 20px;position:relative;touch-action:pan-y;transform:translateY(100%);
+  transition:transform .4s ease,box-shadow .3s ease;background-image:linear-gradient(180deg,#fff 0%,#fdf9fc 100%);
+  box-shadow:0 20px 40px rgba(22,14,24,.22);overflow:hidden;
+}
+#memorize-overlay.open #memorize-sheet{transform:translateY(0)}
+#memorize-sheet.dragging{transition:none}
+body.dark #memorize-sheet{background:#1c161d;background-image:linear-gradient(180deg,#231b24 0%,#1a151d 100%);color:#f8eef5}
+.mm-handle{width:42px;height:5px;border-radius:999px;background:rgba(0,0,0,.14);margin:0 auto 10px}
+body.dark .mm-handle{background:rgba(255,255,255,.18)}
+.mm-close{
+  position:absolute;right:14px;top:14px;border:none;background:transparent;color:var(--sub);
+  font-size:1.3rem;line-height:1;padding:8px;border-radius:10px;cursor:pointer;min-width:44px;min-height:44px;
+}
+.mm-head{padding-right:52px;margin-bottom:10px}
+.mm-title{font-size:1.1rem;font-weight:900;color:var(--pink,#e5458e)}
+body.dark .mm-title{color:#ff8cc2}
+.mm-sub{font-size:.84rem;color:var(--sub);margin-top:2px}
+.mm-streak{
+  margin-top:8px;display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;
+  font-weight:900;font-size:.82rem;background:rgba(255,140,50,.14);color:#d06408;border:1px solid rgba(208,100,8,.18)
+}
+body.dark .mm-streak{background:rgba(255,140,50,.16);color:#ffbe7f;border-color:rgba(255,190,127,.22)}
+.mm-progress-wrap{margin:10px 0 12px}
+.mm-progress-label{font-size:.8rem;font-weight:800;color:var(--sub);margin-bottom:6px}
+.mm-progress-track{height:9px;border-radius:999px;background:rgba(229,69,142,.14);overflow:hidden}
+#mm-progress-bar{height:100%;width:16.666%;background:linear-gradient(90deg,#7b3ef4,#e5458e);border-radius:999px;transition:width .4s ease}
+.mm-level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}
+.mm-level-chip{
+  border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:10px 8px;min-height:44px;
+  font:inherit;font-size:.78rem;font-weight:900;color:var(--sub);cursor:pointer
+}
+.mm-level-chip.active{border-color:var(--pink,#e5458e);color:var(--pink,#e5458e);background:#fff2f8}
+.mm-level-chip.locked{opacity:.45;cursor:not-allowed}
+body.dark .mm-level-chip{background:#281f2a;border-color:#3d3040;color:#d8bfd0}
+body.dark .mm-level-chip.active{background:rgba(255,140,194,.14);border-color:#ff8cc2;color:#ff8cc2}
+.mm-message{
+  min-height:24px;font-size:.88rem;font-weight:800;color:#7a6a76;margin-bottom:9px;
+  transition:opacity .22s ease,transform .22s ease;opacity:1
+}
+body.dark .mm-message{color:#d4becb}
+.mm-content{
+  min-height:220px;border:1px solid var(--line);border-radius:18px;padding:14px;overflow:auto;max-height:min(48vh,420px);
+  background:rgba(255,255,255,.72);transition:transform .28s ease,opacity .28s ease;
+}
+body.dark .mm-content{background:rgba(34,26,35,.66);border-color:#3c2f3f}
+.mm-content.transitioning{opacity:.6;transform:translateY(8px)}
+.mm-verse{font-size:1.08rem;line-height:1.72;font-weight:700;color:var(--text)}
+body.dark .mm-verse{color:#f8eef5}
+.mm-blank-btn{
+  border:none;border-bottom:2px solid rgba(229,69,142,.55);background:transparent;padding:0 2px;min-height:44px;
+  font:inherit;font-weight:900;color:#c53f82;cursor:pointer
+}
+.mm-blank-static{display:inline-block;min-width:58px;border-bottom:2px dashed rgba(229,69,142,.35);text-align:center;color:#c98aac}
+.mm-reveal{display:inline-block;padding:1px 6px;border-radius:10px;background:rgba(76,175,80,.18);color:#2f7b37;font-weight:900}
+.mm-options{display:grid;gap:8px;margin-top:14px}
+.mm-option{
+  border:1.5px solid rgba(229,69,142,.3);background:#fff;border-radius:14px;padding:12px;min-height:44px;
+  font:inherit;font-size:.96rem;font-weight:800;cursor:pointer;text-align:left;transition:transform .15s ease,box-shadow .15s ease
+}
+.mm-option:active{transform:scale(.985)}
+body.dark .mm-option{background:#2a202b;color:#f8eef5;border-color:#57435b}
+.mm-type-wrap{margin-top:12px;display:grid;gap:8px}
+.mm-input{
+  width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;font-size:.97rem;
+  background:#fff;color:var(--text)
+}
+body.dark .mm-input{background:#251d27;color:#f8eef5;border-color:#4b3b50}
+.mm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.mm-btn{
+  border:none;border-radius:16px;padding:12px;min-height:44px;cursor:pointer;font:inherit;font-size:.95rem;font-weight:900;
+  background:linear-gradient(135deg,#f05ca2,#de4089);color:#fff
+}
+.mm-btn:disabled{opacity:.6;cursor:not-allowed}
+.mm-btn-ghost{background:#fff;color:#c43d7f;border:1.5px solid rgba(229,69,142,.28)}
+body.dark .mm-btn-ghost{background:#271f29;color:#ff9dcf;border-color:#624a66}
+.mm-correct-flash{animation:mm-flash .42s ease}
+.mm-wrong-flash{animation:mm-wrong .45s ease}
+.mm-shake{animation:mm-shake .34s ease}
+.mm-word-bounce{display:inline-block;animation:mm-bounce .35s ease}
+.mm-success-mark{font-size:1.25rem;margin-left:6px;display:inline-block;animation:mm-bounce .38s ease}
+#mm-confetti{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden
+}
+.mm-piece{position:absolute;top:-18px;border-radius:50%;animation:mm-fall 1.2s linear forwards}
+@keyframes mm-flash{0%{box-shadow:0 0 0 rgba(76,175,80,0)}30%{box-shadow:0 0 0 999px rgba(76,175,80,.16) inset}100%{box-shadow:0 0 0 rgba(76,175,80,0)}}
+@keyframes mm-wrong{0%{box-shadow:0 0 0 rgba(229,57,53,0)}32%{box-shadow:0 0 0 999px rgba(229,57,53,.16) inset}100%{box-shadow:0 0 0 rgba(229,57,53,0)}}
+@keyframes mm-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
+@keyframes mm-bounce{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes mm-fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(360px) rotate(220deg);opacity:0}}
+@media(max-width:375px){.mm-level-chip{font-size:.73rem;padding:9px 6px}}
+</style>
+
 </head>
 <body>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
@@ -2115,6 +2219,7 @@ body.dark #bn-nav {
   <div class="verse-actions">
     <button class="va-btn" id="verse-share-btn" onclick="shareCurrentVerse()">Sdílet verš</button>
     <button class="va-btn ghost" id="verse-fav-btn" onclick="toggleFavoriteVerse()">♡ Oblíbené</button>
+    <button class="va-btn ghost memorize-btn" id="verse-memorize-btn" onclick="openMemorizeMode()" aria-label="Spustit memorovací režim">🧠</button>
   </div>
 </div>
 <div id="app-tabs-outer">
@@ -2163,6 +2268,29 @@ body.dark #bn-nav {
       </button>
     </div>
     <button class="dss-close-btn" type="button" onclick="closeDisplaySettings()">Hotovo</button>
+  </div>
+</div>
+<div id="memorize-overlay" role="dialog" aria-modal="true" aria-label="Memorovací režim">
+  <div id="memorize-sheet">
+    <div class="mm-handle"></div>
+    <button class="mm-close" type="button" onclick="closeMemorizeMode()" aria-label="Zavřít">✕</button>
+    <div class="mm-head">
+      <div class="mm-title">Memorovací režim 🧠</div>
+      <div class="mm-sub" id="mm-verse-ref"></div>
+      <div class="mm-streak" id="mm-streak-badge">🔥 0</div>
+    </div>
+    <div class="mm-progress-wrap">
+      <div class="mm-progress-label" id="mm-progress-label">Úroveň 1 / 6</div>
+      <div class="mm-progress-track"><div id="mm-progress-bar"></div></div>
+    </div>
+    <div class="mm-level-grid" id="mm-level-grid"></div>
+    <div class="mm-message" id="mm-message"></div>
+    <div class="mm-content" id="mm-content"></div>
+    <div id="mm-confetti" aria-hidden="true"></div>
+    <div class="mm-actions">
+      <button type="button" class="mm-btn mm-btn-ghost" id="mm-retry-btn">Zkusit znovu</button>
+      <button type="button" class="mm-btn" id="mm-next-btn">Pokračovat</button>
+    </div>
   </div>
 </div>
 <div id="ux35-toast" aria-live="polite"></div>
@@ -2589,6 +2717,458 @@ window.shareCurrentVerse=async function(){
     }
   },'image/png');
 };
+
+/* === MEMORIZE MODE === */
+(function(){
+  const LEVELS = [
+    { id: 1, name: 'Přečti si' },
+    { id: 2, name: 'Jedno slovo' },
+    { id: 3, name: 'Každé třetí' },
+    { id: 4, name: 'Polovina' },
+    { id: 5, name: 'První písmena' },
+    { id: 6, name: 'Zpaměti' }
+  ];
+  const MESSAGES = [
+    'Skvěle! Jsi o krok blíž k zapamatování. 🎯',
+    'Úroveň splněna! Krásná práce ✨',
+    'Paráda! Tohle už máš v srdci. 💖',
+    'Jen tak dál, jde ti to výborně! 🚀'
+  ];
+  const mm = {
+    open: false,
+    level: 1,
+    unlocked: 1,
+    verse: null,
+    storageKey: '',
+    progress: { level: 0, completedAt: '', streak: 0 },
+    quiz: null
+  };
+  const el = {
+    overlay: document.getElementById('memorize-overlay'),
+    sheet: document.getElementById('memorize-sheet'),
+    ref: document.getElementById('mm-verse-ref'),
+    streak: document.getElementById('mm-streak-badge'),
+    label: document.getElementById('mm-progress-label'),
+    bar: document.getElementById('mm-progress-bar'),
+    levels: document.getElementById('mm-level-grid'),
+    msg: document.getElementById('mm-message'),
+    content: document.getElementById('mm-content'),
+    retry: document.getElementById('mm-retry-btn'),
+    next: document.getElementById('mm-next-btn'),
+    confetti: document.getElementById('mm-confetti')
+  };
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function normalize(s){
+    return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
+  }
+  function tokenData(text){
+    const parts = (text||'').split(/(\s+)/);
+    const words = [];
+    let wi = -1;
+    const map = parts.map(function(part){
+      if (/^\s+$/.test(part)) return { t: 'space', text: part };
+      wi += 1;
+      const clean = part.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,'');
+      const pre = part.match(/^[^\p{L}\p{N}]+/u);
+      const post = part.match(/[^\p{L}\p{N}]+$/u);
+      words.push(clean || part);
+      return { t: 'word', original: part, clean: clean || part, index: wi, pre: pre ? pre[0] : '', post: post ? post[0] : '' };
+    });
+    return { parts: map, words: words };
+  }
+  function localDayStamp(dt){
+    const d = dt || new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  }
+  function loadProgress(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(mm.storageKey) || '{}') || {};
+      return {
+        level: Number(raw.level) || 0,
+        completedAt: typeof raw.completedAt === 'string' ? raw.completedAt : '',
+        streak: Number(raw.streak) || 0
+      };
+    }catch(e){
+      return { level: 0, completedAt: '', streak: 0 };
+    }
+  }
+  function saveProgress(){
+    try{ localStorage.setItem(mm.storageKey, JSON.stringify(mm.progress)); }catch(e){}
+  }
+  function updateStreakOnComplete(){
+    const today = new Date();
+    const todayISO = today.toISOString().slice(0,10);
+    const prev = mm.progress.completedAt;
+    let streak = Number(mm.progress.streak) || 0;
+    if (!prev) streak = 1;
+    else if (prev === todayISO) streak = Math.max(1, streak);
+    else {
+      const prevDt = new Date(prev + 'T00:00:00');
+      const diffDays = Math.round((localDayStamp(today) - localDayStamp(prevDt)) / 86400000);
+      streak = diffDays === 1 ? streak + 1 : 1;
+    }
+    mm.progress.completedAt = todayISO;
+    mm.progress.streak = streak;
+  }
+  function shuffle(a){
+    const arr = a.slice();
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+  function alternatives(words, answer){
+    const base = words.filter(w => normalize(w) !== normalize(answer) && normalize(w).length > 1);
+    const picks = shuffle(base).slice(0,2);
+    while (picks.length < 2) picks.push(answer + (picks.length ? '!' : '?'));
+    return shuffle([answer].concat(picks));
+  }
+  function hiddenIndices(words, level){
+    const len = words.length;
+    if (level === 2){
+      const target = Math.max(1, Math.round(len * 0.12));
+      const scored = words.map((w,i)=>({i:i,score:normalize(w).length})).sort((a,b)=>b.score-a.score);
+      return scored.slice(0,target).map(x=>x.i).sort((a,b)=>a-b);
+    }
+    if (level === 3){
+      const out = [];
+      for(let i=2;i<len;i+=3) out.push(i);
+      return out.length ? out : [Math.min(2, len-1)];
+    }
+    if (level === 4){
+      const out = [];
+      for(let i=1;i<len;i+=2) out.push(i);
+      return out.length ? out : [Math.min(1, len-1)];
+    }
+    return [];
+  }
+  function initialsHint(words){
+    return words.map(function(w){
+      const ch = w.charAt(0) || '';
+      return ch ? ch + '_'.repeat(Math.max(2, Math.min(8, w.length - 1))) : '';
+    }).join(' ');
+  }
+  function setMessage(text){
+    if (!el.msg) return;
+    el.msg.style.opacity = '0';
+    el.msg.style.transform = 'translateY(6px)';
+    setTimeout(function(){
+      el.msg.textContent = text;
+      el.msg.style.opacity = '1';
+      el.msg.style.transform = 'translateY(0)';
+    }, 110);
+  }
+  function confetti(){
+    if (!el.confetti) return;
+    el.confetti.innerHTML = '';
+    const colors = ['#e5458e','#7b3ef4','#f0b429','#2ecc71','#3498db','#ff6b6b'];
+    for(let i=0;i<34;i++){
+      const p = document.createElement('span');
+      p.className = 'mm-piece';
+      p.style.left = (Math.random()*100) + '%';
+      p.style.width = p.style.height = (6 + Math.random()*8) + 'px';
+      p.style.background = colors[Math.floor(Math.random()*colors.length)];
+      p.style.animationDelay = (Math.random()*0.3) + 's';
+      p.style.animationDuration = (0.8 + Math.random()*0.7) + 's';
+      el.confetti.appendChild(p);
+    }
+    setTimeout(function(){ if (el.confetti) el.confetti.innerHTML = ''; }, 1600);
+  }
+  function flash(ok){
+    if (!el.sheet) return;
+    el.sheet.classList.remove('mm-correct-flash','mm-wrong-flash');
+    void el.sheet.offsetWidth;
+    el.sheet.classList.add(ok ? 'mm-correct-flash' : 'mm-wrong-flash');
+  }
+  function renderVerseMasked(tokens, currentIndex){
+    return tokens.parts.map(function(part){
+      if (part.t === 'space') return part.text;
+      if (!mm.quiz || !mm.quiz.hiddenSet[part.index]) return esc(part.original);
+      if (mm.quiz.solved[part.index]){
+        return '<span class="mm-reveal'+(part.index===currentIndex?' mm-word-bounce':'')+'">' + esc(part.pre + part.clean + part.post) + '</span>';
+      }
+      if (part.index === currentIndex) {
+        return part.pre + '<button class="mm-blank-btn" type="button" disabled>_____</button>' + part.post;
+      }
+      return part.pre + '<span class="mm-blank-static">_____</span>' + part.post;
+    }).join('');
+  }
+  function transitionContent(fn){
+    if (!el.content) return fn();
+    el.content.classList.add('transitioning');
+    setTimeout(function(){ fn(); el.content.classList.remove('transitioning'); }, 130);
+  }
+  function evaluateTyped(answer, typed){
+    return normalize(answer) === normalize(typed);
+  }
+  function setButtons(done){
+    if (!el.next || !el.retry) return;
+    const finalLevel = mm.level === 6;
+    if (done) {
+      el.next.disabled = false;
+      el.next.textContent = finalLevel ? 'Hotovo 🎉' : 'Další úroveň';
+    } else {
+      el.next.disabled = mm.level !== 1;
+      el.next.textContent = mm.level === 1 ? 'Úroveň splněna' : 'Pokračovat';
+    }
+    el.retry.textContent = 'Zkusit znovu';
+  }
+  function completeLevel(){
+    const prevLevel = mm.progress.level || 0;
+    mm.progress.level = Math.max(prevLevel, mm.level);
+    updateStreakOnComplete();
+    saveProgress();
+    mm.unlocked = Math.min(6, (mm.progress.level || 0) + 1);
+    confetti();
+    setMessage(pick(MESSAGES));
+    setButtons(true);
+    renderLevelGrid();
+  }
+  function wrongFeedback(answer){
+    flash(false);
+    if (!el.content) return;
+    el.content.classList.add('mm-shake');
+    setMessage('❌ Správně je: ' + answer);
+    setTimeout(function(){ el.content && el.content.classList.remove('mm-shake'); }, 360);
+  }
+  function nextQuizItem(){
+    if (!mm.quiz) return;
+    mm.quiz.cursor += 1;
+    if (mm.quiz.cursor >= mm.quiz.items.length){
+      completeLevel();
+      renderLevel();
+      return;
+    }
+    renderLevel();
+  }
+  function answerOption(value){
+    if (!mm.quiz) return;
+    const item = mm.quiz.items[mm.quiz.cursor];
+    const correct = evaluateTyped(item.answer, value);
+    if (correct){
+      mm.quiz.solved[item.index] = true;
+      flash(true);
+      setMessage('✅ Správně!');
+      setTimeout(nextQuizItem, 260);
+    } else {
+      wrongFeedback(item.answer);
+      setTimeout(renderLevel, 1500);
+    }
+  }
+  function submitTyped(inputId){
+    if (!mm.quiz) return;
+    const input = document.getElementById(inputId);
+    const val = input ? input.value : '';
+    const item = mm.quiz.items[mm.quiz.cursor];
+    const correct = evaluateTyped(item.answer, val);
+    if (correct){
+      if (mm.quiz.solved && typeof item.index === 'number') mm.quiz.solved[item.index] = true;
+      flash(true);
+      setMessage('✅ Výborně!');
+      setTimeout(nextQuizItem, 260);
+    } else {
+      wrongFeedback(item.answer);
+      setTimeout(renderLevel, 1500);
+    }
+  }
+  function buildQuiz(level){
+    const tk = tokenData(mm.verse.t || '');
+    const hidden = hiddenIndices(tk.words, level);
+    const hiddenSet = {};
+    const solved = {};
+    hidden.forEach(function(i){ hiddenSet[i] = true; solved[i] = false; });
+    const items = hidden.map(function(i, idx){
+      return {
+        index: i,
+        answer: tk.words[i],
+        mode: (level === 4 && (idx % 2 === 1)) ? 'type' : 'pick',
+        options: alternatives(tk.words, tk.words[i])
+      };
+    });
+    mm.quiz = { tokens: tk, hiddenSet: hiddenSet, solved: solved, items: items, cursor: 0 };
+  }
+  function renderLevelGrid(){
+    if (!el.levels) return;
+    el.levels.innerHTML = LEVELS.map(function(level){
+      const locked = level.id > mm.unlocked;
+      const active = level.id === mm.level;
+      return '<button type="button" class="mm-level-chip'+(active?' active':'')+(locked?' locked':'')+'" data-level="'+level.id+'" '+(locked?'disabled':'')+'>'+level.id+'. '+level.name+'</button>';
+    }).join('');
+  }
+  function renderLevel(){
+    if (!mm.verse || !el.content) return;
+    const levelMeta = LEVELS[mm.level - 1];
+    el.label.textContent = 'Úroveň ' + mm.level + ' / 6';
+    el.bar.style.width = ((mm.level / 6) * 100) + '%';
+    if (el.streak) el.streak.textContent = '🔥 ' + (mm.progress.streak || 0);
+    setButtons(false);
+    transitionContent(function(){
+      if (mm.level === 1){
+        el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
+        setMessage('Úroveň 1: Jen si verš v klidu přečti.');
+        return;
+      }
+      if (mm.level >= 2 && mm.level <= 4){
+        if (!mm.quiz) buildQuiz(mm.level);
+        const item = mm.quiz.items[mm.quiz.cursor];
+        const prompt = item && item.mode === 'type' ? 'Dopiš chybějící slovo:' : 'Vyber správné chybějící slovo:';
+        let html = '<div class="mm-verse">' + renderVerseMasked(mm.quiz.tokens, item ? item.index : -1) + '</div>';
+        html += '<div class="mm-type-wrap"><div style="font-weight:900">'+prompt+'</div>';
+        if (item) {
+          if (item.mode === 'type') {
+            html += '<input class="mm-input" id="mm-type-word" placeholder="Napiš slovo" autocomplete="off">';
+            html += '<button type="button" class="mm-option" onclick="memorizeSubmitWord()">Potvrdit</button>';
+          } else {
+            html += '<div class="mm-options">' + item.options.map(function(opt){
+              return '<button type="button" class="mm-option" data-opt="' + encodeURIComponent(opt) + '" onclick="memorizePickOption(this)">' + esc(opt) + '</button>';
+            }).join('') + '</div>';
+          }
+        }
+        html += '</div>';
+        el.content.innerHTML = html;
+        setMessage('Úroveň ' + mm.level + ': ' + levelMeta.name);
+        return;
+      }
+      if (mm.level === 5){
+        const tk = tokenData(mm.verse.t || '');
+        const hint = initialsHint(tk.words);
+        el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">'+esc(hint)+'</div><textarea id="mm-level5-input" class="mm-input" rows="4" placeholder="Dopiš celý verš podle prvních písmen"></textarea><button type="button" class="mm-option" onclick="memorizeSubmitLevel5()">Zkontrolovat</button>';
+        setMessage('Úroveň 5: Vidíš jen první písmena.');
+        return;
+      }
+      el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">Napiš verš celý zpaměti:</div><textarea id="mm-level6-input" class="mm-input" rows="5" placeholder="Sem napiš celý verš"></textarea><button type="button" class="mm-option" onclick="memorizeSubmitLevel6()">Vyhodnotit</button>';
+      setMessage('Úroveň 6: Teď už úplně zpaměti.');
+    });
+  }
+  function resetCurrentLevel(){
+    mm.quiz = null;
+    renderLevel();
+  }
+  function goNextLevel(){
+    if (mm.level === 1){
+      completeLevel();
+      mm.level = Math.min(mm.unlocked, 2);
+      mm.quiz = null;
+      renderLevel();
+      return;
+    }
+    if (mm.progress.level >= mm.level && mm.level < mm.unlocked){
+      mm.level += 1;
+      mm.quiz = null;
+      renderLevelGrid();
+      renderLevel();
+    }
+  }
+  function close(){
+    mm.open = false;
+    if (!el.overlay) return;
+    el.overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function open(){
+    const vv = VERSES[state.idx];
+    if (!vv || !el.overlay) return;
+    mm.verse = vv;
+    mm.storageKey = 'memorize_' + vv.c + '_' + vv.v;
+    mm.progress = loadProgress();
+    mm.unlocked = Math.min(6, (mm.progress.level || 0) + 1);
+    mm.level = mm.unlocked;
+    mm.quiz = null;
+    mm.open = true;
+    el.ref.textContent = 'Zj ' + vv.c + ':' + vv.v + ' • ' + chName(vv.c);
+    renderLevelGrid();
+    renderLevel();
+    el.overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('memorize-overlay');
+  }
+  window.openMemorizeMode = open;
+  window.closeMemorizeMode = close;
+  window.memorizePickOption = function(btn){
+    if (!btn) return;
+    const encoded = btn.getAttribute('data-opt') || '';
+    answerOption(decodeURIComponent(encoded));
+  };
+  window.memorizeSubmitWord = function(){ submitTyped('mm-type-word'); };
+  window.memorizeSubmitLevel5 = function(){
+    const input = document.getElementById('mm-level5-input');
+    if (evaluateTyped(mm.verse.t, input ? input.value : '')) {
+      flash(true);
+      setMessage('✅ Perfektní! Verš držíš skvěle.');
+      completeLevel();
+      renderLevel();
+    } else {
+      wrongFeedback(mm.verse.t);
+      setTimeout(renderLevel, 1500);
+    }
+  };
+  window.memorizeSubmitLevel6 = function(){
+    const input = document.getElementById('mm-level6-input');
+    if (evaluateTyped(mm.verse.t, input ? input.value : '')) {
+      flash(true);
+      setMessage('✅ Nádhera! Máš to zpaměti.');
+      completeLevel();
+      renderLevel();
+    } else {
+      wrongFeedback(mm.verse.t);
+      setTimeout(renderLevel, 1500);
+    }
+  };
+  if (el.levels){
+    el.levels.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest ? e.target.closest('.mm-level-chip') : null;
+      if (!btn) return;
+      const next = Number(btn.getAttribute('data-level'));
+      if (!next || next > mm.unlocked) return;
+      mm.level = next;
+      mm.quiz = null;
+      renderLevelGrid();
+      renderLevel();
+    });
+  }
+  if (el.overlay){
+    el.overlay.addEventListener('click', function(e){ if (e.target === el.overlay) close(); });
+  }
+  if (el.retry) el.retry.addEventListener('click', resetCurrentLevel);
+  if (el.next) el.next.addEventListener('click', goNextLevel);
+  if (el.sheet){
+    const DRAG_CLOSE = 110;
+    let startY = 0;
+    let dragY = 0;
+    let dragging = false;
+    el.sheet.addEventListener('touchstart', function(e){
+      const t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      startY = t.clientY;
+      dragY = 0;
+      dragging = true;
+      el.sheet.classList.add('dragging');
+    }, { passive: true });
+    el.sheet.addEventListener('touchmove', function(e){
+      if (!dragging) return;
+      const t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      const dy = t.clientY - startY;
+      if (dy <= 0) return;
+      dragY = dy;
+      e.preventDefault();
+      el.sheet.style.transform = 'translateY(' + dy + 'px)';
+      if (el.overlay) el.overlay.style.background = 'rgba(10,8,14,' + Math.max(0.12, 0.36 - dy / 420) + ')';
+    }, { passive: false });
+    function finishDrag(){
+      if (!dragging) return;
+      dragging = false;
+      el.sheet.classList.remove('dragging');
+      if (dragY > DRAG_CLOSE) close();
+      el.sheet.style.transform = '';
+      if (el.overlay) el.overlay.style.background = '';
+      dragY = 0;
+    }
+    el.sheet.addEventListener('touchend', finishDrag, { passive: true });
+    el.sheet.addEventListener('touchcancel', finishDrag, { passive: true });
+  }
+})();
 
 // swipe to close nav sheet
 (function(){
@@ -4948,6 +5528,7 @@ const FCM_SENDER_ID = '360259005980';
   function closeTopOverlayForBack() {
     var ordered = [
       ['profile-overlay', window.closeProfile],
+      ['memorize-overlay', window.closeMemorizeMode],
       ['notif-settings-overlay', window.closeNotifSettings],
       ['display-settings-overlay', window.closeDisplaySettings],
       ['streak-detail-overlay', window.closeStreakDetail],
