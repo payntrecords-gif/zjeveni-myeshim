@@ -3002,13 +3002,14 @@ window.shareCurrentVerse=async function(){
     if (!el.next || !el.retry) return;
     const finalLevel = mm.level === 6;
     const freeAdvance = FREE_ADVANCE_LEVELS.includes(mm.level);
+    el.retry.style.display = freeAdvance ? 'none' : '';
     if (done) {
       el.next.disabled = false;
       el.next.textContent = finalLevel ? 'Hotovo 🎉' : 'Další úroveň';
       el.next.classList.add('mm-next-ready');
     } else {
       el.next.disabled = !freeAdvance;
-      el.next.textContent = freeAdvance ? 'Úroveň splněna' : 'Pokračovat';
+      el.next.textContent = freeAdvance ? 'Další úroveň' : 'Pokračovat';
       el.next.classList.remove('mm-next-ready');
     }
     el.retry.textContent = 'Zkusit znovu';
@@ -3164,29 +3165,11 @@ window.shareCurrentVerse=async function(){
     setTimeout(function(){ el.bar && el.bar.classList.remove('mm-progress-sheen'); }, 1200);
     setButtons((mm.progress.level || 0) >= mm.level);
     transitionContent(function(){
-      /* ── LEVEL 1: SKENOVÁNÍ ── */
+      /* ── LEVEL 1: ČTENÍ ── */
       if (mm.level === 1){
-        if (!mm.quiz) buildScanQuiz();
-        if (mm.completedThisView || mm.quiz.cursor >= mm.quiz.total){
-          el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
-          if (el.footer) el.footer.innerHTML = '';
-          setMessage('✅ Skvěle! Verš jsi aktivně přečetl/a.');
-        } else {
-          const tk = mm.quiz.tokens;
-          const cursor = mm.quiz.cursor;
-          const wordsHtml = tk.parts.map(function(part){
-            if (part.t === 'space') return part.text;
-            var wi = part.index;
-            var cls = 'mm-scan-word';
-            if (wi < cursor) cls += ' mm-scan-done';
-            else if (wi === cursor) cls += ' mm-scan-active';
-            return '<button type="button" class="' + cls + '" data-action="scan-word" data-word-idx="' + wi + '">' + esc(part.original) + '</button>';
-          }).join('');
-          el.content.innerHTML = '<div class="mm-verse">' + wordsHtml + '</div>';
-          if (el.footer) el.footer.innerHTML = '<div class="mm-quiz-prompt">Klepej na slova v pořadí: ' + cursor + '\u00a0/\u00a0' + mm.quiz.total + '</div>';
-          setMessage('Úroveň 1: Klepni na každé zvýrazněné slovo.');
-          if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
-        }
+        el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
+        if (el.footer) el.footer.innerHTML = '';
+        setMessage('Úroveň 1: Přečti si celý verš.');
         return;
       }
       /* ── LEVEL 2: JEDNO SLOVO ── */
@@ -3233,16 +3216,23 @@ window.shareCurrentVerse=async function(){
         el.content.innerHTML = '<div class="mm-verse">' + verseHtml + '</div>';
         if (el.footer) el.footer.innerHTML = '<div class="mm-quiz-prompt">Vyber správné slovo do označené mezery:</div><div class="mm-bank">' + bankHtml + '</div>';
         setMessage('Úroveň 3: Doplň slova do mezer.');
-        if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
+        if (el.next && (mm.progress.level || 0) < mm.level) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
         return;
       }
       /* ── LEVEL 4: PRVNÍ PÍSMENA ── */
       if (mm.level === 4){
+        if (!mm.quiz) mm.quiz = { revealed: false };
         const tk4 = tokenData(mm.verse.t || '');
         const hint = initialsHint(tk4.words);
-        el.content.innerHTML = '<div class="mm-verse">' + esc(hint) + '</div>';
-        if (el.footer) el.footer.innerHTML = '';
-        setMessage('Úroveň 4: Vidíš jen první písmena. Čti v mysli celý verš.');
+        if (mm.quiz.revealed){
+          el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
+          if (el.footer) el.footer.innerHTML = '<button type="button" class="mm-reveal-btn" data-action="toggle-level4-verse">Skrýt verš 👁</button>';
+          setMessage('Úroveň 4: Čti celý verš a vrať se k iniciálám.');
+        } else {
+          el.content.innerHTML = '<div class="mm-verse">' + esc(hint) + '</div>';
+          if (el.footer) el.footer.innerHTML = '<button type="button" class="mm-reveal-btn" data-action="toggle-level4-verse">Zobrazit verš 👁</button>';
+          setMessage('Úroveň 4: Vidíš jen první písmena. Čti v mysli celý verš.');
+        }
         return;
       }
       /* ── LEVEL 5: SKLÁDAČKA ── */
@@ -3269,7 +3259,7 @@ window.shareCurrentVerse=async function(){
           '<div class="mm-puzzle-pool">' + (poolHtml || '<span class="mm-puzzle-placeholder">Všechny části jsou použity</span>') + '</div>' +
           (canCheck ? '<button type="button" class="mm-option" data-action="puzzle-check" style="margin-top:10px">Zkontrolovat ✓</button>' : '');
         setMessage('Úroveň 5: Seřaď části verše ve správném pořadí.');
-        if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
+        if (el.next && (mm.progress.level || 0) < mm.level) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
         return;
       }
       /* ── LEVEL 6: MISTROVSTVÍ ── */
@@ -3292,7 +3282,7 @@ window.shareCurrentVerse=async function(){
           '</div>';
       }
       setMessage('Úroveň 6: Zkus to zpaměti – buď k sobě upřímný/á.');
-      if (el.next) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
+      if (el.next && (mm.progress.level || 0) < mm.level) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
     });
   }
   function resetCurrentLevel(){
@@ -3305,7 +3295,9 @@ window.shareCurrentVerse=async function(){
     const freeAdvance = FREE_ADVANCE_LEVELS.includes(mm.level);
     if (freeAdvance){
       if (!mm.completedThisView) completeLevel();
-      mm.level = Math.min(Math.max(mm.unlocked, mm.level + 1), 6);
+      const nextLevel = Math.min(mm.level + 1, 6);
+      if (nextLevel > mm.unlocked) return;
+      mm.level = nextLevel;
       mm.quiz = null;
       mm.attempts = 0;
       mm.completedThisView = false;
@@ -3481,6 +3473,11 @@ window.shareCurrentVerse=async function(){
       if (action === 'reveal-verse') {
         if (mm.quiz) mm.quiz.revealed = true;
         setMessage('Přečti verš a upřímně zhodnoť.');
+        renderLevel();
+        return;
+      }
+      if (action === 'toggle-level4-verse') {
+        if (mm.quiz) mm.quiz.revealed = !mm.quiz.revealed;
         renderLevel();
         return;
       }
