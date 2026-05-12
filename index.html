@@ -2078,24 +2078,28 @@ body.dark #bn-nav {
 }
 </style>
 
-<style id="memorize-mode-style">
+<style id="memo-style">
 /* === MEMORIZE MODE === */
-#memorize-overlay{
+#memo-overlay{
   position:fixed;inset:0;z-index:1000;background:rgba(10,8,14,.36);
   backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
   display:none;align-items:flex-end;justify-content:center;
   padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:contain;
 }
-#memorize-overlay.open{display:flex;animation:wov-in .22s ease}
-#memorize-sheet{
+#memo-overlay.open{display:flex;animation:wov-in .22s ease}
+#memo-sheet{
   width:100%;max-width:480px;max-height:85vh;background:#fff;border-radius:28px 28px 0 0;
   padding:16px 16px 12px;position:fixed;bottom:0;left:0;right:0;margin:0 auto;display:flex;flex-direction:column;touch-action:pan-y;transform:translateY(100%);
   transition:transform .4s ease,box-shadow .3s ease;background-image:linear-gradient(180deg,#fff 0%,#fdf9fc 100%);
   box-shadow:0 20px 40px rgba(22,14,24,.22);overflow:hidden;
 }
-#memorize-overlay.open #memorize-sheet{transform:translateY(0)}
-#memorize-sheet.dragging{transition:none}
-body.dark #memorize-sheet{background:#1c161d;background-image:linear-gradient(180deg,#231b24 0%,#1a151d 100%);color:#f8eef5}
+#memo-overlay.open #memo-sheet{transform:translateY(0);animation:wsh-up .28s cubic-bezier(.22,1,.36,1)}
+#memo-sheet.dragging{transition:none}
+body.dark #memo-sheet{background:#1c161d;background-image:linear-gradient(180deg,#231b24 0%,#1a151d 100%);color:#f8eef5}
+.mm-level-badge{
+  min-width:18px;height:18px;border-radius:999px;padding:0 5px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:900;background:#2fbf62;color:#fff;line-height:1;
+}
 .mm-handle{width:42px;height:5px;border-radius:999px;background:rgba(0,0,0,.14);margin:0 auto 10px}
 body.dark .mm-handle{background:rgba(255,255,255,.18)}
 .mm-close{
@@ -2143,13 +2147,15 @@ body.dark .mm-verse{color:#f8eef5}
 }
 .mm-blank-static{display:inline-block;min-width:58px;border-bottom:2px dashed rgba(229,69,142,.35);text-align:center;color:#c98aac}
 .mm-reveal{display:inline-block;padding:1px 6px;border-radius:10px;background:rgba(76,175,80,.18);color:#2f7b37;font-weight:900}
-.mm-options{display:grid;gap:8px;margin-top:14px}
+.mm-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}
 .mm-option{
   border:1.5px solid rgba(229,69,142,.3);background:#fff;border-radius:14px;padding:12px;min-height:44px;
   font:inherit;font-size:.96rem;font-weight:800;cursor:pointer;text-align:left;transition:transform .15s ease,box-shadow .15s ease
 }
+.mm-option.active{border-color:var(--pink,#e5458e);background:#fff2f8;transform:scale(1.03)}
 .mm-option:active{transform:scale(.985)}
 body.dark .mm-option{background:#2a202b;color:#f8eef5;border-color:#57435b}
+body.dark .mm-option.active{background:rgba(255,140,194,.18);border-color:#ff8cc2}
 .mm-type-wrap{margin-top:12px;display:grid;gap:8px}
 .mm-input{
   width:100%;min-height:44px;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;font-size:.97rem;
@@ -2157,7 +2163,7 @@ body.dark .mm-option{background:#2a202b;color:#f8eef5;border-color:#57435b}
 }
 body.dark .mm-input{background:#251d27;color:#f8eef5;border-color:#4b3b50}
 .mm-actions{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;flex-shrink:0;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;flex-shrink:0;
   position:sticky;bottom:0;z-index:3;padding:8px 0 calc(env(safe-area-inset-bottom, 0px) + 2px);
   background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.94) 28%,rgba(255,255,255,.98) 100%);
 }
@@ -2171,7 +2177,7 @@ body.dark .mm-btn-ghost{background:#271f29;color:#ff9dcf;border-color:#624a66}
 body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba(28,22,29,.94) 28%,rgba(28,22,29,.98) 100%)}
 .mm-correct-flash{animation:mm-flash .42s ease}
 .mm-wrong-flash{animation:mm-wrong .45s ease}
-.mm-shake{animation:mm-shake .34s ease}
+.mm-shake{animation:shake .34s ease}
 .mm-word-bounce{display:inline-block;animation:mm-bounce .35s ease}
 .mm-success-mark{font-size:1.25rem;margin-left:6px;display:inline-block;animation:mm-bounce .38s ease}
 #mm-confetti{
@@ -2180,6 +2186,7 @@ body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba
 .mm-piece{position:absolute;top:-18px;border-radius:50%;animation:mm-fall 1.2s linear forwards}
 @keyframes mm-flash{0%{box-shadow:0 0 0 rgba(76,175,80,0)}30%{box-shadow:0 0 0 999px rgba(76,175,80,.16) inset}100%{box-shadow:0 0 0 rgba(76,175,80,0)}}
 @keyframes mm-wrong{0%{box-shadow:0 0 0 rgba(229,57,53,0)}32%{box-shadow:0 0 0 999px rgba(229,57,53,.16) inset}100%{box-shadow:0 0 0 rgba(229,57,53,0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
 @keyframes mm-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
 @keyframes mm-bounce{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
 @keyframes mm-fall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(360px) rotate(220deg);opacity:0}}
@@ -2223,7 +2230,7 @@ body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba
   <div class="verse-actions">
     <button class="va-btn" id="verse-share-btn" onclick="shareCurrentVerse()">Sdílet verš</button>
     <button class="va-btn ghost" id="verse-fav-btn" onclick="toggleFavoriteVerse()">♡ Oblíbené</button>
-    <button class="va-btn ghost" id="verse-memorize-btn" aria-label="Spustit memorovací režim">Memorovat</button>
+    <button class="va-btn ghost" id="verse-memorize-btn" aria-label="Spustit memorovací režim">🧠 Memorovat <span id="verse-memo-badge" class="mm-level-badge" style="display:none"></span></button>
   </div>
 </div>
 <div id="app-tabs-outer">
@@ -2274,8 +2281,8 @@ body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba
     <button class="dss-close-btn" type="button" onclick="closeDisplaySettings()">Hotovo</button>
   </div>
 </div>
-<div id="memorize-overlay" role="dialog" aria-modal="true" aria-label="Memorovací režim">
-  <div id="memorize-sheet">
+<div id="memo-overlay" role="dialog" aria-modal="true" aria-label="Memorovací režim">
+  <div id="memo-sheet">
     <div class="mm-handle"></div>
     <button class="mm-close" type="button" aria-label="Zavřít">✕</button>
     <div class="mm-head">
@@ -2292,8 +2299,9 @@ body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba
     <div class="mm-content" id="mm-content"></div>
     <div id="mm-confetti" aria-hidden="true"></div>
     <div class="mm-actions">
-      <button type="button" class="mm-btn mm-btn-ghost" id="mm-retry-btn">Zkusit znovu</button>
-      <button type="button" class="mm-btn" id="mm-next-btn">Pokračovat</button>
+      <button type="button" class="mm-btn" id="mm-check-btn">Zkontrolovat</button>
+      <button type="button" class="mm-btn mm-btn-ghost" id="mm-skip-btn">Přeskočit</button>
+      <button type="button" class="mm-btn mm-btn-ghost" id="mm-close-btn">Zavřít</button>
     </div>
   </div>
 </div>
@@ -2411,6 +2419,7 @@ function render(){
   nextBtn.setAttribute('aria-disabled',state.idx===VERSES.length-1?'true':'false');
   setTab(state.tab||'qa');
   updateFavoriteButton();
+  if (typeof window.updateMemoBadge === 'function') window.updateMemoBadge();
   save();
 }
 
@@ -2743,37 +2752,33 @@ window.shareCurrentVerse=async function(){
     level: 1,
     unlocked: 1,
     verse: null,
-    storageKey: '',
-    progress: { level: 0, completedAt: '', streak: 0 },
+    verseRef: '',
+    progress: { level: 0 },
     quiz: null,
-    attempts: 0
+    attempts: 0,
+    levelDone: false
   };
   const GENERIC_OPTIONS = ['Slovo','Amen','Duch','Život','Pravda','Světlo'];
   const MIN_HINT_UNDERSCORE_COUNT = 1;
   const MAX_HINT_UNDERSCORE_COUNT = 8;
   const DRAG_FADE_DISTANCE = 420;
   const el = {
-    overlay: document.getElementById('memorize-overlay'),
-    sheet: document.getElementById('memorize-sheet'),
+    overlay: document.getElementById('memo-overlay'),
+    sheet: document.getElementById('memo-sheet'),
     ref: document.getElementById('mm-verse-ref'),
-    streak: document.getElementById('mm-streak-badge'),
     label: document.getElementById('mm-progress-label'),
     bar: document.getElementById('mm-progress-bar'),
     levels: document.getElementById('mm-level-grid'),
     msg: document.getElementById('mm-message'),
     content: document.getElementById('mm-content'),
-    retry: document.getElementById('mm-retry-btn'),
-    next: document.getElementById('mm-next-btn'),
+    check: document.getElementById('mm-check-btn'),
+    skip: document.getElementById('mm-skip-btn'),
+    closeBtn: document.getElementById('mm-close-btn'),
+    badge: document.getElementById('verse-memo-badge'),
     confetti: document.getElementById('mm-confetti')
   };
   function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
   function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
-  function parseLocalISODate(isoDate){
-    const parts = (isoDate || '').split('-');
-    const y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
-    if (!y || !m || !d) return null;
-    return new Date(y, m - 1, d);
-  }
   function normalize(s){
     // Normalize text for tolerant matching across punctuation/diacritics variants.
     return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
@@ -2793,39 +2798,21 @@ window.shareCurrentVerse=async function(){
     });
     return { parts: map, words: words };
   }
-  function localDayStamp(dt){
-    const d = dt || new Date();
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  }
   function loadProgress(){
     try{
-      const raw = JSON.parse(localStorage.getItem(mm.storageKey) || '{}') || {};
-      return {
-        level: Number(raw.level) || 0,
-        completedAt: typeof raw.completedAt === 'string' ? raw.completedAt : '',
-        streak: Number(raw.streak) || 0
-      };
+      const all = JSON.parse(localStorage.getItem('memo_progress') || '{}') || {};
+      return { level: Number(all[mm.verseRef]) || 0 };
     }catch(e){
-      return { level: 0, completedAt: '', streak: 0 };
+      return { level: 0 };
     }
   }
   function saveProgress(){
-    try{ localStorage.setItem(mm.storageKey, JSON.stringify(mm.progress)); }catch(e){}
-  }
-  function updateStreakOnComplete(){
-    const today = new Date();
-    const todayISODate = today.toISOString().slice(0,10);
-    const prev = mm.progress.completedAt;
-    let streak = Number(mm.progress.streak) || 0;
-    if (!prev) streak = 1;
-    else if (prev === todayISODate) streak = Math.max(1, streak);
-    else {
-      const prevDt = parseLocalISODate(prev);
-      const diffDays = prevDt ? Math.round((localDayStamp(today) - localDayStamp(prevDt)) / 86400000) : 99;
-      streak = diffDays === 1 ? streak + 1 : 1;
-    }
-    mm.progress.completedAt = todayISODate;
-    mm.progress.streak = streak;
+    try{
+      const all = JSON.parse(localStorage.getItem('memo_progress') || '{}') || {};
+      all[mm.verseRef] = Number(mm.progress.level) || 0;
+      localStorage.setItem('memo_progress', JSON.stringify(all));
+    }catch(e){}
+    updateMemoBadge();
   }
   function shuffle(a){
     const arr = a.slice();
@@ -2837,16 +2824,16 @@ window.shareCurrentVerse=async function(){
   }
   function alternatives(words, answer){
     const base = words.filter(w => normalize(w) !== normalize(answer) && normalize(w).length > 1);
-    const picks = shuffle(base).slice(0,2);
+    const picks = shuffle(base).slice(0,3);
     const generic = GENERIC_OPTIONS.filter(w => normalize(w) !== normalize(answer));
-    while (picks.length < 2 && generic.length) picks.push(generic.shift());
-    while (picks.length < 2) picks.push('Slovo');
+    while (picks.length < 3 && generic.length) picks.push(generic.shift());
+    while (picks.length < 3) picks.push('Slovo');
     return shuffle([answer].concat(picks));
   }
   function hiddenIndices(words, level){
     const len = words.length;
     if (level === 2){
-      const target = Math.max(1, Math.round(len * 0.12));
+      const target = Math.max(1, Math.round(len * 0.15));
       const scored = words.map((w,i)=>({i:i,score:normalize(w).length})).sort((a,b)=>b.score-a.score);
       return scored.slice(0,target).map(x=>x.i).sort((a,b)=>a-b);
     }
@@ -2867,6 +2854,26 @@ window.shareCurrentVerse=async function(){
       const ch = w.charAt(0) || '';
       return ch ? ch + '_'.repeat(clamp(w.length - 1, MIN_HINT_UNDERSCORE_COUNT, MAX_HINT_UNDERSCORE_COUNT)) : '';
     }).join(' ');
+  }
+  function verseRef(vv){
+    return vv ? ('Zj ' + vv.c + ':' + vv.v) : '';
+  }
+  function readMemoProgressMap(){
+    try { return JSON.parse(localStorage.getItem('memo_progress') || '{}') || {}; }
+    catch(e){ return {}; }
+  }
+  function updateMemoBadge(){
+    if (!el.badge) return;
+    const vv = VERSES[state.idx];
+    const ref = verseRef(vv);
+    const level = Number(readMemoProgressMap()[ref]) || 0;
+    if (level > 0){
+      el.badge.style.display = 'inline-flex';
+      el.badge.textContent = String(level);
+    } else {
+      el.badge.style.display = 'none';
+      el.badge.textContent = '';
+    }
   }
   function setMessage(text){
     if (!el.msg) return;
@@ -2921,45 +2928,46 @@ window.shareCurrentVerse=async function(){
   function matchesNormalizedAnswer(answer, typed){
     return normalize(answer) === normalize(typed);
   }
-  function setButtons(done){
-    if (!el.next || !el.retry) return;
-    const finalLevel = mm.level === 6;
-    if (done) {
-      el.next.disabled = false;
-      el.next.textContent = finalLevel ? 'Hotovo 🎉' : 'Další úroveň';
+  function setButtons(){
+    if (!el.check || !el.skip || !el.closeBtn) return;
+    if (mm.levelDone){
+      el.check.textContent = mm.level === 6 ? 'Dokončit' : 'Další úroveň';
+      el.skip.disabled = true;
     } else {
-      el.next.disabled = mm.level !== 1;
-      el.next.textContent = mm.level === 1 ? 'Úroveň splněna' : 'Pokračovat';
+      el.check.textContent = mm.level === 1 ? 'Rozumím, dál' : 'Zkontrolovat';
+      el.skip.disabled = mm.level === 1;
     }
-    el.retry.textContent = 'Zkusit znovu';
+    el.check.disabled = false;
+    el.closeBtn.textContent = 'Zavřít';
   }
   function completeLevel(){
     const prevLevel = mm.progress.level || 0;
     mm.progress.level = Math.max(prevLevel, mm.level);
-    updateStreakOnComplete();
     saveProgress();
     mm.unlocked = Math.min(6, (mm.progress.level || 0) + 1);
+    mm.levelDone = true;
     confetti();
-    setMessage(pick(MESSAGES));
-    setButtons(true);
+    setMessage('Úroveň ' + mm.level + ' splněna! 🎉');
+    if (typeof window.toast === 'function') window.toast('Úroveň ' + mm.level + ' splněna! 🎉');
+    setButtons();
     renderLevelGrid();
   }
   function wrongFeedback(answer){
+    mm.attempts += 1;
     flash(false);
     if (!el.content) return;
     el.content.classList.add('mm-shake');
-    setMessage('❌ Správně je: ' + answer);
+    if (mm.attempts >= 3){
+      setMessage('❌ Správně je: ' + answer);
+      setTimeout(function(){ skipCurrent(true); }, 750);
+    } else {
+      setMessage('❌ Zkus znovu (' + mm.attempts + '/3)');
+    }
     setTimeout(function(){ el.content && el.content.classList.remove('mm-shake'); }, 360);
-  }
-  function restartCurrentLevel(){
-    mm.attempts += 1;
-    mm.quiz = null;
-    const attemptLabel = mm.attempts >= 1 ? ' (Pokus ' + (mm.attempts + 1) + ')' : '';
-    setMessage('Téměř! Zkus to od začátku 💪' + attemptLabel);
-    setTimeout(function(){ renderLevel(); }, 400);
   }
   function nextQuizItem(){
     if (!mm.quiz) return;
+    mm.attempts = 0;
     mm.quiz.cursor += 1;
     if (mm.quiz.cursor >= mm.quiz.items.length){
       completeLevel();
@@ -2979,7 +2987,6 @@ window.shareCurrentVerse=async function(){
       setTimeout(nextQuizItem, 260);
     } else {
       wrongFeedback(item.answer);
-      setTimeout(restartCurrentLevel, 1500);
     }
   }
   function submitTyped(inputId){
@@ -2995,7 +3002,6 @@ window.shareCurrentVerse=async function(){
       setTimeout(nextQuizItem, 260);
     } else {
       wrongFeedback(item.answer);
-      setTimeout(restartCurrentLevel, 1500);
     }
   }
   function buildQuiz(level){
@@ -3008,7 +3014,7 @@ window.shareCurrentVerse=async function(){
       return {
         index: i,
         answer: tk.words[i],
-        mode: (level === 4 && (idx % 2 === 1)) ? 'type' : 'pick',
+        mode: level === 4 ? 'type' : 'pick',
         options: alternatives(tk.words, tk.words[i])
       };
     });
@@ -3027,8 +3033,7 @@ window.shareCurrentVerse=async function(){
     const levelMeta = LEVELS[mm.level - 1];
     el.label.textContent = 'Úroveň ' + mm.level + ' / 6';
     el.bar.style.width = ((mm.level / 6) * 100) + '%';
-    if (el.streak) el.streak.textContent = '🔥 ' + (mm.progress.streak || 0);
-    setButtons((mm.progress.level || 0) >= mm.level);
+    setButtons();
     transitionContent(function(){
       if (mm.level === 1){
         el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
@@ -3044,10 +3049,10 @@ window.shareCurrentVerse=async function(){
         if (item) {
           if (item.mode === 'type') {
             html += '<input class="mm-input" id="mm-type-word" placeholder="Napiš slovo" autocomplete="off">';
-            html += '<button type="button" class="mm-option" data-action="submit-word">Potvrdit</button>';
           } else {
             html += '<div class="mm-options">' + item.options.map(function(opt, choiceIndex){
-              return '<button type="button" class="mm-option" data-choice-index="' + choiceIndex + '">' + esc(opt) + '</button>';
+              const selected = item.selectedIndex === choiceIndex ? ' active' : '';
+              return '<button type="button" class="mm-option'+selected+'" data-choice-index="' + choiceIndex + '">' + esc(opt) + '</button>';
             }).join('') + '</div>';
           }
         }
@@ -3059,11 +3064,11 @@ window.shareCurrentVerse=async function(){
       if (mm.level === 5){
         const tk = tokenData(mm.verse.t || '');
         const hint = initialsHint(tk.words);
-        el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">'+esc(hint)+'</div><textarea id="mm-level5-input" class="mm-input" rows="4" placeholder="Dopiš celý verš podle prvních písmen"></textarea><button type="button" class="mm-option" data-action="submit-level5">Zkontrolovat</button>';
+        el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">'+esc(hint)+'</div><div class="mm-type-wrap">' + tk.words.map(function(w, i){ return '<input class="mm-input mm-level5-word" data-i="'+i+'" placeholder="'+esc((w.charAt(0) || '') + '___')+'" autocomplete="off">'; }).join('') + '</div>';
         setMessage('Úroveň 5: Vidíš jen první písmena.');
         return;
       }
-      el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">Napiš verš celý zpaměti:</div><textarea id="mm-level6-input" class="mm-input" rows="5" placeholder="Sem napiš celý verš"></textarea><button type="button" class="mm-option" data-action="submit-level6">Vyhodnotit</button>';
+      el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">Napiš verš celý zpaměti:</div><textarea id="mm-level6-input" class="mm-input" rows="5" placeholder="Sem napiš celý verš"></textarea>';
       setMessage('Úroveň 6: Teď už úplně zpaměti.');
     });
   }
@@ -3072,20 +3077,41 @@ window.shareCurrentVerse=async function(){
     mm.attempts = 0;
     renderLevel();
   }
-  function goNextLevel(){
+  function skipCurrent(fromReveal){
     if (mm.level === 1){
-      completeLevel();
-      mm.level = Math.min(mm.unlocked, 2);
-      mm.quiz = null;
-      mm.attempts = 0;
-      renderLevel();
       return;
     }
-    if (mm.progress.level >= mm.level && mm.level < mm.unlocked){
-      mm.level += 1;
-      mm.quiz = null;
-      mm.attempts = 0;
-      renderLevelGrid();
+    if (mm.level >= 2 && mm.level <= 4 && mm.quiz){
+      const item = mm.quiz.items[mm.quiz.cursor];
+      if (item){
+        mm.quiz.solved[item.index] = true;
+        if (!fromReveal) setMessage('Přeskočeno. Správně: ' + item.answer);
+      }
+      setTimeout(nextQuizItem, fromReveal ? 300 : 150);
+      return;
+    }
+    if (mm.level === 5 || mm.level === 6){
+      if (!fromReveal) setMessage('Přeskočeno.');
+      completeLevel();
+      renderLevel();
+    }
+  }
+  function goNextLevel(){
+    if (mm.levelDone){
+      if (mm.level < 6){
+        mm.level += 1;
+        mm.levelDone = false;
+        mm.quiz = null;
+        mm.attempts = 0;
+        renderLevelGrid();
+        renderLevel();
+      } else {
+        close();
+      }
+      return;
+    }
+    if (mm.level === 1){
+      completeLevel();
       renderLevel();
     }
   }
@@ -3101,33 +3127,38 @@ window.shareCurrentVerse=async function(){
     const vv = VERSES[state.idx];
     if (!vv || !el.overlay) return;
     mm.verse = vv;
-    mm.storageKey = 'memorize_' + vv.c + '_' + vv.v;
+    mm.verseRef = verseRef(vv);
     mm.progress = loadProgress();
     mm.unlocked = Math.min(6, (mm.progress.level || 0) + 1);
     mm.level = mm.unlocked;
     mm.quiz = null;
+    mm.attempts = 0;
+    mm.levelDone = false;
     mm.open = true;
-    el.ref.textContent = 'Zj ' + vv.c + ':' + vv.v + ' • ' + chName(vv.c);
+    el.ref.textContent = mm.verseRef + ' • ' + chName(vv.c);
     renderLevelGrid();
     renderLevel();
     el.overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
-    if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('memorize-overlay');
+    if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('memo-overlay');
   }
-  window.openMemorizeMode = open;
-  window.closeMemorizeMode = close;
+  window.openMemoMode = open;
+  window.closeMemoMode = close;
+  window.updateMemoBadge = updateMemoBadge;
   function submitLevel5(){
-    const input = document.getElementById('mm-level5-input');
-    if (matchesNormalizedAnswer(mm.verse.t, input ? input.value : '')) {
+    const tk = tokenData(mm.verse.t || '');
+    const words = Array.from(document.querySelectorAll('.mm-level5-word'));
+    const typed = words.map(function(input){ return input.value || ''; });
+    const allGood = tk.words.every(function(word, i){ return matchesNormalizedAnswer(word, typed[i] || ''); });
+    if (allGood) {
       flash(true);
       setMessage('✅ Perfektní! Verš držíš skvěle.');
       completeLevel();
       renderLevel();
     } else {
-      wrongFeedback(mm.verse.t);
-      setTimeout(restartCurrentLevel, 1500);
+      wrongFeedback('zkontroluj všechna slova');
     }
   }
   function submitLevel6(){
@@ -3139,8 +3170,32 @@ window.shareCurrentVerse=async function(){
       renderLevel();
     } else {
       wrongFeedback(mm.verse.t);
-      setTimeout(restartCurrentLevel, 1500);
     }
+  }
+  function checkCurrent(){
+    if (mm.levelDone){
+      goNextLevel();
+      return;
+    }
+    if (mm.level === 1){
+      goNextLevel();
+      return;
+    }
+    if (mm.level >= 2 && mm.level <= 4){
+      if (!mm.quiz) return;
+      const item = mm.quiz.items[mm.quiz.cursor];
+      if (!item) return;
+      if (item.mode === 'type'){
+        submitTyped('mm-type-word');
+      } else if (Number.isInteger(item.selectedIndex) && item.options && item.options[item.selectedIndex] != null){
+        answerOption(item.options[item.selectedIndex]);
+      } else {
+        setMessage('Vyber jednu možnost.');
+      }
+      return;
+    }
+    if (mm.level === 5){ submitLevel5(); return; }
+    if (mm.level === 6){ submitLevel6(); }
   }
   if (el.levels){
     el.levels.addEventListener('click', function(e){
@@ -3151,6 +3206,7 @@ window.shareCurrentVerse=async function(){
       mm.level = next;
       mm.quiz = null;
       mm.attempts = 0;
+      mm.levelDone = false;
       renderLevelGrid();
       renderLevel();
     });
@@ -3159,33 +3215,34 @@ window.shareCurrentVerse=async function(){
     el.overlay.addEventListener('click', function(e){ if (e.target === el.overlay) close(); });
   }
   document.getElementById('verse-memorize-btn')?.addEventListener('click', open);
-  document.querySelector('#memorize-sheet .mm-close')?.addEventListener('click', close);
+  document.querySelector('#memo-sheet .mm-close')?.addEventListener('click', close);
   if (el.content){
     el.content.addEventListener('click', function(e){
       const btn = e.target && e.target.closest ? e.target.closest('button.mm-option') : null;
       if (!btn) return;
-      const action = btn.getAttribute('data-action');
-      if (action === 'submit-word') { submitTyped('mm-type-word'); return; }
-      if (action === 'submit-level5') { submitLevel5(); return; }
-      if (action === 'submit-level6') { submitLevel6(); return; }
       const choiceIndex = Number(btn.getAttribute('data-choice-index'));
       const item = mm.quiz && mm.quiz.items ? mm.quiz.items[mm.quiz.cursor] : null;
-      if (item && Number.isInteger(choiceIndex) && item.options && item.options[choiceIndex] != null) answerOption(item.options[choiceIndex]);
+      if (item && Number.isInteger(choiceIndex) && item.options && item.options[choiceIndex] != null){
+        item.selectedIndex = choiceIndex;
+        renderLevel();
+      }
     });
     el.content.addEventListener('keydown', function(e){
       if (e.key !== 'Enter') return;
       const target = e.target;
-      if (target && target.id === 'mm-type-word') { e.preventDefault(); submitTyped('mm-type-word'); }
+      if (target && target.id === 'mm-type-word') { e.preventDefault(); checkCurrent(); }
     });
   }
   if (el.sheet){
     el.sheet.addEventListener('click', function(e){
       const target = e.target && e.target.closest ? e.target.closest('button') : null;
       if (!target) return;
-      if (target.id === 'mm-retry-btn') resetCurrentLevel();
-      if (target.id === 'mm-next-btn') goNextLevel();
+      if (target.id === 'mm-check-btn') checkCurrent();
+      if (target.id === 'mm-skip-btn') skipCurrent();
+      if (target.id === 'mm-close-btn') close();
     });
   }
+  updateMemoBadge();
   if (el.sheet){
     const DRAG_CLOSE = 110;
     let startY = 0;
@@ -5597,7 +5654,7 @@ const FCM_SENDER_ID = '360259005980';
   function closeTopOverlayForBack() {
     var ordered = [
       ['profile-overlay', window.closeProfile],
-      ['memorize-overlay', window.closeMemorizeMode],
+      ['memo-overlay', window.closeMemoMode],
       ['notif-settings-overlay', window.closeNotifSettings],
       ['display-settings-overlay', window.closeDisplaySettings],
       ['streak-detail-overlay', window.closeStreakDetail],
