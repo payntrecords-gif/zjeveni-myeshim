@@ -2267,24 +2267,17 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 .mm-peek-plain{font-weight:700;color:var(--sub)}
 .mm-peek-flash{animation:mm-peek-in .2s ease;background:rgba(229,69,142,.06);border-radius:12px;padding:10px}
 @keyframes mm-peek-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-/* === LEVEL 4: LIVE WORD INPUTS === */
-.mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;overflow:visible;display:block}
-body.dark .mm-word-quiz-container{background:#1e1e2e}
-.mm-word-quiz{font-size:1.1rem;line-height:2.0;font-weight:700;color:var(--text);display:block!important;white-space:normal!important;text-align:left}
-.mm-wi-wrap{display:inline!important;position:relative;vertical-align:baseline;white-space:normal;margin:0;padding:0}
-.mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
-.mm-wi-hint.mm-wi-hint-on{opacity:1}
-.mm-wi-fixed{display:inline-block;font:inherit;font-size:inherit;font-weight:900;color:inherit;padding-right:2px}
-.mm-word-input{display:inline-block;border:none!important;border-bottom:none!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:left;outline:none!important;padding:0;min-width:0;box-sizing:content-box;vertical-align:baseline}
-.mm-word-input::placeholder{color:#b0bec5;font-weight:700}
-.mm-word-input:focus,.mm-word-input:focus-visible{border:none!important;border-bottom:none!important;outline:none!important;background:transparent;box-shadow:none!important}
-.mm-word-input.mm-wi-correct{border:none!important;border-bottom:none!important;background:transparent;color:inherit;font-weight:900;pointer-events:none;padding:0;outline:none!important;box-shadow:none!important}
-.mm-word-input.mm-wi-wrong{color:#e53935}
-.mm-word-input.mm-wi-inactive{opacity:.45;pointer-events:none}
-body.dark .mm-word-input{color:#f8eef5}
-body.dark .mm-word-input::placeholder{color:#64748b}
-body.dark .mm-word-input.mm-wi-correct{border:none!important;border-bottom:none!important;color:inherit;box-shadow:none!important}
-body.dark .mm-word-input.mm-wi-wrong{color:#ff6b6b}
+/* === LEVEL 4: DOPLŇ SLOVO === */
+.mm-level4-mask{
+  display:inline-block;min-width:58px;padding:2px 12px;border-radius:10px;background:rgba(0,0,0,.06);text-align:center;
+  vertical-align:middle;color:var(--sub);font-weight:900;letter-spacing:.04em
+}
+.mm-level4-mask.mm-scan-active{background:rgba(229,69,142,.16);color:var(--pink,#e5458e);box-shadow:inset 0 0 0 2px rgba(229,69,142,.28)}
+.mm-level4-current{display:grid;gap:10px;padding:14px;border-radius:16px;background:rgba(0,0,0,.04);margin-top:12px}
+.mm-level4-progress{font-size:.82rem;font-weight:800;color:var(--sub)}
+body.dark .mm-level4-mask{background:rgba(255,255,255,.08);color:#d8bfd0}
+body.dark .mm-level4-mask.mm-scan-active{background:rgba(255,140,194,.14);color:#ff8cc2;box-shadow:inset 0 0 0 2px rgba(255,140,194,.25)}
+body.dark .mm-level4-current{background:rgba(255,255,255,.05)}
 </style>
 
 </head>
@@ -3195,18 +3188,23 @@ window.shareCurrentVerse=async function(){
   function buildLevel4Quiz(){
     const tk = tokenData(mm.verse.t || '');
     const solved = tk.words.map(function(word){ return isStaticWordToken(word); });
+    const hidden = [];
+    tk.words.forEach(function(word, index){
+      if (solved[index]) return;
+      hidden.push(index);
+    });
     mm.quiz = {
       tokens: tk,
       solved: solved,
-      cursor: nextUnsolvedWordIndex({ solved: solved }, 0)
+      hidden: hidden,
+      hiddenSet: new Set(hidden),
+      items: hidden.map(function(index){
+        const word = tk.words[index];
+        const wordParts = level4WordParts(word);
+        return { index: index, answer: word, hint: wordParts.mask };
+      }),
+      cursor: 0
     };
-  }
-  function nextUnsolvedWordIndex(quiz, startIndex){
-    /* move cursor over auto-solved/static tokens in level 4 */
-    if (!quiz || !Array.isArray(quiz.solved)) return startIndex;
-    var cursor = Number(startIndex) || 0;
-    while (cursor < quiz.solved.length && quiz.solved[cursor]) cursor += 1;
-    return cursor;
   }
   function scrollBehaviorForInputFocus(){
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
@@ -3244,49 +3242,18 @@ window.shareCurrentVerse=async function(){
       renderLevel();
     }
   }
-  function submitWordInput(idx){
-    if (!mm.quiz || mm.level !== 4) return;
-    const wi = Number(idx);
-    if (wi !== mm.quiz.cursor) return;
-    const input = document.getElementById('mm-wi-' + wi);
-    if (!input) return;
-    const value = input.value.trim();
-    const correctWord = mm.quiz.tokens.words[wi];
-    if (!correctWord) return;
-    const wordParts = level4WordParts(correctWord);
-    if (matchesNormalizedAnswer(correctWord, value)){
-      mm.quiz.solved[wi] = true;
-      mm.quiz.cursor = nextUnsolvedWordIndex(mm.quiz, wi + 1);
-      flash(true);
-      if (navigator && navigator.vibrate) navigator.vibrate([12]);
-      if (mm.quiz.cursor >= mm.quiz.tokens.words.length){
-        completeLevel();
-      } else {
-        setMessage('✅ Správně! Doplň další slovo. (' + mm.quiz.cursor + '/' + mm.quiz.tokens.words.length + ')');
+  function renderLevel4Verse(quiz, currentIndex){
+    if (!quiz || !quiz.tokens) return '';
+    return quiz.tokens.parts.map(function(part){
+      if (part.t === 'space') return part.text;
+      if (!quiz.hiddenSet.has(part.index)) return esc(part.original);
+      if (quiz.solved[part.index]){
+        return part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
       }
-      renderLevel();
-    } else {
-      flash(false);
-      if (navigator && navigator.vibrate) navigator.vibrate([30, 50, 30]);
-      /* show correct word hint above the input for 1 second */
-      var hintId = 'mm-wi-hint-' + wi;
-      var hintEl = document.getElementById(hintId);
-      if (hintEl){
-        hintEl.textContent = correctWord;
-        hintEl.classList.add('mm-wi-hint-on');
-        setTimeout(function(){
-          var h = document.getElementById(hintId);
-          if (h) h.classList.remove('mm-wi-hint-on');
-        }, 1000);
-      }
-      /* shake and clear only this word */
-      var inputId = 'mm-wi-' + wi;
-      input.classList.add('mm-wi-wrong');
-      setTimeout(function(){
-        var inp = document.getElementById(inputId);
-        if (inp){ inp.classList.remove('mm-wi-wrong'); inp.value = ''; inp.focus({ preventScroll: true }); }
-      }, 360);
-    }
+      const mask = level4WordParts(part.clean).mask;
+      const activeClass = part.index === currentIndex ? ' mm-scan-active' : '';
+      return part.pre + '<span class="mm-level4-mask' + activeClass + '">' + esc(mask) + '</span>' + part.post;
+    }).join('');
   }
   function renderLevel(){
     if (!mm.verse || !el.content) return;
@@ -3371,70 +3338,36 @@ window.shareCurrentVerse=async function(){
         if (el.next && (mm.progress.level || 0) < mm.level) { el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
         return;
       }
-      /* ── LEVEL 4: PRVNÍ PÍSMENO (live word inputs) ── */
+      /* ── LEVEL 4: PRVNÍ PÍSMENO ── */
       if (mm.level === 4){
         if (!mm.quiz) buildLevel4Quiz();
         const q4 = mm.quiz;
-        if (q4.cursor >= q4.tokens.words.length){
-          /* all words solved – show complete verse */
+        if (q4.cursor >= q4.items.length){
           el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
           if (el.footer) el.footer.innerHTML = '';
         } else {
-          /* pre/post punctuation emitted as plain text nodes – no wrapper span needed */
-          const punct = function(text){ return text ? esc(text) : ''; };
-          const verseHtml = q4.tokens.parts.map(function(part){
-            if (part.t === 'space') return ' ';
-            /* pure-punctuation token (no alphanumeric chars at all) */
-            if (!/[\p{L}\p{N}]/u.test(part.clean || '')){
-              return esc(part.original || part.clean || '');
-            }
-            const wi = part.index;
-            const correct = q4.solved[wi];
-            const staticWord = isStaticWordToken(part.clean);
-            const wordParts = level4WordParts(part.clean);
-            const placeholder = wordParts.mask;
-            const wordLen = wordParts.length;
-            const pre = punct(part.pre);
-            const post = punct(part.post);
-            if (staticWord){
-              /* single-char or punctuation-only words: plain text, no input */
-              return pre + esc(part.clean) + post;
-            }
-            if (correct){
-              return pre +
-                '<span class="mm-wi-wrap">' +
-                  '<input class="mm-word-input mm-wi-correct" id="mm-wi-' + wi + '"' +
-                  ' value="' + esc(part.clean) + '"' +
-                  ' size="' + wordLen + '"' +
-                  ' readonly tabindex="-1">' +
-                '</span>' +
-                post;
-            }
-            const isCurrent = wi === q4.cursor;
-            var wiCls = 'mm-word-input' + (isCurrent ? '' : ' mm-wi-inactive');
-            return pre +
-              '<span class="mm-wi-wrap" id="mm-wi-wrap-' + wi + '">' +
-                '<span class="mm-wi-hint" id="mm-wi-hint-' + wi + '"></span>' +
-                '<input class="' + wiCls + '" id="mm-wi-' + wi + '"' +
-                ' data-word-idx="' + wi + '"' +
-                ' data-correct-rest="' + esc(wordParts.value) + '"' +
-                ' placeholder="' + esc(placeholder) + '"' +
-                ' size="' + wordLen + '"' +
-                ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"' +
-                (isCurrent ? '' : ' tabindex="-1"') +
-                '>' +
-              '</span>' +
-              post;
-          }).join('');
-          el.content.innerHTML = '<div class="mm-word-quiz-container"><div class="mm-word-quiz">' + verseHtml + '</div></div>';
-          if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end">' + buildPeekButton() + '</div>';
+          const item = q4.items[q4.cursor];
+          el.content.innerHTML = '<div class="mm-verse">' + renderLevel4Verse(q4, item.index) + '</div>';
+          if (el.footer) el.footer.innerHTML =
+            '<div class="mm-quiz-prompt">Doplň zvýrazněné slovo s nápovědou prvního písmena.</div>' +
+            '<div class="mm-level4-current">' +
+              '<div class="mm-level4-progress">Slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length + '</div>' +
+              '<span class="mm-level4-mask mm-scan-active">' + esc(item.hint) + '</span>' +
+              '<div class="mm-type-wrap" style="margin-top:0">' +
+                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(item.hint) + '">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">' +
+                  buildPeekButton() +
+                  '<button type="button" class="mm-btn" data-action="submit-level4-word" style="flex:1;min-width:150px">Potvrdit slovo</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
           setTimeout(function(){
-            const inp = document.getElementById('mm-wi-' + q4.cursor);
+            const inp = document.getElementById('mm-type-word');
             if (inp){ inp.focus({ preventScroll: true }); }
-          }, 50);
+          }, 80);
         }
-        setMessage('Úroveň 4: Vidíš první písmeno — doplň každé slovo!');
-        if (el.next && q4.cursor < q4.tokens.words.length && (mm.progress.level || 0) < mm.level){ el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
+        setMessage('Úroveň 4: Doplňuj slova jedno po druhém podle nápovědy.');
+        if (el.next && q4.cursor < q4.items.length && (mm.progress.level || 0) < mm.level){ el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
         return;
       }
       /* ── LEVEL 5: MISTROVSTVÍ ── */
@@ -3664,6 +3597,7 @@ window.shareCurrentVerse=async function(){
       if (action === 'puzzle-add') { puzzleAdd(target.getAttribute('data-chunk-id')); return; }
       if (action === 'puzzle-remove') { puzzleRemove(target.getAttribute('data-chunk-id')); return; }
       if (action === 'puzzle-check') { puzzleCheck(); return; }
+      if (action === 'submit-level4-word') { submitTyped('mm-type-word'); return; }
       if (action === 'check-verse') {
         const inp = document.getElementById('mm-master-input');
         if (mm.quiz && inp){
@@ -3721,34 +3655,10 @@ window.shareCurrentVerse=async function(){
       if (e.key !== 'Enter') return;
       const target = e.target;
       if (target && target.id === 'mm-type-word') { e.preventDefault(); submitTyped('mm-type-word'); }
-      if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
-        e.preventDefault();
-        submitWordInput(target.getAttribute('data-word-idx'));
-      }
-    });
-    el.sheet.addEventListener('keydown', function(e){
-      if (e.key !== ' ') return;
-      const target = e.target;
-      if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
-        e.preventDefault();
-        submitWordInput(target.getAttribute('data-word-idx'));
-      }
-    });
-    el.sheet.addEventListener('input', function(e){
-      const target = e.target;
-      if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
-        const correctLen = (target.getAttribute('data-correct-rest') || '').length;
-        const newSize = Math.max(1, target.value.length, correctLen);
-        target.setAttribute('size', newSize);
-        /* auto-submit when typed length matches the correct word length */
-        if (target.value.length === correctLen && correctLen > 0){
-          submitWordInput(target.getAttribute('data-word-idx'));
-        }
-      }
     });
     el.sheet.addEventListener('focusin', function(e){
       const target = e.target;
-      if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
+      if (target && target.id === 'mm-type-word' && mm.level === 4){
         const elInput = target;
         setTimeout(function(){
           elInput.scrollIntoView({ behavior: scrollBehaviorForInputFocus(), block: 'center' });
