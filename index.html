@@ -3295,7 +3295,8 @@ window.shareCurrentVerse=async function(){
     const freeAdvance = FREE_ADVANCE_LEVELS.includes(mm.level);
     if (freeAdvance){
       if (!mm.completedThisView) completeLevel();
-      mm.level = Math.min(mm.level + 1, mm.unlocked, 6);
+      const nextLevel = Math.min(mm.level + 1, 6);
+      mm.level = nextLevel <= mm.unlocked ? nextLevel : mm.level;
       mm.quiz = null;
       mm.attempts = 0;
       mm.completedThisView = false;
