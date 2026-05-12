@@ -3184,7 +3184,8 @@ window.shareCurrentVerse=async function(){
   function submitTyped(inputId){
     if (!mm.quiz) return;
     const input = document.getElementById(inputId);
-    const inputValue = input ? input.value : (mm.quiz.typed || '');
+    if (!input) return;
+    const inputValue = input.value;
     const item = mm.quiz.items[mm.quiz.cursor];
     if (!item || mm.quiz.submitting) return;
     mm.quiz.submitting = true;
@@ -3311,21 +3312,25 @@ window.shareCurrentVerse=async function(){
   function peekVerse(verseText, contentEl, btn){
     if (!contentEl || !btn) return;
     btn.disabled = true;
-    contentEl.querySelectorAll('input, textarea').forEach(function(field){
-      if (field.tagName === 'TEXTAREA') field.defaultValue = field.value;
-      else field.setAttribute('value', field.value);
+    const savedFields = Array.from(contentEl.querySelectorAll('input[id], textarea[id]')).map(function(field){
+      return { id: field.id, value: field.value };
     });
+    const focusedField = document.activeElement && contentEl.contains(document.activeElement) ? document.activeElement.id : '';
     const orig = contentEl.innerHTML;
     contentEl.innerHTML = '<div class="mm-verse mm-peek-flash">' + esc(verseText || '') + '</div>';
     setTimeout(function() {
       contentEl.innerHTML = orig;
+      savedFields.forEach(function(saved){
+        const field = document.getElementById(saved.id);
+        if (field) field.value = saved.value;
+      });
       btn.disabled = false;
-      if (mm.level === 4){
-        const inlineInput = document.getElementById(LEVEL4_INPUT_ID);
-        if (inlineInput){
-          inlineInput.focus({ preventScroll: true });
-          const len = inlineInput.value.length;
-          inlineInput.setSelectionRange(len, len);
+      const inputToFocus = (focusedField && document.getElementById(focusedField)) || (mm.level === 4 ? document.getElementById(LEVEL4_INPUT_ID) : null);
+      if (inputToFocus){
+        inputToFocus.focus({ preventScroll: true });
+        if (typeof inputToFocus.setSelectionRange === 'function'){
+          const len = inputToFocus.value.length;
+          inputToFocus.setSelectionRange(len, len);
         }
       }
       syncLevel4Viewport();
@@ -3370,7 +3375,7 @@ window.shareCurrentVerse=async function(){
       } else if (isHidden && isActive){
         tokenText = part.pre +
           '<input id="' + LEVEL4_INPUT_ID + '" class="mm-level4-inline-input" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ' +
-          'value="' + esc(quiz.typed || '') + '" placeholder="' + esc(wordParts.mask) + '" aria-label="Doplňované slovo" aria-describedby="mm-level4-hint" ' +
+          'value="' + esc(quiz.typed || '') + '" placeholder="' + esc(wordParts.mask) + '" aria-label="Doplňované slovo, nápověda ' + esc(wordParts.mask) + '" ' +
           'style="--mm-l4-word-length:' + Math.max(wordParts.length, 1) + '" size="' + Math.max(wordParts.length, 1) + '">' +
           part.post;
       } else if (isHidden){
