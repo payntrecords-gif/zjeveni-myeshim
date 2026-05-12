@@ -4383,6 +4383,24 @@ const FCM_SENDER_ID = '360259005980';
     return firebase.messaging();
   }
 
+  async function syncFcmTokenToFirestore(token) {
+    try {
+      const uid = (window.firebase && firebase.auth && firebase.auth().currentUser) ? firebase.auth().currentUser.uid : '';
+      const _db = (window.firebase && typeof firebase.firestore === 'function') ? firebase.firestore() : null;
+      if (!uid || !_db) return;
+      const notifNow = new Date().toISOString();
+      await _db.collection('users').doc(uid).collection('data').doc('notifications').set({
+        fcmToken: token,
+        enabled: true,
+        updatedAt: notifNow
+      }, { merge: true });
+      await _db.collection('users').doc(uid).set({
+        fcmToken: token,
+        updatedAt: notifNow
+      }, { merge: true });
+    } catch(e) {}
+  }
+
   async function ensureFcmToken() {
     if (fcmTokenRequested) return;
     if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
@@ -4399,6 +4417,7 @@ const FCM_SENDER_ID = '360259005980';
       });
       if (token) {
         safeLSSet('myeshim-fcm-token', token);
+        syncFcmTokenToFirestore(token);
       }
     } catch (e) {
       fcmTokenRequested = false;
@@ -4417,7 +4436,10 @@ const FCM_SENDER_ID = '360259005980';
         vapidKey: (typeof VAPID_PUBLIC_KEY !== 'undefined') ? VAPID_PUBLIC_KEY : '',
         serviceWorkerRegistration: fcmRegistration
       });
-      if (token) safeLSSet('myeshim-fcm-token', token);
+      if (token) {
+        safeLSSet('myeshim-fcm-token', token);
+        syncFcmTokenToFirestore(token);
+      }
     } catch(e) {}
   }
 

@@ -91,8 +91,12 @@ async function sendReminderToToken(token, message) {
 }
 
 async function getAllNotificationDocs() {
-  const dataSnap = await db.collectionGroup('data').get();
-  return dataSnap.docs.filter((doc) => doc.id === 'notifications');
+  const usersSnap = await db.collection('users').get();
+  const promises = usersSnap.docs.map(userDoc =>
+    userDoc.ref.collection('data').doc('notifications').get()
+  );
+  const notifDocs = await Promise.all(promises);
+  return notifDocs.filter(doc => doc.exists);
 }
 
 function isValidYmd(value) {
