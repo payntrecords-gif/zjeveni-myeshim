@@ -2316,6 +2316,10 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 .mm-level4-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .mm-level4-card-copy{font-size:.82rem;color:var(--sub);font-weight:700;line-height:1.35}
 .mm-level4-inline-hint{font-size:.78rem;font-weight:900;color:var(--pink,#e5458e)}
+.mm-level4-sr{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0
+}
 .mm-level4-card-actions{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
 .mm-level4-submit{flex:1;min-width:132px}
 @media (max-height:700px){
@@ -3453,10 +3457,11 @@ window.shareCurrentVerse=async function(){
           if (el.footer) el.footer.innerHTML =
             '<div class="mm-level4-input-card">' +
               '<div class="mm-level4-card-copy" id="mm-level4-input-copy">Napiš zvýrazněné slovo podle prvního písmene.</div>' +
+              '<div class="mm-level4-sr" id="mm-level4-input-context">Zvýrazněné slovo najdeš v horním panelu s tokeny verše.</div>' +
               '<div class="mm-type-wrap" style="margin-top:0">' +
                 '<div class="mm-level4-inline-hint" id="mm-level4-hint">' + hintText + '</div>' +
                 '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ' +
-                  'aria-label="Pole pro dopsání zvýrazněného slova" aria-describedby="mm-level4-input-copy mm-level4-hint" ' +
+                  'aria-label="Pole pro dopsání zvýrazněného slova" aria-describedby="mm-level4-input-copy mm-level4-input-context mm-level4-hint" ' +
                   'placeholder="Doplň slovo">' +
                 '<div class="mm-level4-card-actions">' +
                   buildPeekButton() +
