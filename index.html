@@ -3282,7 +3282,7 @@ window.shareCurrentVerse=async function(){
     return '<button type="button" class="mm-btn mm-btn-peek" data-action="peek-verse">👁️ Nakouknout (2s)</button>';
   }
   function scrollLevel4ActiveToken(wordIndex){
-    if (!Number.isInteger(wordIndex)) return;
+    if (!Number.isInteger(wordIndex) || wordIndex < 0) return;
     const token = document.getElementById('mm-l4-token-' + wordIndex);
     if (!token) return;
     const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3345,7 +3345,7 @@ window.shareCurrentVerse=async function(){
       } else if (isHidden){
         tokenText = part.pre + '<span class="mm-level4-mask' + (isActive ? ' mm-scan-active' : '') + '">' + esc(level4WordParts(part.clean).mask) + '</span>' + part.post;
       }
-      return '<span id="mm-l4-token-' + part.index + '" class="' + tokenClass + '"' + (isActive ? ' aria-current="true"' : '') + '>' + tokenText + '</span>';
+      return '<span id="mm-l4-token-' + part.index + '" class="' + tokenClass + '"' + (isActive ? ' aria-current="step"' : '') + '>' + tokenText + '</span>';
     }).join('');
   }
   function renderLevel(){
@@ -3455,7 +3455,7 @@ window.shareCurrentVerse=async function(){
                 '</div>' +
                 '<span class="mm-level4-hint-badge">' + hintText + '</span>' +
               '</div>' +
-              '<div class="mm-level4-token-flow mm-verse">' + renderLevel4Verse(q4, item.index) + '</div>' +
+              '<div class="mm-level4-token-flow mm-verse" tabindex="0" aria-label="Náhled verše s aktuálně zvýrazněným slovem">' + renderLevel4Verse(q4, item.index) + '</div>' +
             '</div>';
           if (el.footer) el.footer.innerHTML =
             '<div class="mm-level4-input-card">' +
@@ -3467,7 +3467,7 @@ window.shareCurrentVerse=async function(){
                 '<span class="mm-level4-hint-badge">' + hintText + '</span>' +
               '</div>' +
               '<div class="mm-type-wrap" style="margin-top:0">' +
-                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-describedby="mm-level4-input-copy mm-level4-context-copy" placeholder="' + esc(item.hint) + '">' +
+                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Pole pro dopsání zvýrazněného slova" aria-describedby="mm-level4-input-copy mm-level4-context-copy" placeholder="' + esc(item.hint) + '">' +
                 '<div class="mm-level4-card-actions">' +
                   buildPeekButton() +
                   '<button type="button" class="mm-btn mm-level4-submit" data-action="submit-level4-word">Potvrdit slovo</button>' +
