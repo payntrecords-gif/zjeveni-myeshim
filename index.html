@@ -2268,21 +2268,19 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 .mm-peek-flash{animation:mm-peek-in .2s ease;background:rgba(229,69,142,.06);border-radius:12px;padding:10px}
 @keyframes mm-peek-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 /* === LEVEL 4: LIVE WORD INPUTS === */
-.mm-word-quiz{font-size:1.15rem;line-height:1.8;font-weight:700;color:var(--text)}
-body.dark .mm-word-quiz{color:#f8eef5}
-.mm-wi-wrap{position:relative;display:inline;vertical-align:baseline;margin:0 1px}
-.mm-wi-hint{position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
+.mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;line-height:2.4}
+body.dark .mm-word-quiz-container{background:#1e1e2e}
+.mm-word-quiz{font-size:1.1rem;line-height:2.2;font-weight:700;color:var(--text);word-spacing:.15em;display:block;white-space:normal}
+.mm-wi-wrap{display:inline;position:relative;white-space:nowrap;margin:0}
+.mm-wi-punct{margin-left:0!important;letter-spacing:0}
+.mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
 .mm-wi-hint.mm-wi-hint-on{opacity:1}
-.mm-word-input{display:inline;border:none!important;border-bottom:none!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:center;outline:none!important;padding:0 2px;min-width:1.6ch;box-sizing:content-box;transition:color .15s;vertical-align:baseline}
+.mm-word-input{display:inline;border:none!important;border-bottom:2px solid #e5458e!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:center;outline:none!important;padding:0 2px;min-width:2ch;box-sizing:content-box;vertical-align:baseline;transition:color .15s,border-color .15s}
 .mm-word-input::placeholder{color:#b0bec5;font-weight:700}
-.mm-word-input:focus{border:none!important;outline:none!important;background:transparent;color:var(--text)}
-.mm-word-input.mm-wi-correct{border:none!important;color:#22a63a;font-weight:900;background:transparent;pointer-events:none}
-.mm-word-input.mm-wi-wrong{border:none!important;color:#e53935;background:transparent;animation:mm-wi-shake .36s ease}
-body.dark .mm-word-input{color:#f8eef5}
-body.dark .mm-word-input::placeholder{color:#64748b}
-body.dark .mm-word-input.mm-wi-correct{color:#4aba6c;background:transparent}
-body.dark .mm-word-input.mm-wi-wrong{color:#ff6b6b;background:transparent}
-.mm-word-input.mm-wi-inactive{opacity:1}
+.mm-word-input:focus{border-bottom-color:#e5458e!important;outline:none!important;background:transparent}
+.mm-word-input.mm-wi-correct{border-bottom-color:#22a63a!important;color:#22a63a;font-weight:900;pointer-events:none}
+.mm-word-input.mm-wi-wrong{border-bottom-color:#e53935!important;color:#e53935}
+.mm-word-input.mm-wi-inactive{opacity:.45;pointer-events:none}
 </style>
 
 </head>
@@ -3214,6 +3212,12 @@ window.shareCurrentVerse=async function(){
     if (clean.length <= 1) return clean;
     return clean.charAt(0) + '_'.repeat(Math.max(0, clean.length - 1));
   }
+  function nextUnsolvedWordIndex(quiz, startIndex){
+    if (!quiz || !Array.isArray(quiz.solved)) return startIndex;
+    var cursor = Number(startIndex) || 0;
+    while (cursor < quiz.solved.length && quiz.solved[cursor]) cursor += 1;
+    return cursor;
+  }
   function buildPeekButton(){
     return '<button type="button" class="mm-btn mm-btn-peek" data-action="peek-verse">👁️ Nakouknout (2s)</button>';
   }
@@ -3282,7 +3286,7 @@ window.shareCurrentVerse=async function(){
     if (!correctWord) return;
     if (matchesNormalizedAnswer(correctWord, value)){
       mm.quiz.solved[wi] = true;
-      mm.quiz.cursor += 1;
+      mm.quiz.cursor = nextUnsolvedWordIndex(mm.quiz, wi + 1);
       flash(true);
       if (navigator && navigator.vibrate) navigator.vibrate([12]);
       if (mm.quiz.cursor >= mm.quiz.tokens.words.length){
@@ -3401,10 +3405,14 @@ window.shareCurrentVerse=async function(){
       if (mm.level === 4){
         const tk4 = tokenData(mm.verse.t || '');
         if (!mm.quiz){
+          const solved = tk4.words.map(function(word){
+            const normalizedWord = (word || '').trim();
+            return normalizedWord.length <= 1 || !/[\p{L}\p{N}]/u.test(normalizedWord);
+          });
           mm.quiz = {
             tokens: tk4,
-            solved: tk4.words.map(function(){ return false; }),
-            cursor: 0
+            solved: solved,
+            cursor: nextUnsolvedWordIndex({ solved: solved }, 0)
           };
         }
         const q4 = mm.quiz;
@@ -3413,23 +3421,36 @@ window.shareCurrentVerse=async function(){
           el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
           if (el.footer) el.footer.innerHTML = '';
         } else {
+          const renderStaticToken = function(text, isPunct){
+            if (!text) return '';
+            return '<span class="mm-wi-wrap' + (isPunct ? ' mm-wi-punct' : '') + '">' + esc(text) + '</span>';
+          };
           const verseHtml = q4.tokens.parts.map(function(part){
             if (part.t === 'space') return part.text;
+            if (!/[\p{L}\p{N}]/u.test(part.clean || '')){
+              return renderStaticToken(part.original || part.clean || '', true);
+            }
             const wi = part.index;
             const correct = q4.solved[wi];
+            const staticWord = (part.clean || '').length <= 1;
             const placeholder = initialsMask(part.clean);
             const wordLen = Math.max(2, part.clean.length);
+            const pre = renderStaticToken(part.pre, true);
+            const post = renderStaticToken(part.post, true);
+            if (staticWord){
+              return pre + renderStaticToken(part.clean, false) + post;
+            }
             if (correct){
-              return part.pre +
+              return pre +
                 '<input class="mm-word-input mm-wi-correct" id="mm-wi-' + wi + '"' +
                 ' value="' + esc(part.clean) + '"' +
                 ' size="' + wordLen + '"' +
                 ' readonly tabindex="-1">' +
-                part.post;
+                post;
             }
             const isCurrent = wi === q4.cursor;
             var wiCls = 'mm-word-input' + (isCurrent ? '' : ' mm-wi-inactive');
-            return part.pre +
+            return pre +
               '<span class="mm-wi-wrap" id="mm-wi-wrap-' + wi + '">' +
                 '<span class="mm-wi-hint" id="mm-wi-hint-' + wi + '"></span>' +
                 '<input class="' + wiCls + '" id="mm-wi-' + wi + '"' +
@@ -3441,9 +3462,9 @@ window.shareCurrentVerse=async function(){
                 (isCurrent ? '' : ' tabindex="-1"') +
                 '>' +
               '</span>' +
-              part.post;
+              post;
           }).join('');
-          el.content.innerHTML = '<div class="mm-word-quiz">' + verseHtml + '</div>';
+          el.content.innerHTML = '<div class="mm-word-quiz-container"><div class="mm-word-quiz">' + verseHtml + '</div></div>';
           if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end">' + buildPeekButton() + '</div>';
           setTimeout(function(){
             const inp = document.getElementById('mm-wi-' + q4.cursor);
@@ -3763,6 +3784,15 @@ window.shareCurrentVerse=async function(){
         if (target.value.length === correctLen && correctLen > 0){
           submitWordInput(target.getAttribute('data-word-idx'));
         }
+      }
+    });
+    el.sheet.addEventListener('focusin', function(e){
+      const target = e.target;
+      if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
+        const elInput = target;
+        setTimeout(function(){
+          elInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 350);
       }
     });
   }
