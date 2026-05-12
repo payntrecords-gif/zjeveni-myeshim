@@ -2288,6 +2288,7 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
   background:rgba(229,69,142,.12);color:var(--pink,#e5458e);font-size:.76rem;font-weight:900;letter-spacing:.04em
 }
 .mm-level4-token-flow{
+  /* top scroll-margin keeps the active chip visible below the sticky context header */
   --mm-l4-sticky-offset:68px;
   display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-start;overflow:auto;max-height:clamp(92px,24vh,176px);
   padding:2px 2px 4px;scrollbar-width:thin
@@ -3467,7 +3468,9 @@ window.shareCurrentVerse=async function(){
                 '<span class="mm-level4-hint-badge">' + hintText + '</span>' +
               '</div>' +
               '<div class="mm-type-wrap" style="margin-top:0">' +
-                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Pole pro dopsání zvýrazněného slova" aria-describedby="mm-level4-input-copy mm-level4-context-copy" placeholder="' + esc(item.hint) + '">' +
+                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ' +
+                  'aria-label="Pole pro dopsání zvýrazněného slova" aria-describedby="mm-level4-input-copy mm-level4-context-copy" ' +
+                  'placeholder="' + esc(item.hint) + '">' +
                 '<div class="mm-level4-card-actions">' +
                   buildPeekButton() +
                   '<button type="button" class="mm-btn mm-level4-submit" data-action="submit-level4-word">Potvrdit slovo</button>' +
