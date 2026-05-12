@@ -3189,17 +3189,15 @@ window.shareCurrentVerse=async function(){
     const tk = tokenData(mm.verse.t || '');
     const solved = tk.words.map(function(word){ return isStaticWordToken(word); });
     const hidden = [];
-    const hiddenSet = {};
     tk.words.forEach(function(word, index){
       if (solved[index]) return;
       hidden.push(index);
-      hiddenSet[index] = true;
     });
     mm.quiz = {
       tokens: tk,
       solved: solved,
       hidden: hidden,
-      hiddenSet: hiddenSet,
+      hiddenSet: new Set(hidden),
       items: hidden.map(function(index){
         const word = tk.words[index];
         const wordParts = level4WordParts(word);
@@ -3248,7 +3246,7 @@ window.shareCurrentVerse=async function(){
     if (!quiz || !quiz.tokens) return '';
     return quiz.tokens.parts.map(function(part){
       if (part.t === 'space') return part.text;
-      if (!quiz.hiddenSet[part.index]) return esc(part.original);
+      if (!quiz.hiddenSet.has(part.index)) return esc(part.original);
       if (quiz.solved[part.index]){
         return part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
       }
@@ -3351,7 +3349,7 @@ window.shareCurrentVerse=async function(){
           const item = q4.items[q4.cursor];
           el.content.innerHTML = '<div class="mm-verse">' + renderLevel4Verse(q4, item.index) + '</div>';
           if (el.footer) el.footer.innerHTML =
-            '<div class="mm-quiz-prompt">Doplň zvýrazněné slovo podle prvního písmene.</div>' +
+            '<div class="mm-quiz-prompt">Doplň zvýrazněné slovo s nápovědou prvního písmena.</div>' +
             '<div class="mm-level4-current">' +
               '<div class="mm-level4-progress">Slovo ' + (q4.cursor + 1) + ' z ' + q4.items.length + '</div>' +
               '<span class="mm-level4-mask mm-scan-active">' + esc(item.hint) + '</span>' +
