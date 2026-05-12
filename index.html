@@ -2172,6 +2172,12 @@ body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba
 .mm-correct-flash{animation:mm-flash .42s ease}
 .mm-wrong-flash{animation:mm-wrong .45s ease}
 .mm-shake{animation:mm-shake .34s ease}
+.mm-diff-ok{color:#2a7d37;font-weight:700}
+.mm-diff-err{color:#c0392b;font-weight:700;text-decoration:underline wavy #e74c3c}
+body.dark .mm-diff-ok{color:#4aba6c}
+body.dark .mm-diff-err{color:#ff6b6b}
+.mm-diff-legend{font-size:.78rem;color:var(--sub);margin-top:8px;text-align:center}
+.mm-diff-wrap{line-height:1.8;font-size:1rem}
 .mm-word-bounce{display:inline-block;animation:mm-bounce .35s ease}
 .mm-success-mark{font-size:1.25rem;margin-left:6px;display:inline-block;animation:mm-bounce .38s ease}
 #mm-confetti{
@@ -2944,6 +2950,23 @@ window.shareCurrentVerse=async function(){
     setButtons(true);
     renderLevelGrid();
   }
+  function buildTypingDiff(expected, typed){
+    // Returns HTML: expected words colored green (correct) or red (wrong/missing).
+    var expParts = expected.split(/(\s+)/);
+    var expNorm = normalize(expected).split(/\s+/);
+    var typNorm = normalize(typed || '').split(/\s+/);
+    var wi = 0;
+    return expParts.map(function(part){
+      if (/^\s+$/.test(part)) return part;
+      var expW = expNorm[wi] || '';
+      var typW = typNorm[wi] || '';
+      wi++;
+      var ok = expW.length > 0 && expW === typW;
+      return ok
+        ? '<span class="mm-diff-ok">' + esc(part) + '</span>'
+        : '<span class="mm-diff-err">' + esc(part) + '</span>';
+    }).join('');
+  }
   function wrongFeedback(answer){
     flash(false);
     if (!el.content) return;
@@ -3118,28 +3141,39 @@ window.shareCurrentVerse=async function(){
   }
   window.openMemorizeMode = open;
   window.closeMemorizeMode = close;
+  function showTypingDiff(typed){
+    flash(false);
+    if (!el.content) return;
+    el.content.classList.add('mm-shake');
+    setTimeout(function(){ el.content && el.content.classList.remove('mm-shake'); }, 360);
+    const diffHtml = buildTypingDiff(mm.verse.t, typed);
+    el.content.innerHTML =
+      '<div class="mm-verse mm-diff-wrap">' + diffHtml + '</div>' +
+      '<div class="mm-diff-legend">🟢 správně &nbsp;🔴 špatně / chybí — klepni <strong>Zkusit znovu</strong></div>';
+    setMessage('❌ Oprav červeně označená slova.');
+  }
   function submitLevel5(){
     const input = document.getElementById('mm-level5-input');
-    if (matchesNormalizedAnswer(mm.verse.t, input ? input.value : '')) {
+    const typed = input ? input.value : '';
+    if (matchesNormalizedAnswer(mm.verse.t, typed)) {
       flash(true);
       setMessage('✅ Perfektní! Verš držíš skvěle.');
       completeLevel();
       renderLevel();
     } else {
-      wrongFeedback(mm.verse.t);
-      setTimeout(restartCurrentLevel, 1500);
+      showTypingDiff(typed);
     }
   }
   function submitLevel6(){
     const input = document.getElementById('mm-level6-input');
-    if (matchesNormalizedAnswer(mm.verse.t, input ? input.value : '')) {
+    const typed = input ? input.value : '';
+    if (matchesNormalizedAnswer(mm.verse.t, typed)) {
       flash(true);
       setMessage('✅ Nádhera! Máš to zpaměti.');
       completeLevel();
       renderLevel();
     } else {
-      wrongFeedback(mm.verse.t);
-      setTimeout(restartCurrentLevel, 1500);
+      showTypingDiff(typed);
     }
   }
   if (el.levels){
@@ -4222,6 +4256,12 @@ const FCM_SENDER_ID = '360259005980';
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+
+  // Re-run initStreak after Firestore sync overwrites localStorage streak values,
+  // so the badge and profile panel always show the same up-to-date streak.
+  window.addEventListener('myeshim-data-synced', function() {
+    initStreak();
+  });
 })();
 </script>
 
