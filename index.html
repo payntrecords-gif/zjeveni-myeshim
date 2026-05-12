@@ -2276,7 +2276,7 @@ body.dark .mm-word-quiz{color:#f8eef5}
 body.dark .mm-word-input{color:#f8eef5}
 body.dark .mm-word-input.mm-wi-correct{color:#4aba6c;background:rgba(74,186,108,.12)}
 body.dark .mm-word-input.mm-wi-wrong{color:#ff6b6b;background:rgba(255,107,107,.12)}
-@keyframes mm-wi-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.mm-word-input.mm-wi-inactive{opacity:.35}
 </style>
 
 </head>
@@ -3289,18 +3289,22 @@ window.shareCurrentVerse=async function(){
       flash(false);
       if (navigator && navigator.vibrate) navigator.vibrate([30, 50, 30]);
       /* show correct word hint above the input for 1 second */
-      var hintEl = document.getElementById('mm-wi-hint-' + wi);
+      var hintId = 'mm-wi-hint-' + wi;
+      var hintEl = document.getElementById(hintId);
       if (hintEl){
         hintEl.textContent = correctWord;
         hintEl.classList.add('mm-wi-hint-on');
         setTimeout(function(){
-          if (hintEl) hintEl.classList.remove('mm-wi-hint-on');
+          var h = document.getElementById(hintId);
+          if (h) h.classList.remove('mm-wi-hint-on');
         }, 1000);
       }
       /* shake and clear only this word */
+      var inputId = 'mm-wi-' + wi;
       input.classList.add('mm-wi-wrong');
       setTimeout(function(){
-        if (input){ input.classList.remove('mm-wi-wrong'); input.value = ''; input.focus(); }
+        var inp = document.getElementById(inputId);
+        if (inp){ inp.classList.remove('mm-wi-wrong'); inp.value = ''; inp.focus(); }
       }, 360);
     }
   }
@@ -3418,16 +3422,17 @@ window.shareCurrentVerse=async function(){
                 part.post;
             }
             const isCurrent = wi === q4.cursor;
+            var wiCls = 'mm-word-input' + (isCurrent ? '' : ' mm-wi-inactive');
             return part.pre +
               '<span class="mm-wi-wrap" id="mm-wi-wrap-' + wi + '">' +
                 '<span class="mm-wi-hint" id="mm-wi-hint-' + wi + '"></span>' +
-                '<input class="mm-word-input" id="mm-wi-' + wi + '"' +
+                '<input class="' + wiCls + '" id="mm-wi-' + wi + '"' +
                 ' data-word-idx="' + wi + '"' +
                 ' data-correct="' + esc(part.clean) + '"' +
                 ' placeholder="' + esc(placeholder) + '"' +
                 ' size="' + wordLen + '"' +
                 ' autocomplete="off" autocorrect="off" spellcheck="false"' +
-                (isCurrent ? '' : ' tabindex="-1" style="opacity:.35"') +
+                (isCurrent ? '' : ' tabindex="-1"') +
                 '>' +
               '</span>' +
               part.post;
@@ -3749,7 +3754,7 @@ window.shareCurrentVerse=async function(){
         const newSize = Math.max(2, Math.max(target.value.length, correctLen));
         target.setAttribute('size', newSize);
         /* auto-submit when typed length matches the correct word length */
-        if (target.value.length >= correctLen && correctLen > 0){
+        if (target.value.length === correctLen && correctLen > 0){
           submitWordInput(target.getAttribute('data-word-idx'));
         }
       }
