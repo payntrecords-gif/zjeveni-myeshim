@@ -3742,7 +3742,7 @@ window.shareCurrentVerse=async function(){
       const target = e.target;
       if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
         const correctLen = (target.getAttribute('data-correct-rest') || '').length;
-        const newSize = Math.max(1, Math.max(target.value.length, correctLen));
+        const newSize = Math.max(1, target.value.length, correctLen);
         target.setAttribute('size', newSize);
         /* auto-submit when typed length matches the correct word length */
         if (target.value.length === correctLen && correctLen > 0){
