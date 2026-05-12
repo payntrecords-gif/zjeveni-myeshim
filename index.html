@@ -2270,14 +2270,14 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 /* === LEVEL 4: LIVE WORD INPUTS === */
 .mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;overflow:visible;display:block}
 body.dark .mm-word-quiz-container{background:#1e1e2e}
-.mm-word-quiz{font-size:1.1rem;line-height:2.6;font-weight:700;color:var(--text);display:block!important;white-space:normal!important;text-align:left}
+.mm-word-quiz{font-size:1.1rem;line-height:2.2;font-weight:700;color:var(--text);display:block!important;white-space:normal!important;text-align:left}
 .mm-wi-wrap{display:inline!important;position:relative;vertical-align:baseline;white-space:normal;margin:0;padding:0}
 .mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
 .mm-wi-hint.mm-wi-hint-on{opacity:1}
 .mm-wi-fixed{display:inline-block;font:inherit;font-size:inherit;font-weight:900;color:inherit;padding-right:2px}
-.mm-word-input{display:inline-block;border:none!important;border-bottom:2px solid #e5458e!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:left;outline:none!important;padding:0 2px;min-width:0;box-sizing:content-box;vertical-align:baseline;transition:color .15s,border-color .15s}
+.mm-word-input{display:inline-block;border:none!important;border-bottom:none!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:left;outline:none!important;padding:0;min-width:0;box-sizing:content-box;vertical-align:baseline;transition:color .15s}
 .mm-word-input::placeholder{color:#b0bec5;font-weight:700}
-.mm-word-input:focus{border-bottom-color:#e5458e!important;outline:none!important;background:transparent}
+.mm-word-input:focus,.mm-word-input:focus-visible{border:none!important;border-bottom:none!important;outline:none!important;background:transparent;box-shadow:none!important}
 .mm-word-input.mm-wi-correct{border:none!important;border-bottom:none!important;background:transparent;color:inherit;font-weight:900;pointer-events:none;padding:0;outline:none!important;box-shadow:none!important}
 .mm-word-input.mm-wi-wrong{border-bottom-color:#e53935!important;color:#e53935}
 .mm-word-input.mm-wi-inactive{opacity:.45;pointer-events:none}
@@ -3181,14 +3181,11 @@ window.shareCurrentVerse=async function(){
   }
   function level4WordParts(word){
     const chars = Array.from((word || '').trim());
-    if (!chars.length) return { first: '', rest: '', restMask: '', restLength: 0 };
-    const first = chars[0];
-    const restChars = chars.slice(1);
+    if (!chars.length) return { value: '', mask: '', length: 0 };
     return {
-      first,
-      rest: restChars.join(''),
-      restMask: '_'.repeat(restChars.length),
-      restLength: restChars.length
+      value: chars.join(''),
+      mask: '_'.repeat(chars.length),
+      length: chars.length
     };
   }
   function isStaticWordToken(word){
@@ -3257,7 +3254,7 @@ window.shareCurrentVerse=async function(){
     const correctWord = mm.quiz.tokens.words[wi];
     if (!correctWord) return;
     const wordParts = level4WordParts(correctWord);
-    if (matchesNormalizedAnswer(correctWord, wordParts.first + value)){
+    if (matchesNormalizedAnswer(correctWord, value)){
       mm.quiz.solved[wi] = true;
       mm.quiz.cursor = nextUnsolvedWordIndex(mm.quiz, wi + 1);
       flash(true);
@@ -3395,8 +3392,8 @@ window.shareCurrentVerse=async function(){
             const correct = q4.solved[wi];
             const staticWord = isStaticWordToken(part.clean);
             const wordParts = level4WordParts(part.clean);
-            const placeholder = wordParts.restMask;
-            const wordLen = wordParts.restLength;
+            const placeholder = wordParts.mask;
+            const wordLen = wordParts.length;
             const pre = punct(part.pre);
             const post = punct(part.post);
             if (staticWord){
@@ -3418,10 +3415,9 @@ window.shareCurrentVerse=async function(){
             return pre +
               '<span class="mm-wi-wrap" id="mm-wi-wrap-' + wi + '">' +
                 '<span class="mm-wi-hint" id="mm-wi-hint-' + wi + '"></span>' +
-                '<span class="mm-wi-fixed">' + esc(wordParts.first) + '</span>' +
                 '<input class="' + wiCls + '" id="mm-wi-' + wi + '"' +
                 ' data-word-idx="' + wi + '"' +
-                ' data-correct-rest="' + esc(wordParts.rest) + '"' +
+                ' data-correct-rest="' + esc(wordParts.value) + '"' +
                 ' placeholder="' + esc(placeholder) + '"' +
                 ' size="' + wordLen + '"' +
                 ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"' +
