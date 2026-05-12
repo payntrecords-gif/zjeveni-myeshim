@@ -56,6 +56,24 @@ self.addEventListener('push', function(event) {
   event.waitUntil(showReminderNotification(payload));
 });
 
+// Re-subscribe and notify clients when FCM rotates the push subscription (token refresh)
+self.addEventListener('pushsubscriptionchange', function(event) {
+  event.waitUntil(
+    self.registration.pushManager.subscribe(event.oldSubscription
+      ? event.oldSubscription.options
+      : { userVisibleOnly: true }
+    ).then(function() {
+      return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    }).then(function(clientList) {
+      clientList.forEach(function(client) {
+        client.postMessage({ type: 'PUSH_SUBSCRIPTION_CHANGED' });
+      });
+    }).catch(function(err) {
+      console.warn('[firebase-messaging-sw] pushsubscriptionchange: failed to re-subscribe or notify clients:', err);
+    })
+  );
+});
+
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
   const payload = event.notification && event.notification.data ? event.notification.data : {};
