@@ -2274,29 +2274,29 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 }
 .mm-level4-mask.mm-scan-active{background:rgba(229,69,142,.16);color:var(--pink,#e5458e);box-shadow:inset 0 0 0 2px rgba(229,69,142,.28)}
 .mm-level4-current{display:grid;gap:10px;padding:14px;border-radius:16px;background:rgba(0,0,0,.04);margin-top:12px}
-.mm-level4-progress{font-size:.74rem;font-weight:800;color:var(--sub);line-height:1.2}
+.mm-level4-progress{font-size:.82rem;font-weight:800;color:var(--sub);line-height:1.2}
 .mm-content.mm-level4-layout{padding:0;border:none;background:transparent;box-shadow:none}
 .mm-level4-context{
-  position:sticky;top:0;z-index:3;display:grid;gap:6px;padding:8px 9px 7px;margin:-2px 0 0;
-  background:rgba(255,255,255,.94);border:1px solid rgba(229,69,142,.14);border-radius:15px;
+  position:sticky;top:0;z-index:3;display:grid;gap:8px;padding:8px 10px 6px;margin:0;
+  background:rgba(255,255,255,.95);border:1px solid rgba(229,69,142,.14);border-radius:16px;
   box-shadow:0 4px 10px rgba(22,14,24,.05)
 }
 .mm-level4-context-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex-wrap:wrap}
 .mm-level4-context-copy{font-size:.78rem;color:var(--sub);font-weight:700}
 .mm-level4-hint-badge{
   display:inline-flex;align-items:center;justify-content:center;padding:5px 10px;border-radius:999px;
-  background:rgba(229,69,142,.12);color:var(--pink,#e5458e);font-size:.76rem;font-weight:900;letter-spacing:.04em
+  background:rgba(229,69,142,.12);color:var(--pink,#e5458e);font-size:.8rem;font-weight:900;letter-spacing:.04em
 }
 .mm-level4-token-flow{
   /* top scroll-margin keeps the active chip visible below the sticky context header */
-  --mm-l4-sticky-offset:48px;
-  display:flex;flex-wrap:wrap;gap:4px 5px;align-items:flex-start;overflow:auto;max-height:clamp(68px,16vh,102px);
-  padding:1px 0 1px;scrollbar-width:thin
+  --mm-l4-sticky-offset:56px;
+  display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-start;align-content:flex-start;overflow:auto;max-height:clamp(124px,26vh,188px);
+  padding:2px 1px 4px;scrollbar-width:thin
 }
 .mm-l4-token{
-  display:inline-flex;align-items:center;justify-content:center;min-width:0;max-width:100%;padding:4px 8px;min-height:28px;border-radius:10px;
-  background:rgba(0,0,0,.032);border:1px solid rgba(122,106,118,.1);color:rgba(43,29,40,.86);font-size:.85rem;font-weight:700;
-  line-height:1.2;box-shadow:none;scroll-margin:var(--mm-l4-sticky-offset) 16px 16px
+  display:inline-flex;align-items:center;justify-content:center;min-width:0;max-width:100%;padding:8px 12px;min-height:40px;border-radius:14px;
+  background:rgba(0,0,0,.032);border:1px solid rgba(122,106,118,.1);color:rgba(43,29,40,.86);font-size:1rem;font-weight:700;
+  line-height:1.45;box-shadow:none;scroll-margin:var(--mm-l4-sticky-offset) 16px 16px
 }
 .mm-l4-static-token{background:rgba(0,0,0,.028)}
 .mm-l4-token .mm-level4-mask,.mm-l4-token .mm-reveal{min-width:0;padding:0;background:transparent;box-shadow:none;border-radius:0}
@@ -2306,9 +2306,13 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
   background:rgba(229,69,142,.12);border-color:rgba(229,69,142,.42);color:var(--pink,#e5458e);
   box-shadow:0 0 0 2px rgba(229,69,142,.12)
 }
+.mm-l4-wrong-token{
+  background:rgba(229,57,53,.12);border-color:rgba(229,57,53,.46);color:#c0392b;
+  box-shadow:0 0 0 2px rgba(229,57,53,.08);animation:mm-opt-shake .34s ease
+}
 .mm-l4-active-token .mm-level4-mask{color:inherit}
 .mm-level4-inline-input{
-  width:calc(var(--mm-l4-word-length, 5) * .72ch + 1.1ch);min-width:2.8ch;max-width:min(70vw,22ch);padding:0;border:none;
+  width:calc(var(--mm-l4-word-length, 5) * .86ch + 1.35ch);min-width:4ch;max-width:min(82vw,24ch);padding:0;border:none;
   background:transparent;color:inherit;font:inherit;font-weight:900;letter-spacing:.04em;text-align:center;outline:none;
   box-shadow:none;caret-color:currentColor
 }
@@ -2317,22 +2321,22 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 .mm-level4-inline-input::-ms-clear{display:none}
 #mm-quiz-footer.mm-level4-footer{border-top:none;margin-top:4px;padding:0 0 2px}
 .mm-level4-actions{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
-.mm-level4-actions .mm-btn{min-height:40px;padding:10px 12px;border-radius:12px;font-size:.89rem}
-.mm-level4-actions .mm-btn-peek{min-height:34px;padding:7px 11px;font-size:.78rem}
+.mm-level4-actions .mm-btn{min-height:38px;padding:9px 12px;border-radius:12px;font-size:.87rem}
+.mm-level4-actions .mm-btn-peek{min-height:32px;padding:6px 10px;font-size:.76rem}
 .mm-level4-submit{flex:1;min-width:132px}
 @media (max-height:700px){
-  .mm-level4-context{padding:7px 8px 6px}
-  .mm-level4-token-flow{max-height:clamp(62px,14vh,88px)}
+  .mm-level4-context{padding:7px 8px 5px}
+  .mm-level4-token-flow{max-height:clamp(112px,23vh,164px)}
 }
 @media (max-width:420px){
   .mm-level4-context{padding-left:8px;padding-right:8px}
-  .mm-level4-progress{font-size:.72rem}
-  .mm-level4-token-flow{gap:4px;max-height:clamp(60px,15vh,92px)}
-  .mm-l4-token{font-size:.82rem;padding:4px 7px;min-height:26px}
-  .mm-level4-inline-input{max-width:min(78vw,19ch)}
+  .mm-level4-progress{font-size:.76rem}
+  .mm-level4-token-flow{gap:7px 8px;max-height:clamp(106px,24vh,156px)}
+  .mm-l4-token{font-size:.95rem;padding:7px 10px;min-height:38px}
+  .mm-level4-inline-input{max-width:min(84vw,22ch)}
   .mm-level4-actions{gap:5px}
-  .mm-level4-actions .mm-btn{min-height:38px;padding:9px 11px;font-size:.86rem}
-  .mm-level4-actions .mm-btn-peek{min-height:32px;padding:6px 10px;font-size:.75rem}
+  .mm-level4-actions .mm-btn{min-height:36px;padding:8px 10px;font-size:.84rem}
+  .mm-level4-actions .mm-btn-peek{min-height:30px;padding:5px 9px;font-size:.73rem}
   .mm-level4-submit{min-width:118px}
 }
 body.dark .mm-level4-mask{background:rgba(255,255,255,.08);color:#d8bfd0}
@@ -2351,6 +2355,10 @@ body.dark .mm-l4-solved-token{background:rgba(76,175,80,.18);color:#9be0a6}
 body.dark .mm-l4-active-token{
   background:rgba(255,140,194,.16);border-color:rgba(255,140,194,.48);color:#ff9dcf;
   box-shadow:0 0 0 2px rgba(255,140,194,.12)
+}
+body.dark .mm-l4-wrong-token{
+  background:rgba(229,57,53,.18);border-color:rgba(255,107,107,.5);color:#ff8c8c;
+  box-shadow:0 0 0 2px rgba(255,107,107,.12)
 }
 </style>
 
@@ -2925,6 +2933,8 @@ window.shareCurrentVerse=async function(){
   const MAX_HINT_UNDERSCORE_COUNT = 8;
   const DRAG_FADE_DISTANCE = 420;
   const MM_KEYBOARD_SCROLL_DELAY = 350;
+  const MM_HAPTIC_OK = [12];
+  const MM_HAPTIC_ERROR = [30, 50, 30];
   const LEVEL4_INPUT_ID = 'mm-level4-inline-input';
   const el = {
     overlay: document.getElementById('memorize-overlay'),
@@ -2941,6 +2951,12 @@ window.shareCurrentVerse=async function(){
   };
   function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
   function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+  function vibrateIfSupported(pattern){
+    try{
+      if (navigator.vibrate) navigator.vibrate(pattern);
+    }catch(e){}
+  }
+  function forceReflow(node){ if (node) void node.offsetWidth; }
   function parseLocalISODate(isoDate){
     const parts = (isoDate || '').split('-');
     const y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
@@ -3193,14 +3209,11 @@ window.shareCurrentVerse=async function(){
     mm.quiz.typed = inputValue;
     const correct = matchesNormalizedAnswer(item.answer, inputValue);
     if (correct){
-      if (mm.quiz.solved && typeof item.index === 'number') mm.quiz.solved[item.index] = true;
-      mm.quiz.typed = '';
-      flash(true);
-      setMessage('✅ Výborně!');
-      setTimeout(nextQuizItem, 260);
+      vibrateIfSupported(MM_HAPTIC_OK);
+      advanceLevel4Word();
     } else {
-      wrongFeedback(item.answer);
-      setTimeout(restartCurrentLevel, 1500);
+      vibrateIfSupported(MM_HAPTIC_ERROR);
+      handleLevel4WrongAnswer();
     }
   }
   function buildScanQuiz(){
@@ -3385,6 +3398,142 @@ window.shareCurrentVerse=async function(){
       return '<span id="mm-l4-token-' + part.index + '" class="' + tokenClass + '"' + (isActive ? ' aria-current="step"' : '') + '>' + tokenText + '</span>';
     }).join('');
   }
+  function level4PartByIndex(quiz, wordIndex){
+    if (!quiz || !quiz.tokens || !quiz.tokens.parts) return null;
+    return quiz.tokens.parts.find(function(part){
+      return part.t === 'word' && part.index === wordIndex;
+    }) || null;
+  }
+  function ensureLevel4Input(){
+    var input = document.getElementById(LEVEL4_INPUT_ID);
+    if (input) return input;
+    input = document.createElement('input');
+    input.id = LEVEL4_INPUT_ID;
+    input.className = 'mm-level4-inline-input';
+    input.type = 'text';
+    input.setAttribute('inputmode', 'text');
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('autocapitalize', 'off');
+    input.setAttribute('spellcheck', 'false');
+    input.setAttribute('aria-label', 'Doplňované slovo');
+    input.setAttribute('aria-describedby', 'mm-level4-hint');
+    return input;
+  }
+  function configureLevel4Input(input, quiz, wordParts){
+    if (!input) return;
+    var length = wordParts && wordParts.length ? wordParts.length : 1;
+    input.value = quiz && typeof quiz.typed === 'string' ? quiz.typed : '';
+    input.placeholder = wordParts && wordParts.mask ? wordParts.mask : '';
+    input.size = length;
+    input.style.setProperty('--mm-l4-word-length', length);
+  }
+  function focusLevel4Input(){
+    var input = document.getElementById(LEVEL4_INPUT_ID);
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    if (typeof input.setSelectionRange === 'function'){
+      var len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }
+  function setLevel4TokenState(token, quiz, wordIndex, state){
+    if (!token || !quiz) return;
+    var part = level4PartByIndex(quiz, wordIndex);
+    if (!part) return;
+    var wordParts = level4WordParts(part.clean);
+    var tokenClass = 'mm-l4-token';
+    if (state.isActive) tokenClass += ' mm-l4-active-token';
+    if (!state.isHidden) tokenClass += ' mm-l4-static-token';
+    else if (state.isSolved) tokenClass += ' mm-l4-solved-token';
+    else tokenClass += ' mm-l4-hidden-token';
+    token.className = tokenClass;
+    if (state.isActive) token.setAttribute('aria-current', 'step');
+    else token.removeAttribute('aria-current');
+    token.textContent = '';
+    if (state.isHidden && state.isSolved){
+      token.innerHTML = part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
+      return;
+    }
+    if (state.isHidden && state.isActive){
+      if (part.pre) token.appendChild(document.createTextNode(part.pre));
+      var input = state.inputEl || ensureLevel4Input();
+      configureLevel4Input(input, quiz, wordParts);
+      token.appendChild(input);
+      if (part.post) token.appendChild(document.createTextNode(part.post));
+      return;
+    }
+    if (state.isHidden){
+      token.innerHTML = part.pre + '<span class="mm-level4-mask">' + esc(wordParts.mask) + '</span>' + part.post;
+      return;
+    }
+    token.textContent = part.original;
+  }
+  function updateLevel4Header(quiz){
+    if (!quiz || quiz.cursor >= quiz.items.length) return;
+    var item = quiz.items[quiz.cursor];
+    var progressEl = el.content ? el.content.querySelector('.mm-level4-progress') : null;
+    var hintEl = document.getElementById('mm-level4-hint');
+    if (progressEl) progressEl.textContent = 'Slovo ' + (quiz.cursor + 1) + ' z ' + quiz.items.length;
+    if (hintEl) hintEl.textContent = 'Nápověda: ' + item.hint;
+  }
+  function focusAndSyncLevel4(){
+    requestAnimationFrame(function(){
+      focusLevel4Input();
+      syncLevel4Viewport();
+    });
+  }
+  function advanceLevel4Word(){
+    if (!mm.quiz || mm.level !== 4) return;
+    var quiz = mm.quiz;
+    var currentItem = quiz.items[quiz.cursor];
+    if (!currentItem) return;
+    var activeInput = document.getElementById(LEVEL4_INPUT_ID);
+    var currentToken = document.getElementById('mm-l4-token-' + currentItem.index);
+    quiz.solved[currentItem.index] = true;
+    quiz.typed = '';
+    quiz.submitting = false;
+    quiz.cursor += 1;
+    if (quiz.cursor >= quiz.items.length){
+      if (currentToken) setLevel4TokenState(currentToken, quiz, currentItem.index, { isHidden: true, isSolved: true, isActive: false });
+      flash(true);
+      setMessage('✅ Výborně!');
+      completeLevel();
+      renderLevel();
+      return;
+    }
+    updateLevel4Header(quiz);
+    var nextItem = quiz.items[quiz.cursor];
+    var nextToken = document.getElementById('mm-l4-token-' + nextItem.index);
+    if (nextToken) setLevel4TokenState(nextToken, quiz, nextItem.index, { isHidden: true, isSolved: false, isActive: true, inputEl: activeInput });
+    if (currentToken) setLevel4TokenState(currentToken, quiz, currentItem.index, { isHidden: true, isSolved: true, isActive: false });
+    flash(true);
+    setMessage('✅ Výborně!');
+    focusAndSyncLevel4();
+  }
+  function handleLevel4WrongAnswer(){
+    if (!mm.quiz || mm.level !== 4) return;
+    var quiz = mm.quiz;
+    var item = quiz.items[quiz.cursor];
+    if (!item) return;
+    quiz.typed = '';
+    quiz.submitting = false;
+    var input = document.getElementById(LEVEL4_INPUT_ID);
+    if (input) input.value = '';
+    var token = document.getElementById('mm-l4-token-' + item.index);
+    if (quiz.wrongTimer) clearTimeout(quiz.wrongTimer);
+    if (token){
+      token.classList.remove('mm-l4-wrong-token');
+      forceReflow(token);
+      token.classList.add('mm-l4-wrong-token');
+      quiz.wrongTimer = setTimeout(function(){
+        token.classList.remove('mm-l4-wrong-token');
+      }, 520);
+    }
+    flash(false);
+    setMessage('❌ Nesedí. Oprav jen zvýrazněné slovo.');
+    focusAndSyncLevel4();
+  }
   function renderLevel(){
     if (!mm.verse || !el.content) return;
     el.content.classList.remove('mm-level4-layout');
@@ -3496,17 +3645,7 @@ window.shareCurrentVerse=async function(){
               buildPeekButton() +
               '<button type="button" class="mm-btn mm-level4-submit" data-action="submit-level4-word">Potvrdit slovo</button>' +
             '</div>';
-          setTimeout(function(){
-            syncLevel4Viewport();
-            const inp = document.getElementById(LEVEL4_INPUT_ID);
-            if (inp){
-              inp.focus({ preventScroll: true });
-              if (typeof inp.setSelectionRange === 'function'){
-                const len = inp.value.length;
-                inp.setSelectionRange(len, len);
-              }
-            }
-          }, 80);
+          focusAndSyncLevel4();
         }
         setMessage('Úroveň 4: Doplňuj slova jedno po druhém podle nápovědy.');
         if (el.next && q4.cursor < q4.items.length && (mm.progress.level || 0) < mm.level){ el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
@@ -3727,6 +3866,13 @@ window.shareCurrentVerse=async function(){
   document.getElementById('verse-memorize-btn')?.addEventListener('click', open);
   document.querySelector('#memorize-sheet .mm-close')?.addEventListener('click', close);
   if (el.sheet){
+    el.sheet.addEventListener('pointerdown', function(e){
+      const target = e.target && e.target.closest ? e.target.closest('button[data-action="submit-level4-word"]') : null;
+      if (!target || mm.level !== 4) return;
+      if (e.pointerType !== 'touch') return;
+      /* keep focus on the inline input so the mobile keyboard stays open during touch submission */
+      e.preventDefault();
+    });
     el.sheet.addEventListener('click', function(e){
       const target = e.target && e.target.closest ? e.target.closest('button') : null;
       if (!target) return;
