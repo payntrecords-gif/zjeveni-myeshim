@@ -2274,6 +2274,7 @@ body.dark .mm-word-quiz-container{background:#1e1e2e}
 .mm-wi-wrap{display:inline!important;position:relative;vertical-align:baseline;white-space:normal;margin:0;padding:0}
 .mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
 .mm-wi-hint.mm-wi-hint-on{opacity:1}
+.mm-wi-fixed{display:inline-block;font:inherit;font-size:inherit;font-weight:900;color:inherit;padding-right:2px}
 .mm-word-input{display:inline-block;border:none!important;border-bottom:2px solid #e5458e!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:left;outline:none!important;padding:0 2px;min-width:0;box-sizing:content-box;vertical-align:baseline;transition:color .15s,border-color .15s}
 .mm-word-input::placeholder{color:#b0bec5;font-weight:700}
 .mm-word-input:focus{border-bottom-color:#e5458e!important;outline:none!important;background:transparent}
@@ -3178,11 +3179,17 @@ window.shareCurrentVerse=async function(){
       return { word: w, ok: (inWords[i] || '').replace(/[^a-záčďéěíňóřšťůúýž]/gi,'') === w.toLowerCase().replace(/[^a-záčďéěíňóřšťůúýž]/gi,'') };
     });
   }
-  function initialsMask(word){
-    const clean = (word || '').trim();
-    if (!clean) return '';
-    if (clean.length <= 1) return clean;
-    return clean.charAt(0) + '_'.repeat(Math.max(0, clean.length - 1));
+  function level4WordParts(word){
+    const chars = Array.from((word || '').trim());
+    if (!chars.length) return { first: '', rest: '', restMask: '', restLength: 0 };
+    const first = chars[0];
+    const restChars = chars.slice(1);
+    return {
+      first,
+      rest: restChars.join(''),
+      restMask: '_'.repeat(restChars.length),
+      restLength: restChars.length
+    };
   }
   function isStaticWordToken(word){
     const normalizedWord = (word || '').trim();
@@ -3249,7 +3256,8 @@ window.shareCurrentVerse=async function(){
     const value = input.value.trim();
     const correctWord = mm.quiz.tokens.words[wi];
     if (!correctWord) return;
-    if (matchesNormalizedAnswer(correctWord, value)){
+    const wordParts = level4WordParts(correctWord);
+    if (matchesNormalizedAnswer(correctWord, wordParts.first + value)){
       mm.quiz.solved[wi] = true;
       mm.quiz.cursor = nextUnsolvedWordIndex(mm.quiz, wi + 1);
       flash(true);
@@ -3386,8 +3394,9 @@ window.shareCurrentVerse=async function(){
             const wi = part.index;
             const correct = q4.solved[wi];
             const staticWord = isStaticWordToken(part.clean);
-            const placeholder = initialsMask(part.clean);
-            const wordLen = Math.max(2, part.clean.length);
+            const wordParts = level4WordParts(part.clean);
+            const placeholder = wordParts.restMask;
+            const wordLen = wordParts.restLength;
             const pre = punct(part.pre);
             const post = punct(part.post);
             if (staticWord){
@@ -3409,9 +3418,10 @@ window.shareCurrentVerse=async function(){
             return pre +
               '<span class="mm-wi-wrap" id="mm-wi-wrap-' + wi + '">' +
                 '<span class="mm-wi-hint" id="mm-wi-hint-' + wi + '"></span>' +
+                '<span class="mm-wi-fixed">' + esc(wordParts.first) + '</span>' +
                 '<input class="' + wiCls + '" id="mm-wi-' + wi + '"' +
                 ' data-word-idx="' + wi + '"' +
-                ' data-correct="' + esc(part.clean) + '"' +
+                ' data-correct-rest="' + esc(wordParts.rest) + '"' +
                 ' placeholder="' + esc(placeholder) + '"' +
                 ' size="' + wordLen + '"' +
                 ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"' +
@@ -3731,8 +3741,8 @@ window.shareCurrentVerse=async function(){
     el.sheet.addEventListener('input', function(e){
       const target = e.target;
       if (target && target.classList && target.classList.contains('mm-word-input') && mm.level === 4){
-        const correctLen = (target.getAttribute('data-correct') || '').length;
-        const newSize = Math.max(2, Math.max(target.value.length, correctLen));
+        const correctLen = (target.getAttribute('data-correct-rest') || '').length;
+        const newSize = Math.max(1, target.value.length, correctLen);
         target.setAttribute('size', newSize);
         /* auto-submit when typed length matches the correct word length */
         if (target.value.length === correctLen && correctLen > 0){
