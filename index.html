@@ -3153,7 +3153,7 @@ window.shareCurrentVerse=async function(){
   }
   function nextQuizItem(){
     if (!mm.quiz) return;
-    if (Object.prototype.hasOwnProperty.call(mm.quiz, 'submitting')) mm.quiz.submitting = false;
+    if ('submitting' in mm.quiz) mm.quiz.submitting = false;
     mm.quiz.cursor += 1;
     if (mm.quiz.cursor >= mm.quiz.items.length){
       completeLevel();
@@ -3312,7 +3312,7 @@ window.shareCurrentVerse=async function(){
     if (!contentEl || !btn) return;
     btn.disabled = true;
     contentEl.querySelectorAll('input, textarea').forEach(function(field){
-      if (field.tagName === 'TEXTAREA') field.textContent = field.value;
+      if (field.tagName === 'TEXTAREA') field.defaultValue = field.value;
       else field.setAttribute('value', field.value);
     });
     const orig = contentEl.innerHTML;
@@ -3793,10 +3793,7 @@ window.shareCurrentVerse=async function(){
     el.sheet.addEventListener('input', function(e){
       const target = e.target;
       if (!target || target.id !== LEVEL4_INPUT_ID || mm.level !== 4 || !mm.quiz || !mm.quiz.items) return;
-      const item = mm.quiz.items[mm.quiz.cursor];
-      if (!item) return;
       mm.quiz.typed = target.value;
-      if (matchesNormalizedAnswer(item.answer, target.value)) submitTyped(LEVEL4_INPUT_ID);
     });
     el.sheet.addEventListener('focusin', function(e){
       const target = e.target;
