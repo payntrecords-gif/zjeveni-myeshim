@@ -98,50 +98,13 @@ self.addEventListener('periodicsync', event => {
     const ref = verse.c + ':' + verse.v;
     const text = verse.t.slice(0, 140) + (verse.t.length > 140 ? '\u2026' : '');
     const body = '\u201e' + text + '\u201c \u2014 Zj\u00a0' + verse.c + ':' + verse.v + '\n\nUdělej dnes MYEShim! 🙏';
-    await self.registration.showNotification('MYEShim 📖', {
+    await self.registration.showNotification('Nezapomeň na dnešní verš 📖', {
       body: body,
       icon: './icon-192.png',
       badge: './icon-96.png',
-      tag: 'myeshim-daily',
+      tag: 'daily-reminder',
       renotify: false,
       data: { ref: ref, url: self.registration.scope }
     });
   })());
-});
-
-// — FCM PUSH HANDLER — receives push notifications from Firebase Cloud Messaging
-self.addEventListener('push', event => {
-  let data = {};
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch(e) {
-    data = { body: event.data ? event.data.text() : '' };
-  }
-
-  const payloadData = data.data || {};
-  const notification = data.notification || payloadData.notification || {};
-  const title = notification.title || data.title || payloadData.title || 'MYEShim – dnešní verš 📖';
-  const body = notification.body
-    || data.body
-    || payloadData.body
-    || data.verse
-    || payloadData.verse
-    || 'Otevři appku a přečti si dnešní verš.';
-  const ref = data.ref || payloadData.ref || '';
-  const link = data.fcmOptions?.link
-    || payloadData.fcmOptions?.link
-    || data.url
-    || payloadData.url
-    || self.registration.scope;
-
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body: body,
-      icon: './icon-192.png',
-      badge: './icon-96.png',
-      tag: 'myeshim-daily',
-      renotify: false,
-      data: { ref: ref, url: link }
-    })
-  );
 });
