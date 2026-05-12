@@ -2102,15 +2102,10 @@ body.dark .mm-handle{background:rgba(255,255,255,.18)}
   position:absolute;right:14px;top:14px;border:none;background:transparent;color:var(--sub);
   font-size:1.3rem;line-height:1;padding:8px;border-radius:10px;cursor:pointer;min-width:44px;min-height:44px;
 }
-.mm-head{padding-right:52px;margin-bottom:10px;flex-shrink:0}
+.mm-head{padding-right:52px;margin-bottom:6px;flex-shrink:0}
 .mm-title{font-size:1.1rem;font-weight:900;color:var(--pink,#e5458e)}
 body.dark .mm-title{color:#ff8cc2}
 .mm-sub{font-size:.84rem;color:var(--sub);margin-top:2px}
-.mm-streak{
-  margin-top:8px;display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;
-  font-weight:900;font-size:.82rem;background:rgba(255,140,50,.14);color:#d06408;border:1px solid rgba(208,100,8,.18)
-}
-body.dark .mm-streak{background:rgba(255,140,50,.16);color:#ffbe7f;border-color:rgba(255,190,127,.22)}
 .mm-progress-wrap{margin:10px 0 12px;flex-shrink:0}
 .mm-progress-label{font-size:.8rem;font-weight:800;color:var(--sub);margin-bottom:6px}
 .mm-progress-track{height:9px;border-radius:999px;background:rgba(229,69,142,.14);overflow:hidden}
@@ -2136,7 +2131,7 @@ body.dark .mm-message{color:#d4becb}
 }
 body.dark .mm-content{background:rgba(34,26,35,.66);border-color:#3c2f3f}
 .mm-content.transitioning{opacity:.6;transform:translateY(8px)}
-.mm-verse{font-size:1.08rem;line-height:1.72;font-weight:700;color:var(--text)}
+.mm-verse{font-size:1.13rem;line-height:1.78;font-weight:700;color:var(--text)}
 body.dark .mm-verse{color:#f8eef5}
 .mm-blank-btn{
   border:none;border-bottom:2px solid rgba(229,69,142,.55);background:transparent;padding:0 2px;min-height:44px;
@@ -2285,14 +2280,13 @@ body.dark #mm-quiz-footer{border-color:#3c2f3f}
     <button class="dss-close-btn" type="button" onclick="closeDisplaySettings()">Hotovo</button>
   </div>
 </div>
-<div id="memorize-overlay" role="dialog" aria-modal="true" aria-label="Memorovací režim">
+<div id="memorize-overlay" role="dialog" aria-modal="true" aria-label="Memorování">
   <div id="memorize-sheet">
     <div class="mm-handle"></div>
     <button class="mm-close" type="button" aria-label="Zavřít">✕</button>
     <div class="mm-head">
-      <div class="mm-title">Memorovací režim 🧠</div>
+      <div class="mm-title">Memorování 🧠</div>
       <div class="mm-sub" id="mm-verse-ref"></div>
-      <div class="mm-streak" id="mm-streak-badge">🔥 0</div>
     </div>
     <div class="mm-progress-wrap">
       <div class="mm-progress-label" id="mm-progress-label">Úroveň 1 / 6</div>
@@ -2769,7 +2763,6 @@ window.shareCurrentVerse=async function(){
     overlay: document.getElementById('memorize-overlay'),
     sheet: document.getElementById('memorize-sheet'),
     ref: document.getElementById('mm-verse-ref'),
-    streak: document.getElementById('mm-streak-badge'),
     label: document.getElementById('mm-progress-label'),
     bar: document.getElementById('mm-progress-bar'),
     levels: document.getElementById('mm-level-grid'),
@@ -2988,8 +2981,7 @@ window.shareCurrentVerse=async function(){
   function restartCurrentLevel(){
     mm.attempts += 1;
     mm.quiz = null;
-    const attemptLabel = mm.attempts >= 1 ? ' (Pokus ' + (mm.attempts + 1) + ')' : '';
-    setMessage('Téměř! Zkus to od začátku 💪' + attemptLabel);
+    setMessage('Téměř! Zkus to od začátku 💪');
     setTimeout(function(){ renderLevel(); }, 400);
   }
   function nextQuizItem(){
@@ -3061,7 +3053,6 @@ window.shareCurrentVerse=async function(){
     const levelMeta = LEVELS[mm.level - 1];
     el.label.textContent = 'Úroveň ' + mm.level + ' / 6';
     el.bar.style.width = ((mm.level / 6) * 100) + '%';
-    if (el.streak) el.streak.textContent = '🔥 ' + (mm.progress.streak || 0);
     setButtons((mm.progress.level || 0) >= mm.level);
     transitionContent(function(){
       if (mm.level === 1){
