@@ -2268,14 +2268,13 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 .mm-peek-flash{animation:mm-peek-in .2s ease;background:rgba(229,69,142,.06);border-radius:12px;padding:10px}
 @keyframes mm-peek-in{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 /* === LEVEL 4: LIVE WORD INPUTS === */
-.mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;line-height:2.4}
+.mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;overflow:visible}
 body.dark .mm-word-quiz-container{background:#1e1e2e}
-.mm-word-quiz{font-size:1.1rem;line-height:2.2;font-weight:700;color:var(--text);word-spacing:.15em;display:block;white-space:normal}
-.mm-wi-wrap{display:inline;position:relative;white-space:nowrap;margin:0}
-.mm-wi-punct{margin-left:0!important;letter-spacing:0}
+.mm-word-quiz{font-size:1.1rem;line-height:2.6;font-weight:700;color:var(--text);display:block;white-space:normal}
+.mm-wi-wrap{display:inline-block;position:relative;vertical-align:baseline;white-space:nowrap}
 .mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
 .mm-wi-hint.mm-wi-hint-on{opacity:1}
-.mm-word-input{display:inline;border:none!important;border-bottom:2px solid #e5458e!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:center;outline:none!important;padding:0 2px;min-width:2ch;box-sizing:content-box;vertical-align:baseline;transition:color .15s,border-color .15s}
+.mm-word-input{display:inline-block;border:none!important;border-bottom:2px solid #e5458e!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:center;outline:none!important;padding:0 2px;min-width:2ch;box-sizing:content-box;vertical-align:baseline;transition:color .15s,border-color .15s}
 .mm-word-input::placeholder{color:#b0bec5;font-weight:700}
 .mm-word-input:focus{border-bottom-color:#e5458e!important;outline:none!important;background:transparent}
 .mm-word-input.mm-wi-correct{border-bottom-color:#22a63a!important;color:#22a63a;font-weight:900;pointer-events:none}
@@ -3427,31 +3426,33 @@ window.shareCurrentVerse=async function(){
           el.content.innerHTML = '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
           if (el.footer) el.footer.innerHTML = '';
         } else {
-          const renderStaticToken = function(text, isPunct){
-            if (!text) return '';
-            return '<span class="mm-wi-wrap' + (isPunct ? ' mm-wi-punct' : '') + '">' + esc(text) + '</span>';
-          };
+          /* pre/post punctuation emitted as plain text nodes – no wrapper span needed */
+          const punct = function(text){ return text ? esc(text) : ''; };
           const verseHtml = q4.tokens.parts.map(function(part){
-            if (part.t === 'space') return part.text;
+            if (part.t === 'space') return ' ';
+            /* pure-punctuation token (no alphanumeric chars at all) */
             if (!/[\p{L}\p{N}]/u.test(part.clean || '')){
-              return renderStaticToken(part.original || part.clean || '', true);
+              return esc(part.original || part.clean || '');
             }
             const wi = part.index;
             const correct = q4.solved[wi];
             const staticWord = isStaticWordToken(part.clean);
             const placeholder = initialsMask(part.clean);
             const wordLen = Math.max(2, part.clean.length);
-            const pre = renderStaticToken(part.pre, true);
-            const post = renderStaticToken(part.post, true);
+            const pre = punct(part.pre);
+            const post = punct(part.post);
             if (staticWord){
-              return pre + renderStaticToken(part.clean, false) + post;
+              /* single-char or punctuation-only words: plain text, no input */
+              return pre + esc(part.clean) + post;
             }
             if (correct){
               return pre +
-                '<input class="mm-word-input mm-wi-correct" id="mm-wi-' + wi + '"' +
-                ' value="' + esc(part.clean) + '"' +
-                ' size="' + wordLen + '"' +
-                ' readonly tabindex="-1">' +
+                '<span class="mm-wi-wrap">' +
+                  '<input class="mm-word-input mm-wi-correct" id="mm-wi-' + wi + '"' +
+                  ' value="' + esc(part.clean) + '"' +
+                  ' size="' + wordLen + '"' +
+                  ' readonly tabindex="-1">' +
+                '</span>' +
                 post;
             }
             const isCurrent = wi === q4.cursor;
