@@ -5804,7 +5804,7 @@ const FCM_SENDER_ID = '360259005980';
         if (userData.lastOpenDate && /^\d{4}-\d{2}-\d{2}$/.test(String(userData.lastOpenDate))) {
           safeLSSet('streak_last_date', String(userData.lastOpenDate));
         }
-        if (userData.fcmToken && !safeLSGet('myeshim-fcm-token', '')) {
+        if (userData.fcmToken) {
           safeLSSet('myeshim-fcm-token', String(userData.fcmToken));
         }
       }
