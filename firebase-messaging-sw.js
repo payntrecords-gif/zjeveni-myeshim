@@ -13,21 +13,47 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function(payload) {
-  const notification = payload && payload.notification ? payload.notification : {};
-  const data = payload && payload.data ? payload.data : {};
-  const title = notification.title || data.title || 'MYEShim – dnešní verš 📖';
+function normalizePayload(payload) {
+  const root = payload || {};
+  const data = root.data || {};
+  const notification = root.notification || {};
+  return {
+    notification: notification,
+    data: data
+  };
+}
+
+function showReminderNotification(payload) {
+  const normalized = normalizePayload(payload);
+  const notification = normalized.notification;
+  const data = normalized.data;
+  const title = notification.title || data.title || 'Nezapomeň na dnešní verš 📖';
   const options = {
-    body: notification.body || data.body || 'Otevři appku a přečti si dnešní verš.',
+    body: notification.body || data.body || 'Otevři appku a přečti si dnešní čtení v MYEShim.',
     icon: './icon-192.png',
     badge: './icon-96.png',
-    tag: data.tag || 'myeshim-daily',
+    tag: data.tag || 'daily-reminder',
+    renotify: false,
     data: {
       ref: data.ref || '',
-            url: data.url || 'https://payntrecords-gif.github.io/zjeveni-myeshim/'
+      url: data.url || 'https://payntrecords-gif.github.io/zjeveni-myeshim/'
     }
   };
   return self.registration.showNotification(title, options);
+}
+
+messaging.onBackgroundMessage(function(payload) {
+  return showReminderNotification(payload);
+});
+
+self.addEventListener('push', function(event) {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch(e) {
+    payload = { data: { body: event.data ? event.data.text() : '' } };
+  }
+  event.waitUntil(showReminderNotification(payload));
 });
 
 self.addEventListener('notificationclick', function(event) {

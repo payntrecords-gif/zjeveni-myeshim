@@ -5710,15 +5710,29 @@ const FCM_SENDER_ID = '360259005980';
     if (!uid || !_db) return;
     try { await _db.collection('users').doc(uid).collection('data').doc(doc).set(payload, { merge: true }); } catch(e) {}
   }
+  async function writeUserDoc(payload) {
+    var uid = getUid();
+    var _db = getDb();
+    if (!uid || !_db) return;
+    try { await _db.collection('users').doc(uid).set(payload, { merge: true }); } catch(e) {}
+  }
 
   async function syncKeyToFirestore(key, value) {
     if (key === 'streak_count' || key === 'streak_last_date' || key === 'streak_best') {
+      var streakLastDate = safeLSGet('streak_last_date', '');
+      var nowIso = new Date().toISOString();
       await writeDoc('streak', {
         count: parseInt(safeLSGet('streak_count', '0'), 10) || 0,
-        lastDate: safeLSGet('streak_last_date', ''),
+        lastDate: streakLastDate,
         best: parseInt(safeLSGet('streak_best', '0'), 10) || 0,
-        updatedAt: new Date().toISOString()
+        updatedAt: nowIso
       });
+      if (/^\d{4}-\d{2}-\d{2}$/.test(streakLastDate)) {
+        await writeUserDoc({
+          lastOpenDate: streakLastDate,
+          updatedAt: nowIso
+        });
+      }
     } else if (key === 'mye_notes') {
       var notes = {};
       try { notes = JSON.parse(value || '{}') || {}; } catch(e) { notes = {}; }
@@ -5735,12 +5749,18 @@ const FCM_SENDER_ID = '360259005980';
       });
     } else if (key === 'notif_enabled' || key === 'notif_time' || key === 'myeshim-fcm-token') {
       var notifTime = getResolvedNotifTime();
+      var notifToken = safeLSGet('myeshim-fcm-token', '');
+      var notifNow = new Date().toISOString();
       await writeDoc('notifications', {
         enabled: safeLSGet('notif_enabled', 'true') !== 'false',
         time: notifTime,
         timezone: cachedTimezone,
-        fcmToken: safeLSGet('myeshim-fcm-token', ''),
-        updatedAt: new Date().toISOString()
+        fcmToken: notifToken,
+        updatedAt: notifNow
+      });
+      await writeUserDoc({
+        fcmToken: notifToken,
+        updatedAt: notifNow
       });
     }
   }
@@ -5754,6 +5774,7 @@ const FCM_SENDER_ID = '360259005980';
       var docs = await Promise.all(refs.map(function(name){
         return _db.collection('users').doc(uid).collection('data').doc(name).get();
       }));
+      var userDoc = await _db.collection('users').doc(uid).get();
       syncingFromRemote = true;
       var streak = docs[0].exists ? (docs[0].data() || {}) : null;
       if (streak) {
@@ -5777,6 +5798,15 @@ const FCM_SENDER_ID = '360259005980';
           safeLSSet('notif_time', String(notif.time));
         }
         if (notif.fcmToken) safeLSSet('myeshim-fcm-token', String(notif.fcmToken));
+      }
+      var userData = userDoc.exists ? (userDoc.data() || {}) : null;
+      if (userData) {
+        if (userData.lastOpenDate && /^\d{4}-\d{2}-\d{2}$/.test(String(userData.lastOpenDate))) {
+          safeLSSet('streak_last_date', String(userData.lastOpenDate));
+        }
+        if (userData.fcmToken) {
+          safeLSSet('myeshim-fcm-token', String(userData.fcmToken));
+        }
       }
       syncingFromRemote = false;
       window.dispatchEvent(new CustomEvent('myeshim-data-synced'));
