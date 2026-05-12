@@ -2307,40 +2307,31 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
   box-shadow:0 0 0 2px rgba(229,69,142,.12)
 }
 .mm-l4-active-token .mm-level4-mask{color:inherit}
+.mm-level4-inline-input{
+  width:calc(var(--mm-l4-word-length, 5) * .72ch + 1.1ch);min-width:2.8ch;max-width:min(70vw,22ch);padding:0;border:none;
+  background:transparent;color:inherit;font:inherit;font-weight:900;letter-spacing:.04em;text-align:center;outline:none;
+  box-shadow:none;caret-color:currentColor
+}
+.mm-level4-inline-input::placeholder{color:currentColor;opacity:.68}
+.mm-level4-inline-input::-ms-clear{display:none}
 #mm-quiz-footer.mm-level4-footer{border-top:none;margin-top:4px;padding:0 0 2px}
-.mm-level4-input-card{
-  position:relative;display:grid;gap:6px;padding:8px 9px 9px;border-radius:15px;border:1px solid rgba(229,69,142,.14);
-  background:rgba(255,255,255,.94);box-shadow:0 4px 10px rgba(22,14,24,.05)
-}
-.mm-level4-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex-wrap:wrap}
-.mm-level4-card-copy{font-size:.78rem;color:var(--sub);font-weight:700;line-height:1.28}
-.mm-level4-inline-hint{font-size:.72rem;font-weight:900;color:var(--pink,#e5458e);line-height:1.2}
-.mm-level4-sr{
-  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
-  clip:rect(0,0,0,0);white-space:nowrap;border:0
-}
-.mm-level4-input-card .mm-type-wrap{gap:6px}
-.mm-level4-input-card .mm-input{min-height:40px;padding:10px 11px;border-radius:12px;font-size:.94rem}
-.mm-level4-card-actions{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
-.mm-level4-card-actions .mm-btn{min-height:40px;padding:10px 12px;border-radius:12px;font-size:.89rem}
-.mm-level4-card-actions .mm-btn-peek{min-height:34px;padding:7px 11px;font-size:.78rem}
+.mm-level4-actions{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap}
+.mm-level4-actions .mm-btn{min-height:40px;padding:10px 12px;border-radius:12px;font-size:.89rem}
+.mm-level4-actions .mm-btn-peek{min-height:34px;padding:7px 11px;font-size:.78rem}
 .mm-level4-submit{flex:1;min-width:132px}
 @media (max-height:700px){
   .mm-level4-context{padding:7px 8px 6px}
   .mm-level4-token-flow{max-height:clamp(62px,14vh,88px)}
-  .mm-level4-input-card{padding:7px 8px 8px}
 }
 @media (max-width:420px){
   .mm-level4-context{padding-left:8px;padding-right:8px}
   .mm-level4-progress{font-size:.72rem}
   .mm-level4-token-flow{gap:4px;max-height:clamp(60px,15vh,92px)}
   .mm-l4-token{font-size:.82rem;padding:4px 7px;min-height:26px}
-  .mm-level4-card-copy{font-size:.76rem}
-  .mm-level4-inline-hint{font-size:.7rem}
-  .mm-level4-input-card .mm-input{min-height:38px;padding:9px 10px}
-  .mm-level4-card-actions{gap:5px}
-  .mm-level4-card-actions .mm-btn{min-height:38px;padding:9px 11px;font-size:.86rem}
-  .mm-level4-card-actions .mm-btn-peek{min-height:32px;padding:6px 10px;font-size:.75rem}
+  .mm-level4-inline-input{max-width:min(78vw,19ch)}
+  .mm-level4-actions{gap:5px}
+  .mm-level4-actions .mm-btn{min-height:38px;padding:9px 11px;font-size:.86rem}
+  .mm-level4-actions .mm-btn-peek{min-height:32px;padding:6px 10px;font-size:.75rem}
   .mm-level4-submit{min-width:118px}
 }
 body.dark .mm-level4-mask{background:rgba(255,255,255,.08);color:#d8bfd0}
@@ -2352,7 +2343,6 @@ body.dark .mm-level4-context{
   box-shadow:0 6px 14px rgba(0,0,0,.18)
 }
 body.dark .mm-level4-hint-badge{background:rgba(255,140,194,.14);color:#ff8cc2}
-body.dark .mm-level4-inline-hint{color:#ff9dcf}
 body.dark .mm-l4-token{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);color:#f8eef5;box-shadow:none}
 body.dark .mm-l4-static-token{background:rgba(255,255,255,.04)}
 body.dark .mm-l4-hidden-token{color:#d8bfd0}
@@ -2361,7 +2351,6 @@ body.dark .mm-l4-active-token{
   background:rgba(255,140,194,.16);border-color:rgba(255,140,194,.48);color:#ff9dcf;
   box-shadow:0 0 0 2px rgba(255,140,194,.12)
 }
-body.dark .mm-level4-input-card{background:rgba(34,26,35,.94);border-color:rgba(255,140,194,.18);box-shadow:0 6px 14px rgba(0,0,0,.18)}
 </style>
 
 </head>
@@ -2935,6 +2924,7 @@ window.shareCurrentVerse=async function(){
   const MAX_HINT_UNDERSCORE_COUNT = 8;
   const DRAG_FADE_DISTANCE = 420;
   const MM_KEYBOARD_SCROLL_DELAY = 350;
+  const LEVEL4_INPUT_ID = 'mm-level4-inline-input';
   const el = {
     overlay: document.getElementById('memorize-overlay'),
     sheet: document.getElementById('memorize-sheet'),
@@ -3163,6 +3153,7 @@ window.shareCurrentVerse=async function(){
   }
   function nextQuizItem(){
     if (!mm.quiz) return;
+    if (Object.prototype.hasOwnProperty.call(mm.quiz, 'submitting')) mm.quiz.submitting = false;
     mm.quiz.cursor += 1;
     if (mm.quiz.cursor >= mm.quiz.items.length){
       completeLevel();
@@ -3193,11 +3184,15 @@ window.shareCurrentVerse=async function(){
   function submitTyped(inputId){
     if (!mm.quiz) return;
     const input = document.getElementById(inputId);
-    const inputValue = input ? input.value : '';
+    const inputValue = input ? input.value : (mm.quiz.typed || '');
     const item = mm.quiz.items[mm.quiz.cursor];
+    if (!item || mm.quiz.submitting) return;
+    mm.quiz.submitting = true;
+    mm.quiz.typed = inputValue;
     const correct = matchesNormalizedAnswer(item.answer, inputValue);
     if (correct){
       if (mm.quiz.solved && typeof item.index === 'number') mm.quiz.solved[item.index] = true;
+      mm.quiz.typed = '';
       flash(true);
       setMessage('✅ Výborně!');
       setTimeout(nextQuizItem, 260);
@@ -3287,7 +3282,9 @@ window.shareCurrentVerse=async function(){
         const wordParts = level4WordParts(word);
         return { index: index, answer: word, hint: wordParts.mask };
       }),
-      cursor: 0
+      cursor: 0,
+      typed: '',
+      submitting: false
     };
   }
   function scrollBehaviorForInputFocus(){
@@ -3314,11 +3311,23 @@ window.shareCurrentVerse=async function(){
   function peekVerse(verseText, contentEl, btn){
     if (!contentEl || !btn) return;
     btn.disabled = true;
+    contentEl.querySelectorAll('input, textarea').forEach(function(field){
+      if (field.tagName === 'TEXTAREA') field.textContent = field.value;
+      else field.setAttribute('value', field.value);
+    });
     const orig = contentEl.innerHTML;
     contentEl.innerHTML = '<div class="mm-verse mm-peek-flash">' + esc(verseText || '') + '</div>';
     setTimeout(function() {
       contentEl.innerHTML = orig;
       btn.disabled = false;
+      if (mm.level === 4){
+        const inlineInput = document.getElementById(LEVEL4_INPUT_ID);
+        if (inlineInput){
+          inlineInput.focus({ preventScroll: true });
+          const len = inlineInput.value.length;
+          inlineInput.setSelectionRange(len, len);
+        }
+      }
       syncLevel4Viewport();
     }, 2000);
   }
@@ -3349,6 +3358,7 @@ window.shareCurrentVerse=async function(){
       const isHidden = quiz.hiddenSet.has(part.index);
       const isSolved = !!quiz.solved[part.index];
       const isActive = part.index === currentIndex;
+      const wordParts = level4WordParts(part.clean);
       var tokenClass = 'mm-l4-token';
       if (isActive) tokenClass += ' mm-l4-active-token';
       if (!isHidden) tokenClass += ' mm-l4-static-token';
@@ -3357,8 +3367,14 @@ window.shareCurrentVerse=async function(){
       var tokenText = esc(part.original);
       if (isHidden && isSolved){
         tokenText = part.pre + '<span class="mm-reveal">' + esc(part.clean) + '</span>' + part.post;
+      } else if (isHidden && isActive){
+        tokenText = part.pre +
+          '<input id="' + LEVEL4_INPUT_ID + '" class="mm-level4-inline-input" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ' +
+          'value="' + esc(quiz.typed || '') + '" placeholder="' + esc(wordParts.mask) + '" aria-label="Doplňované slovo" aria-describedby="mm-level4-hint" ' +
+          'style="--mm-l4-word-length:' + Math.max(wordParts.length, 1) + '" size="' + Math.max(wordParts.length, 1) + '">' +
+          part.post;
       } else if (isHidden){
-        tokenText = part.pre + '<span class="mm-level4-mask' + (isActive ? ' mm-scan-active' : '') + '">' + esc(level4WordParts(part.clean).mask) + '</span>' + part.post;
+        tokenText = part.pre + '<span class="mm-level4-mask' + (isActive ? ' mm-scan-active' : '') + '">' + esc(wordParts.mask) + '</span>' + part.post;
       }
       return '<span id="mm-l4-token-' + part.index + '" class="' + tokenClass + '"' + (isActive ? ' aria-current="step"' : '') + '>' + tokenText + '</span>';
     }).join('');
@@ -3463,28 +3479,25 @@ window.shareCurrentVerse=async function(){
           if (el.footer) el.footer.classList.add('mm-level4-footer');
           el.content.innerHTML =
             '<div class="mm-level4-context" id="mm-level4-context">' +
-              '<div class="mm-level4-progress" aria-live="polite">' + progressText + '</div>' +
+              '<div class="mm-level4-context-head">' +
+                '<div class="mm-level4-progress" aria-live="polite">' + progressText + '</div>' +
+                '<div class="mm-level4-hint-badge" id="mm-level4-hint">' + hintText + '</div>' +
+              '</div>' +
               '<div class="mm-level4-token-flow mm-verse" tabindex="0" aria-label="Náhled verše s aktuálně zvýrazněným slovem">' + renderLevel4Verse(q4, item.index) + '</div>' +
             '</div>';
           if (el.footer) el.footer.innerHTML =
-            '<div class="mm-level4-input-card">' +
-              '<div class="mm-level4-card-copy" id="mm-level4-input-copy">Napiš zvýrazněné slovo podle nápovědy s prvním písmenem.</div>' +
-              '<div class="mm-level4-sr" id="mm-level4-input-context">Zvýrazněné slovo najdeš v horním panelu s tokeny verše.</div>' +
-              '<div class="mm-type-wrap" style="margin-top:0">' +
-                '<div class="mm-level4-inline-hint" id="mm-level4-hint">' + hintText + '</div>' +
-                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" ' +
-                  'aria-label="Pole pro dopsání zvýrazněného slova" aria-describedby="mm-level4-input-copy mm-level4-input-context mm-level4-hint" ' +
-                  'placeholder="Doplň slovo">' +
-                '<div class="mm-level4-card-actions">' +
-                  buildPeekButton() +
-                  '<button type="button" class="mm-btn mm-level4-submit" data-action="submit-level4-word">Potvrdit slovo</button>' +
-                '</div>' +
-              '</div>' +
+            '<div class="mm-level4-actions">' +
+              buildPeekButton() +
+              '<button type="button" class="mm-btn mm-level4-submit" data-action="submit-level4-word">Potvrdit slovo</button>' +
             '</div>';
           setTimeout(function(){
             syncLevel4Viewport();
-            const inp = document.getElementById('mm-type-word');
-            if (inp){ inp.focus({ preventScroll: true }); }
+            const inp = document.getElementById(LEVEL4_INPUT_ID);
+            if (inp){
+              inp.focus({ preventScroll: true });
+              const len = inp.value.length;
+              inp.setSelectionRange(len, len);
+            }
           }, 80);
         }
         setMessage('Úroveň 4: Doplňuj slova jedno po druhém podle nápovědy.');
@@ -3718,7 +3731,7 @@ window.shareCurrentVerse=async function(){
       if (action === 'puzzle-add') { puzzleAdd(target.getAttribute('data-chunk-id')); return; }
       if (action === 'puzzle-remove') { puzzleRemove(target.getAttribute('data-chunk-id')); return; }
       if (action === 'puzzle-check') { puzzleCheck(); return; }
-      if (action === 'submit-level4-word') { submitTyped('mm-type-word'); return; }
+      if (action === 'submit-level4-word') { submitTyped(LEVEL4_INPUT_ID); return; }
       if (action === 'check-verse') {
         const inp = document.getElementById('mm-master-input');
         if (mm.quiz && inp){
@@ -3775,11 +3788,19 @@ window.shareCurrentVerse=async function(){
     el.sheet.addEventListener('keydown', function(e){
       if (e.key !== 'Enter') return;
       const target = e.target;
-      if (target && target.id === 'mm-type-word') { e.preventDefault(); submitTyped('mm-type-word'); }
+      if (target && target.id === LEVEL4_INPUT_ID) { e.preventDefault(); submitTyped(LEVEL4_INPUT_ID); }
+    });
+    el.sheet.addEventListener('input', function(e){
+      const target = e.target;
+      if (!target || target.id !== LEVEL4_INPUT_ID || mm.level !== 4 || !mm.quiz || !mm.quiz.items) return;
+      const item = mm.quiz.items[mm.quiz.cursor];
+      if (!item) return;
+      mm.quiz.typed = target.value;
+      if (matchesNormalizedAnswer(item.answer, target.value)) submitTyped(LEVEL4_INPUT_ID);
     });
     el.sheet.addEventListener('focusin', function(e){
       const target = e.target;
-      if (target && target.id === 'mm-type-word' && mm.level === 4){
+      if (target && target.id === LEVEL4_INPUT_ID && mm.level === 4){
         const elInput = target;
         setTimeout(function(){
           elInput.scrollIntoView({ behavior: scrollBehaviorForInputFocus(), block: 'center' });
