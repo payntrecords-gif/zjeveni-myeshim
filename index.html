@@ -2945,9 +2945,9 @@ window.shareCurrentVerse=async function(){
         return '<span class="mm-reveal'+(part.index===currentIndex?' mm-word-bounce':'')+'">' + esc(part.pre + part.clean + part.post) + '</span>';
       }
       if (part.index === currentIndex) {
-        return part.pre + '<button class="mm-blank-btn" type="button" disabled>_____</button>' + part.post;
+        return part.pre + '<button class="mm-blank-btn" type="button" disabled aria-label="Prázdné pole">_____</button>' + part.post;
       }
-      return part.pre + '<span class="mm-blank-static">_____</span>' + part.post;
+      return part.pre + '<span class="mm-blank-static" aria-label="Prázdné pole">_____</span>' + part.post;
     }).join('');
   }
   function transitionContent(fn){
@@ -3093,7 +3093,7 @@ window.shareCurrentVerse=async function(){
     el.label.textContent = 'Úroveň ' + mm.level + ' / 6';
     el.bar.style.width = ((mm.level / 6) * 100) + '%';
     el.bar.classList.remove('mm-progress-sheen');
-    void el.bar.offsetWidth;
+    void el.bar.offsetWidth; /* force reflow so removing and re-adding the class restarts the animation */
     el.bar.classList.add('mm-progress-sheen');
     setTimeout(function(){ el.bar && el.bar.classList.remove('mm-progress-sheen'); }, 1200);
     setButtons((mm.progress.level || 0) >= mm.level);
