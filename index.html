@@ -3191,7 +3191,7 @@ window.shareCurrentVerse=async function(){
     const clean = (word || '').trim();
     if (!clean) return '';
     if (clean.length <= 1) return clean;
-    return clean.charAt(0) + ' ' + '_'.repeat(Math.max(0, clean.length - 1));
+    return clean.charAt(0) + '_'.repeat(Math.max(0, clean.length - 1));
   }
   function buildPeekButton(){
     return '<button type="button" class="mm-btn mm-btn-peek" data-action="peek-verse">👁️ Nakouknout (2s)</button>';
