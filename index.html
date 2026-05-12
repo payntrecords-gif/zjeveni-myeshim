@@ -4054,7 +4054,7 @@ const FCM_SENDER_ID = '360259005980';
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.openStreakDetail(); }
   });
 
-  function initStreak() {
+  function initStreak(skipModal) {
     const today = new Date().toISOString().slice(0, 10);
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
     const lastDate = safeLS('streak_last_date', '');
@@ -4080,8 +4080,8 @@ const FCM_SENDER_ID = '360259005980';
       const cell = document.getElementById('ps-streak-cell');
       if (cell) { cell.classList.remove('streak-pulse'); void cell.offsetWidth; cell.classList.add('streak-pulse'); }
     }
-    // Show welcome modal on first open of day
-    showWelcomeModal(streak, isNewDay);
+    // Show welcome modal on first open of day (skip when called from background sync)
+    if (!skipModal) showWelcomeModal(streak, isNewDay);
   }
 
   window.shareStreakCard = function() {
@@ -4261,8 +4261,9 @@ const FCM_SENDER_ID = '360259005980';
 
   // Re-run initStreak after Firestore sync overwrites localStorage streak values,
   // so the badge and profile panel always show the same up-to-date streak.
+  // skipModal=true: welcome screen was already shown on initial page load.
   window.addEventListener('myeshim-data-synced', function() {
-    initStreak();
+    initStreak(true);
   });
 })();
 </script>
@@ -5707,6 +5708,7 @@ const FCM_SENDER_ID = '360259005980';
 <script id="firestore-sync-script">
 (function(){
   var syncingFromRemote = false;
+  var loadInProgress = false;
   var db = null;
   var TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
   var cachedTimezone = (typeof Intl !== 'undefined' && Intl.DateTimeFormat) ? (Intl.DateTimeFormat().resolvedOptions().timeZone || '') : '';
@@ -5808,9 +5810,11 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   async function loadFirestoreData() {
+    if (loadInProgress) return;
+    loadInProgress = true;
     var uid = getUid();
     var _db = getDb();
-    if (!uid || !_db) return;
+    if (!uid || !_db) { loadInProgress = false; return; }
     try {
       var refs = ['streak', 'notes', 'favorites', 'preferences', 'notifications'];
       var docs = await Promise.all(refs.map(function(name){
@@ -5851,9 +5855,11 @@ const FCM_SENDER_ID = '360259005980';
         }
       }
       syncingFromRemote = false;
+      loadInProgress = false;
       window.dispatchEvent(new CustomEvent('myeshim-data-synced'));
     } catch(e) {
       syncingFromRemote = false;
+      loadInProgress = false;
     }
   }
 
@@ -5881,6 +5887,9 @@ const FCM_SENDER_ID = '360259005980';
 
   document.addEventListener('myeshim-auth-ready', function(event) {
     if (event && event.detail && event.detail.loggedIn) {
+      // Immediately write locally-incremented streak to Firestore so it is not
+      // lost if the user closes the app before loadFirestoreData completes.
+      syncCurrentWatchedValues();
       loadFirestoreData().then(syncCurrentWatchedValues);
     }
   });
@@ -5889,6 +5898,13 @@ const FCM_SENDER_ID = '360259005980';
       loadFirestoreData().then(syncCurrentWatchedValues);
     }
   }, 900);
+
+  // Safety net: flush streak to Firestore whenever the app goes to background.
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden' && getUid()) {
+      syncCurrentWatchedValues();
+    }
+  });
 })();
 </script>
 </body>
