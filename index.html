@@ -2270,8 +2270,8 @@ body.dark .mm-blank-box{background:rgba(255,255,255,.07)}
 /* === LEVEL 4: LIVE WORD INPUTS === */
 .mm-word-quiz-container{padding:16px;background:var(--card-bg,#fff);border-radius:16px;margin:8px 0;overflow:visible}
 body.dark .mm-word-quiz-container{background:#1e1e2e}
-.mm-word-quiz{font-size:1.1rem;line-height:2.6;font-weight:700;color:var(--text);display:block;white-space:normal}
-.mm-wi-wrap{display:inline-block;position:relative;vertical-align:baseline;white-space:nowrap}
+.mm-word-quiz{font-size:1.1rem;line-height:2.6;font-weight:700;color:var(--text);display:inline!important;white-space:normal!important}
+.mm-wi-wrap{display:inline!important;position:relative;vertical-align:baseline;white-space:nowrap}
 .mm-wi-hint{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(76,175,80,.92);color:#fff;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:20}
 .mm-wi-hint.mm-wi-hint-on{opacity:1}
 .mm-word-input{display:inline-block;border:none!important;border-bottom:2px solid #e5458e!important;background:transparent;font:inherit;font-size:inherit;font-weight:700;color:var(--text);text-align:center;outline:none!important;padding:0 2px;min-width:2ch;box-sizing:content-box;vertical-align:baseline;transition:color .15s,border-color .15s}
@@ -2883,7 +2883,7 @@ window.shareCurrentVerse=async function(){
     return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
   }
   function tokenData(text){
-    const parts = (text||'').split(/(\s+)/);
+    const parts = (text||'').trim().replace(/\s+/g,' ').split(/(\s+)/);
     const words = [];
     let wi = -1;
     const map = parts.map(function(part){
