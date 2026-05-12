@@ -6413,8 +6413,8 @@ const FCM_SENDER_ID = '360259005980';
           safeLSSet('myeshim-fcm-token', String(userData.fcmToken));
         }
       }
-      syncingFromRemote = false;
       window.dispatchEvent(new CustomEvent('myeshim-data-synced'));
+      syncingFromRemote = false;
     } catch(e) {
       syncingFromRemote = false;
     } finally {
