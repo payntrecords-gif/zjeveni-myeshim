@@ -2219,7 +2219,7 @@ body.dark .mm-btn-ghost{background:#271f29;color:#ff9dcf;border-color:#624a66}
   <div class="verse-actions">
     <button class="va-btn" id="verse-share-btn" onclick="shareCurrentVerse()">Sdílet verš</button>
     <button class="va-btn ghost" id="verse-fav-btn" onclick="toggleFavoriteVerse()">♡ Oblíbené</button>
-    <button class="va-btn ghost memorize-btn" id="verse-memorize-btn" onclick="openMemorizeMode()" aria-label="Spustit memorovací režim">🧠</button>
+    <button class="va-btn ghost memorize-btn" id="verse-memorize-btn" aria-label="Spustit memorovací režim"><span aria-hidden="true">🧠</span> Memorovat</button>
   </div>
 </div>
 <div id="app-tabs-outer">
@@ -2273,7 +2273,7 @@ body.dark .mm-btn-ghost{background:#271f29;color:#ff9dcf;border-color:#624a66}
 <div id="memorize-overlay" role="dialog" aria-modal="true" aria-label="Memorovací režim">
   <div id="memorize-sheet">
     <div class="mm-handle"></div>
-    <button class="mm-close" type="button" onclick="closeMemorizeMode()" aria-label="Zavřít">✕</button>
+    <button class="mm-close" type="button" aria-label="Zavřít">✕</button>
     <div class="mm-head">
       <div class="mm-title">Memorovací režim 🧠</div>
       <div class="mm-sub" id="mm-verse-ref"></div>
@@ -2743,6 +2743,10 @@ window.shareCurrentVerse=async function(){
     progress: { level: 0, completedAt: '', streak: 0 },
     quiz: null
   };
+  const GENERIC_OPTIONS = ['Slovo','Amen','Duch','Život','Pravda','Světlo'];
+  const MIN_HINT_UNDERSCORE_COUNT = 1;
+  const MAX_HINT_UNDERSCORE_COUNT = 8;
+  const DRAG_FADE_DISTANCE = 420;
   const el = {
     overlay: document.getElementById('memorize-overlay'),
     sheet: document.getElementById('memorize-sheet'),
@@ -2758,7 +2762,15 @@ window.shareCurrentVerse=async function(){
     confetti: document.getElementById('mm-confetti')
   };
   function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+  function parseLocalISODate(isoDate){
+    const parts = (isoDate || '').split('-');
+    const y = Number(parts[0]), m = Number(parts[1]), d = Number(parts[2]);
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d);
+  }
   function normalize(s){
+    // Normalize text for tolerant matching across punctuation/diacritics variants.
     return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\p{L}\p{N}\s]/gu,'').replace(/\s+/g,' ').trim();
   }
   function tokenData(text){
@@ -2797,17 +2809,17 @@ window.shareCurrentVerse=async function(){
   }
   function updateStreakOnComplete(){
     const today = new Date();
-    const todayISO = today.toISOString().slice(0,10);
+    const todayISODate = today.toISOString().slice(0,10);
     const prev = mm.progress.completedAt;
     let streak = Number(mm.progress.streak) || 0;
     if (!prev) streak = 1;
-    else if (prev === todayISO) streak = Math.max(1, streak);
+    else if (prev === todayISODate) streak = Math.max(1, streak);
     else {
-      const prevDt = new Date(prev + 'T00:00:00');
-      const diffDays = Math.round((localDayStamp(today) - localDayStamp(prevDt)) / 86400000);
+      const prevDt = parseLocalISODate(prev);
+      const diffDays = prevDt ? Math.round((localDayStamp(today) - localDayStamp(prevDt)) / 86400000) : 99;
       streak = diffDays === 1 ? streak + 1 : 1;
     }
-    mm.progress.completedAt = todayISO;
+    mm.progress.completedAt = todayISODate;
     mm.progress.streak = streak;
   }
   function shuffle(a){
@@ -2821,7 +2833,9 @@ window.shareCurrentVerse=async function(){
   function alternatives(words, answer){
     const base = words.filter(w => normalize(w) !== normalize(answer) && normalize(w).length > 1);
     const picks = shuffle(base).slice(0,2);
-    while (picks.length < 2) picks.push(answer + (picks.length ? '!' : '?'));
+    const generic = GENERIC_OPTIONS.filter(w => normalize(w) !== normalize(answer));
+    while (picks.length < 2 && generic.length) picks.push(generic.shift());
+    while (picks.length < 2) picks.push('Slovo');
     return shuffle([answer].concat(picks));
   }
   function hiddenIndices(words, level){
@@ -2846,7 +2860,7 @@ window.shareCurrentVerse=async function(){
   function initialsHint(words){
     return words.map(function(w){
       const ch = w.charAt(0) || '';
-      return ch ? ch + '_'.repeat(Math.max(2, Math.min(8, w.length - 1))) : '';
+      return ch ? ch + '_'.repeat(clamp(w.length - 1, MIN_HINT_UNDERSCORE_COUNT, MAX_HINT_UNDERSCORE_COUNT)) : '';
     }).join(' ');
   }
   function setMessage(text){
@@ -2899,7 +2913,7 @@ window.shareCurrentVerse=async function(){
     el.content.classList.add('transitioning');
     setTimeout(function(){ fn(); el.content.classList.remove('transitioning'); }, 130);
   }
-  function evaluateTyped(answer, typed){
+  function matchesNormalizedAnswer(answer, typed){
     return normalize(answer) === normalize(typed);
   }
   function setButtons(done){
@@ -2945,7 +2959,7 @@ window.shareCurrentVerse=async function(){
   function answerOption(value){
     if (!mm.quiz) return;
     const item = mm.quiz.items[mm.quiz.cursor];
-    const correct = evaluateTyped(item.answer, value);
+    const correct = matchesNormalizedAnswer(item.answer, value);
     if (correct){
       mm.quiz.solved[item.index] = true;
       flash(true);
@@ -2959,9 +2973,9 @@ window.shareCurrentVerse=async function(){
   function submitTyped(inputId){
     if (!mm.quiz) return;
     const input = document.getElementById(inputId);
-    const val = input ? input.value : '';
+    const inputValue = input ? input.value : '';
     const item = mm.quiz.items[mm.quiz.cursor];
-    const correct = evaluateTyped(item.answer, val);
+    const correct = matchesNormalizedAnswer(item.answer, inputValue);
     if (correct){
       if (mm.quiz.solved && typeof item.index === 'number') mm.quiz.solved[item.index] = true;
       flash(true);
@@ -3018,10 +3032,10 @@ window.shareCurrentVerse=async function(){
         if (item) {
           if (item.mode === 'type') {
             html += '<input class="mm-input" id="mm-type-word" placeholder="Napiš slovo" autocomplete="off">';
-            html += '<button type="button" class="mm-option" onclick="memorizeSubmitWord()">Potvrdit</button>';
+            html += '<button type="button" class="mm-option" data-action="submit-word">Potvrdit</button>';
           } else {
-            html += '<div class="mm-options">' + item.options.map(function(opt){
-              return '<button type="button" class="mm-option" data-opt="' + encodeURIComponent(opt) + '" onclick="memorizePickOption(this)">' + esc(opt) + '</button>';
+            html += '<div class="mm-options">' + item.options.map(function(opt, choiceIndex){
+              return '<button type="button" class="mm-option" data-choice-index="' + choiceIndex + '">' + esc(opt) + '</button>';
             }).join('') + '</div>';
           }
         }
@@ -3033,11 +3047,11 @@ window.shareCurrentVerse=async function(){
       if (mm.level === 5){
         const tk = tokenData(mm.verse.t || '');
         const hint = initialsHint(tk.words);
-        el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">'+esc(hint)+'</div><textarea id="mm-level5-input" class="mm-input" rows="4" placeholder="Dopiš celý verš podle prvních písmen"></textarea><button type="button" class="mm-option" onclick="memorizeSubmitLevel5()">Zkontrolovat</button>';
+        el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">'+esc(hint)+'</div><textarea id="mm-level5-input" class="mm-input" rows="4" placeholder="Dopiš celý verš podle prvních písmen"></textarea><button type="button" class="mm-option" data-action="submit-level5">Zkontrolovat</button>';
         setMessage('Úroveň 5: Vidíš jen první písmena.');
         return;
       }
-      el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">Napiš verš celý zpaměti:</div><textarea id="mm-level6-input" class="mm-input" rows="5" placeholder="Sem napiš celý verš"></textarea><button type="button" class="mm-option" onclick="memorizeSubmitLevel6()">Vyhodnotit</button>';
+      el.content.innerHTML = '<div class="mm-verse" style="margin-bottom:8px">Napiš verš celý zpaměti:</div><textarea id="mm-level6-input" class="mm-input" rows="5" placeholder="Sem napiš celý verš"></textarea><button type="button" class="mm-option" data-action="submit-level6">Vyhodnotit</button>';
       setMessage('Úroveň 6: Teď už úplně zpaměti.');
     });
   }
@@ -3085,15 +3099,9 @@ window.shareCurrentVerse=async function(){
   }
   window.openMemorizeMode = open;
   window.closeMemorizeMode = close;
-  window.memorizePickOption = function(btn){
-    if (!btn) return;
-    const encoded = btn.getAttribute('data-opt') || '';
-    answerOption(decodeURIComponent(encoded));
-  };
-  window.memorizeSubmitWord = function(){ submitTyped('mm-type-word'); };
-  window.memorizeSubmitLevel5 = function(){
+  function submitLevel5(){
     const input = document.getElementById('mm-level5-input');
-    if (evaluateTyped(mm.verse.t, input ? input.value : '')) {
+    if (matchesNormalizedAnswer(mm.verse.t, input ? input.value : '')) {
       flash(true);
       setMessage('✅ Perfektní! Verš držíš skvěle.');
       completeLevel();
@@ -3102,10 +3110,10 @@ window.shareCurrentVerse=async function(){
       wrongFeedback(mm.verse.t);
       setTimeout(renderLevel, 1500);
     }
-  };
-  window.memorizeSubmitLevel6 = function(){
+  }
+  function submitLevel6(){
     const input = document.getElementById('mm-level6-input');
-    if (evaluateTyped(mm.verse.t, input ? input.value : '')) {
+    if (matchesNormalizedAnswer(mm.verse.t, input ? input.value : '')) {
       flash(true);
       setMessage('✅ Nádhera! Máš to zpaměti.');
       completeLevel();
@@ -3114,7 +3122,7 @@ window.shareCurrentVerse=async function(){
       wrongFeedback(mm.verse.t);
       setTimeout(renderLevel, 1500);
     }
-  };
+  }
   if (el.levels){
     el.levels.addEventListener('click', function(e){
       const btn = e.target && e.target.closest ? e.target.closest('.mm-level-chip') : null;
@@ -3129,6 +3137,26 @@ window.shareCurrentVerse=async function(){
   }
   if (el.overlay){
     el.overlay.addEventListener('click', function(e){ if (e.target === el.overlay) close(); });
+  }
+  document.getElementById('verse-memorize-btn')?.addEventListener('click', open);
+  document.querySelector('#memorize-sheet .mm-close')?.addEventListener('click', close);
+  if (el.content){
+    el.content.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest ? e.target.closest('button.mm-option') : null;
+      if (!btn) return;
+      const action = btn.getAttribute('data-action');
+      if (action === 'submit-word') { submitTyped('mm-type-word'); return; }
+      if (action === 'submit-level5') { submitLevel5(); return; }
+      if (action === 'submit-level6') { submitLevel6(); return; }
+      const choiceIndex = Number(btn.getAttribute('data-choice-index'));
+      const item = mm.quiz && mm.quiz.items ? mm.quiz.items[mm.quiz.cursor] : null;
+      if (item && Number.isInteger(choiceIndex) && item.options && item.options[choiceIndex] != null) answerOption(item.options[choiceIndex]);
+    });
+    el.content.addEventListener('keydown', function(e){
+      if (e.key !== 'Enter') return;
+      const target = e.target;
+      if (target && target.id === 'mm-type-word') { e.preventDefault(); submitTyped('mm-type-word'); }
+    });
   }
   if (el.retry) el.retry.addEventListener('click', resetCurrentLevel);
   if (el.next) el.next.addEventListener('click', goNextLevel);
@@ -3154,7 +3182,7 @@ window.shareCurrentVerse=async function(){
       dragY = dy;
       e.preventDefault();
       el.sheet.style.transform = 'translateY(' + dy + 'px)';
-      if (el.overlay) el.overlay.style.background = 'rgba(10,8,14,' + Math.max(0.12, 0.36 - dy / 420) + ')';
+      if (el.overlay) el.overlay.style.background = 'rgba(10,8,14,' + Math.max(0.12, 0.36 - dy / DRAG_FADE_DISTANCE) + ')';
     }, { passive: false });
     function finishDrag(){
       if (!dragging) return;
