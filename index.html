@@ -3450,8 +3450,8 @@ window.shareCurrentVerse=async function(){
             '<div class="mm-level4-context" id="mm-level4-context">' +
               '<div class="mm-level4-context-head">' +
                 '<div>' +
-                  '<div class="mm-level4-progress">' + progressText + '</div>' +
-                  '<div class="mm-level4-context-copy">Aktivní slovo zůstává nahoře viditelné i při psaní.</div>' +
+                  '<div class="mm-level4-progress" aria-live="polite">' + progressText + '</div>' +
+                  '<div class="mm-level4-context-copy" id="mm-level4-context-copy">Aktivní slovo zůstává nahoře viditelné i při psaní.</div>' +
                 '</div>' +
                 '<span class="mm-level4-hint-badge">' + hintText + '</span>' +
               '</div>' +
@@ -3462,12 +3462,12 @@ window.shareCurrentVerse=async function(){
               '<div class="mm-level4-card-top">' +
                 '<div>' +
                   '<div class="mm-level4-progress">' + progressText + '</div>' +
-                  '<div class="mm-level4-card-copy">Napiš zvýrazněné slovo z panelu nahoře.</div>' +
+                  '<div class="mm-level4-card-copy" id="mm-level4-input-copy">Napiš zvýrazněné slovo z panelu nahoře.</div>' +
                 '</div>' +
                 '<span class="mm-level4-hint-badge">' + hintText + '</span>' +
               '</div>' +
               '<div class="mm-type-wrap" style="margin-top:0">' +
-                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(item.hint) + '">' +
+                '<input id="mm-type-word" class="mm-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-describedby="mm-level4-input-copy mm-level4-context-copy" placeholder="' + esc(item.hint) + '">' +
                 '<div class="mm-level4-card-actions">' +
                   buildPeekButton() +
                   '<button type="button" class="mm-btn mm-level4-submit" data-action="submit-level4-word">Potvrdit slovo</button>' +
