@@ -2280,6 +2280,10 @@ body.dark .mm-word-quiz-container{background:#1e1e2e}
 .mm-word-input.mm-wi-correct{border-bottom-color:#22a63a!important;color:#22a63a;font-weight:900;pointer-events:none}
 .mm-word-input.mm-wi-wrong{border-bottom-color:#e53935!important;color:#e53935}
 .mm-word-input.mm-wi-inactive{opacity:.45;pointer-events:none}
+body.dark .mm-word-input{color:#f8eef5}
+body.dark .mm-word-input::placeholder{color:#64748b}
+body.dark .mm-word-input.mm-wi-correct{color:#4aba6c;border-bottom-color:#4aba6c!important}
+body.dark .mm-word-input.mm-wi-wrong{color:#ff6b6b;border-bottom-color:#ff6b6b!important}
 </style>
 
 </head>
@@ -3322,7 +3326,7 @@ window.shareCurrentVerse=async function(){
       input.classList.add('mm-wi-wrong');
       setTimeout(function(){
         var inp = document.getElementById(inputId);
-        if (inp){ inp.classList.remove('mm-wi-wrong'); inp.value = ''; inp.focus(); }
+        if (inp){ inp.classList.remove('mm-wi-wrong'); inp.value = ''; inp.focus({ preventScroll: true }); }
       }, 360);
     }
   }
@@ -3465,7 +3469,7 @@ window.shareCurrentVerse=async function(){
                 ' data-correct="' + esc(part.clean) + '"' +
                 ' placeholder="' + esc(placeholder) + '"' +
                 ' size="' + wordLen + '"' +
-                ' autocomplete="off" autocorrect="off" spellcheck="false"' +
+                ' autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"' +
                 (isCurrent ? '' : ' tabindex="-1"') +
                 '>' +
               '</span>' +
@@ -3475,7 +3479,7 @@ window.shareCurrentVerse=async function(){
           if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end">' + buildPeekButton() + '</div>';
           setTimeout(function(){
             const inp = document.getElementById('mm-wi-' + q4.cursor);
-            if (inp){ inp.focus(); }
+            if (inp){ inp.focus({ preventScroll: true }); }
           }, 50);
         }
         setMessage('Úroveň 4: Vidíš první písmeno — doplň každé slovo!');
