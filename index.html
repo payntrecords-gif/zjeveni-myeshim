@@ -2818,7 +2818,7 @@ window.shareCurrentVerse=async function(){
     'Jen tak dál, jde ti to výborně! 🚀'
   ];
   // Levels where the user reads/advances freely without active quiz completion
-  const FREE_ADVANCE_LEVELS = [1, 4];
+  const FREE_ADVANCE_LEVELS = [1];
   const mm = {
     open: false,
     level: 1,
@@ -3335,25 +3335,35 @@ window.shareCurrentVerse=async function(){
       }
       /* ── LEVEL 4: PRVNÍ PÍSMENO ── */
       if (mm.level === 4){
-        if (!mm.quiz) mm.quiz = { tokens: tokenData(mm.verse.t || ''), revealedUntil: {}, revealTimers: {} };
-        const fq = mm.quiz;
-        const now = Date.now();
-        const verseHtml = fq.tokens.parts.map(function(part){
-          if (part.t === 'space') return part.text;
-          const word = part.clean || '';
-          const isShort = word.length <= 1;
-          const isPeek = Number(fq.revealedUntil[part.index] || 0) > now;
-          if (isShort){
-            return part.pre + '<span class="mm-peek-plain">' + esc(word) + '</span>' + part.post;
-          }
-          if (isPeek){
-            return part.pre + '<span class="mm-reveal">' + esc(word) + '</span>' + part.post;
-          }
-          return part.pre + '<button type="button" class="mm-peek-word" data-action="peek-word" data-word-idx="' + part.index + '">' + esc(initialsMask(word)) + '</button>' + part.post;
-        }).join('');
-        el.content.innerHTML = '<div class="mm-verse">' + verseHtml + '</div>';
-        if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end">' + buildPeekButton() + '</div>';
-        setMessage('Úroveň 4: Vidíš první písmena — klikni pro krátké nakouknutí (1.5s).');
+        if (!mm.quiz) mm.quiz = { state: 'typing', typed: '' };
+        const q4 = mm.quiz;
+        const hint = initialsHint(tokenData(mm.verse.t || '').words);
+        if (q4.state === 'typing'){
+          el.content.innerHTML =
+            '<div class="mm-verse" style="opacity:.65;letter-spacing:.04em;margin-bottom:12px" aria-label="Nápověda — první písmena">' + esc(hint) + '</div>' +
+            '<textarea id="mm-master-input" class="mm-input" rows="4" placeholder="Napiš celý verš…" style="resize:none" autocorrect="off" spellcheck="false">' + esc(q4.typed || '') + '</textarea>';
+          if (el.footer) el.footer.innerHTML =
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+              buildPeekButton() +
+              '<button type="button" class="mm-btn" data-action="check-verse" style="flex:1;min-width:0">Zkontrolovat</button>' +
+            '</div>';
+          setTimeout(function(){ const inp = document.getElementById('mm-master-input'); if (inp){ inp.focus(); const len = inp.value.length; inp.setSelectionRange(len,len); } }, 80);
+        } else if (q4.state === 'checked'){
+          const diff = wordDiff(q4.typed, mm.verse.t);
+          const okCount = diff.filter(function(d){ return d.ok; }).length;
+          const score = diff.length > 0 ? Math.round(okCount / diff.length * 100) : 0;
+          const diffHtml = diff.map(function(d){
+            return '<span class="' + (d.ok ? 'mm-diff-ok' : 'mm-diff-err') + '" style="color:' + (d.ok ? '#22c55e' : '#ef4444') + '">' + esc(d.word) + '<sup>' + (d.ok ? '✓' : '✗') + '</sup></span>';
+          }).join(' ');
+          el.content.innerHTML =
+            '<div class="mm-verse mm-diff-wrap">' + diffHtml + '</div>' +
+            '<div class="mm-diff-legend">Skóre: <strong>' + score + '%</strong></div>' +
+            '<div style="font-size:.82rem;font-weight:900;color:var(--sub);margin:10px 0 6px">Originál:</div>' +
+            '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
+          if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end">' + buildPeekButton() + '</div>';
+        }
+        setMessage('Úroveň 4: Vidíš první písmena — napiš celý verš z paměti!');
+        if (el.next && q4.state !== 'checked' && (mm.progress.level || 0) < mm.level){ el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
         return;
       }
       /* ── LEVEL 5: MISTROVSTVÍ ── */
