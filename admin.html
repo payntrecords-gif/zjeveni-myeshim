@@ -58,7 +58,7 @@
       appId: "1:360259005980:web:610695f8b44de04dc079d9"
     };
     const EMAILJS_SERVICE_ID = 'service_ritfist';
-    const EMAILJS_TEMPLATE_ID = 'template_64wrero';
+    const EMAILJS_TEMPLATE_ID = 'template_3x8z61m';
     const EMAILJS_PUBLIC_KEY = 'E1vj9Uv9CqN8xYOHS';
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
@@ -137,12 +137,12 @@
         const approveBtn = document.createElement('button');
         approveBtn.className = 'btn btn-gold';
         approveBtn.textContent = '✅ Schválit';
-        approveBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'approved', item); });
+        approveBtn.addEventListener('click', async () => { await setUserStatus(item.email || item.uid, 'approved', item); });
 
         const rejectBtn = document.createElement('button');
         rejectBtn.className = 'btn btn-red';
         rejectBtn.textContent = '❌ Zamítnout';
-        rejectBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected', item); });
+        rejectBtn.addEventListener('click', async () => { await setUserStatus(item.email || item.uid, 'rejected', item); });
 
         actions.append(approveBtn, rejectBtn);
         el.appendChild(actions);
@@ -163,7 +163,7 @@
         const revokeBtn = document.createElement('button');
         revokeBtn.className = 'btn btn-sub';
         revokeBtn.textContent = 'Odvolat přístup';
-        revokeBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected', item); });
+        revokeBtn.addEventListener('click', async () => { await setUserStatus(item.email || item.uid, 'rejected', item); });
         el.appendChild(revokeBtn);
         approvedList.appendChild(el);
       });
@@ -175,7 +175,7 @@
       const errors = [];
       await Promise.all(latestPending.map(async (item) => {
         try {
-          await approveUser(item.uid, item);
+          await approveUser(item.email || item.uid, item);
         } catch (err) {
           errors.push(item.email || item.uid);
           console.error('Approval failed for', item.email || item.uid, err);
