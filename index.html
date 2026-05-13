@@ -38,7 +38,7 @@ try {
   localStorage.removeItem('myeshim_user_email');
   localStorage.removeItem('myeshim_user_name');
 } catch (error) {
-  console.warn('Nepodařilo se vyčistit localStorage klíče myeshim_user_email a myeshim_user_name.', error);
+  console.warn('Failed to clean up localStorage keys myeshim_user_email and myeshim_user_name.', error);
 }
 
 onAuthStateChanged(auth, async (user) => {

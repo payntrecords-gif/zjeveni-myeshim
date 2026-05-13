@@ -87,7 +87,7 @@
         }
 
         await signOut(auth).catch((signOutError) => {
-          console.warn('Nepodařilo se odhlásit neschváleného uživatele:', signOutError);
+          console.warn('Failed to sign out unapproved user:', signOutError);
         });
         window.location.replace('./waiting.html');
       } catch (error) {

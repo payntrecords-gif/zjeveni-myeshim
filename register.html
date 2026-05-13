@@ -92,13 +92,13 @@
           });
         } catch (firestoreError) {
           await deleteUser(credential.user).catch((cleanupError) => {
-            console.error('Nepodařilo se smazat nově vytvořený účet po chybě Firestore:', cleanupError);
+            console.error('Failed to delete newly created account after Firestore error:', cleanupError);
           });
           throw firestoreError;
         }
 
         await signOut(auth).catch((signOutError) => {
-          console.warn('Registrace byla uložena, ale automatické odhlášení se nezdařilo:', signOutError);
+          console.warn('Registration saved but automatic sign-out failed:', signOutError);
         });
         window.location.replace('./waiting.html');
       } catch (error) {
