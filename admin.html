@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>MYEShim – Admin</title>
+  <style>
+    :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
+    .wrap{max-width:900px;margin:0 auto}
+    .card{background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px}
+    h1,h2{margin:0 0 12px} .row{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{padding:10px 14px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+    .btn-gold{background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210}
+    .btn-red{background:#672738;color:#ffd7e0}
+    .btn-sub{background:#2d2434;color:#fff;border:1px solid var(--line)}
+    .muted{color:var(--sub)}
+    .item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+    .head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap}
+    a{color:#f2dc98}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Admin panel</h1>
+      <p class="muted">Správa čekajících a schválených členů.</p>
+      <div class="top-actions">
+        <button class="btn btn-gold" id="approve-all-btn" type="button">Schválit všechny čekající</button>
+        <a href="./import-members.html">Import e-mailů (CSV)</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Čekající žádosti</h2>
+      <div id="pending-list" class="muted">Načítám…</div>
+    </div>
+
+    <div class="card">
+      <h2>Schválení uživatelé</h2>
+      <div id="approved-list" class="muted">Načítám…</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const FIREBASE_AUTH_CONFIG = {
+      apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+      authDomain: "myeshim-app.firebaseapp.com",
+      projectId: "myeshim-app",
+      storageBucket: "myeshim-app.firebasestorage.app",
+      messagingSenderId: "360259005980",
+      appId: "1:360259005980:web:610695f8b44de04dc079d9"
+    };
+
+    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const pendingList = document.getElementById('pending-list');
+    const approvedList = document.getElementById('approved-list');
+    const approveAllBtn = document.getElementById('approve-all-btn');
+    let latestPending = [];
+
+    function formatDate(value) {
+      if (!value) return 'neuvedeno';
+      if (value.toDate) return value.toDate().toLocaleString('cs-CZ');
+      if (typeof value === 'string') return value;
+      return 'neuvedeno';
+    }
+
+    async function setUserStatus(uid, status) {
+      await setDoc(doc(db, 'pendingUsers', uid), { status }, { merge: true });
+      await setDoc(doc(db, 'approvedUsers', uid), { status }, { merge: true });
+    }
+
+    function renderPending(items) {
+      latestPending = items;
+      if (!items.length) {
+        pendingList.textContent = 'Žádné čekající žádosti.';
+        return;
+      }
+      pendingList.innerHTML = '';
+      items.forEach((item) => {
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.innerHTML = `<div class="head"><div><strong>${item.name || 'Bez jména'}</strong><div class="muted">${item.email || 'bez e-mailu'}</div><div class="muted">Registrace: ${formatDate(item.createdAt)}</div></div></div>`;
+        const actions = document.createElement('div');
+        actions.className = 'row';
+
+        const approveBtn = document.createElement('button');
+        approveBtn.className = 'btn btn-gold';
+        approveBtn.textContent = '✅ Schválit';
+        approveBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'approved'); });
+
+        const rejectBtn = document.createElement('button');
+        rejectBtn.className = 'btn btn-red';
+        rejectBtn.textContent = '❌ Zamítnout';
+        rejectBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected'); });
+
+        actions.append(approveBtn, rejectBtn);
+        el.appendChild(actions);
+        pendingList.appendChild(el);
+      });
+    }
+
+    function renderApproved(items) {
+      if (!items.length) {
+        approvedList.textContent = 'Zatím nejsou žádní schválení uživatelé.';
+        return;
+      }
+      approvedList.innerHTML = '';
+      items.forEach((item) => {
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.innerHTML = `<div class="head"><div><strong>${item.name || 'Bez jména'}</strong><div class="muted">${item.email || 'bez e-mailu'}</div></div></div>`;
+        const revokeBtn = document.createElement('button');
+        revokeBtn.className = 'btn btn-sub';
+        revokeBtn.textContent = 'Odvolat přístup';
+        revokeBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected'); });
+        el.appendChild(revokeBtn);
+        approvedList.appendChild(el);
+      });
+    }
+
+    approveAllBtn.addEventListener('click', async () => {
+      if (!latestPending.length) return;
+      const batch = writeBatch(db);
+      latestPending.forEach((item) => {
+        batch.set(doc(db, 'pendingUsers', item.uid), { status: 'approved' }, { merge: true });
+        batch.set(doc(db, 'approvedUsers', item.uid), { status: 'approved' }, { merge: true });
+      });
+      await batch.commit();
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('./login.html');
+        return;
+      }
+
+      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+      if (!adminSnap.exists()) {
+        window.location.replace('./index.html');
+        return;
+      }
+
+      onSnapshot(query(collection(db, 'pendingUsers'), where('status', '==', 'pending')), (snap) => {
+        const items = snap.docs.map((docSnap) => ({ uid: docSnap.id, ...docSnap.data() }));
+        renderPending(items);
+      });
+
+      onSnapshot(query(collection(db, 'pendingUsers'), where('status', '==', 'approved')), (snap) => {
+        const items = snap.docs.map((docSnap) => ({ uid: docSnap.id, ...docSnap.data() }));
+        renderApproved(items);
+      });
+    });
+  </script>
+</body>
+</html>
