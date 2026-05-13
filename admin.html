@@ -55,11 +55,11 @@
       messagingSenderId: "360259005980",
       appId: "1:360259005980:web:610695f8b44de04dc079d9"
     };
-    const EMAILJS_SERVICE_ID = 'service_ritfist';
+    const EMAILJS_SERVICE_ID = 'default_service';
     const EMAILJS_TEMPLATE_ID = 'template_3x8z61m';
     const EMAILJS_PUBLIC_KEY = 'E1vj9Uv9CqN8xYOHS';
 
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
     const auth = getAuth(app);
@@ -82,7 +82,7 @@
       await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         to_email: email,
         to_name: name || '',
-        message: 'Tvůj účet byl schválen! Klikni na následující odkaz pro přístup do aplikace (platnost 48 hodin):',
+        message: 'Tvůj účet byl schválen! Tvůj přístupový odkaz do aplikace MYEShim (platnost 48 hodin):',
         code: link
       });
     }
@@ -95,7 +95,8 @@
         name: userData.name || '',
         createdAt: serverTimestamp(),
         expiresAt: Timestamp.fromMillis(now + 48 * 60 * 60 * 1000),
-        used: false
+        used: false,
+        purpose: 'login'
       });
       await setDoc(doc(db, 'approvedUsers', email), {
         name: userData.name || '',
@@ -110,7 +111,8 @@
       try {
         await sendApprovalEmail(userData.name, email, token);
       } catch (err) {
-        console.error('EmailJS failed:', err);
+        console.error('EmailJS admin send failed', err);
+        if (err && err.text) console.error('EmailJS error text:', err.text);
       }
     }
 
