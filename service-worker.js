@@ -88,7 +88,7 @@ self.addEventListener('periodicsync', event => {
       badge: './icon-96.png',
       tag: 'daily-reminder',
       renotify: false,
-      data: { ref: ref, verseId: ref, source: 'daily-reminder', url: APP_ROOT_URL }
+      data: { ref: ref, source: 'daily-reminder', url: APP_ROOT_URL }
     });
   })());
 });
@@ -160,13 +160,10 @@ async function activateNotificationTarget(targetUrl, data) {
   if (!activeClient) return openNotificationWindow(targetUrl);
 
   let clientRef = activeClient;
-  const currentUrl = (() => {
-    try {
-      return new URL(clientRef.url).href;
-    } catch (error) {
-      return clientRef.url || '';
-    }
-  })();
+  let currentUrl = clientRef.url || '';
+  try {
+    currentUrl = new URL(currentUrl).href;
+  } catch (error) {}
   if (currentUrl !== targetUrl) {
     if (typeof clientRef.navigate === 'function') {
       try {

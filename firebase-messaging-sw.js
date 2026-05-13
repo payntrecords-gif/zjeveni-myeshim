@@ -38,7 +38,7 @@ function showReminderNotification(payload) {
     renotify: false,
     data: Object.assign({}, data, {
       ref: data.ref || '',
-      verseId: data.verseId || data.ref || '',
+      verseId: data.verseId || '',
       source: data.source || data.type || data.tag || 'daily-reminder',
       url: targetUrl
     })
@@ -113,13 +113,10 @@ async function activateNotificationTarget(targetUrl, data) {
   if (!activeClient) return openNotificationWindow(targetUrl);
 
   let clientRef = activeClient;
-  const currentUrl = (() => {
-    try {
-      return new URL(clientRef.url).href;
-    } catch (error) {
-      return clientRef.url || '';
-    }
-  })();
+  let currentUrl = clientRef.url || '';
+  try {
+    currentUrl = new URL(currentUrl).href;
+  } catch (error) {}
   if (currentUrl !== targetUrl) {
     if (typeof clientRef.navigate === 'function') {
       try {
