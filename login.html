@@ -28,7 +28,7 @@
     <label for="email">E-mail</label>
     <input id="email" type="email" required autocomplete="email">
     <label for="password">Heslo</label>
-    <input id="password" type="password" required minlength="6" placeholder="Minimálně 6 znaků" autocomplete="current-password">
+    <input id="password" type="password" required minlength="8" placeholder="Minimálně 8 znaků" autocomplete="current-password">
     <button id="submit-btn" type="submit">Poslat přístupový odkaz</button>
     <a class="link" href="./register.html">Ještě nemáš účet? Zaregistruj se</a>
     <a class="link-small" href="./admin-login.html">Admin přihlášení</a>
@@ -48,11 +48,11 @@
       messagingSenderId: "360259005980",
       appId: "1:360259005980:web:610695f8b44de04dc079d9"
     };
-    const EMAILJS_SERVICE_ID = 'service_ritfist';
+    const EMAILJS_SERVICE_ID = 'default_service';
     const EMAILJS_TEMPLATE_ID = 'template_3x8z61m';
     const EMAILJS_PUBLIC_KEY = 'E1vj9Uv9CqN8xYOHS';
 
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
     const db = getFirestore(app);
@@ -71,7 +71,7 @@
       try {
         const approvedSnap = await getDoc(doc(db, 'approvedUsers', email));
         if (!approvedSnap.exists()) {
-          errorEl.textContent = 'Neplatný e-mail nebo heslo.';
+          errorEl.textContent = 'E-mail nenalezen. Zaregistruj se.';
           return;
         }
         const data = approvedSnap.data();
@@ -81,7 +81,7 @@
         }
         const isPasswordValid = await verifyPassword(password, data.passwordHash, data.passwordSalt);
         if (!isPasswordValid) {
-          errorEl.textContent = 'Neplatný e-mail nebo heslo.';
+          errorEl.textContent = 'Nesprávné heslo.';
           return;
         }
         const token = crypto.randomUUID();
@@ -90,20 +90,23 @@
           name: data.name || '',
           createdAt: serverTimestamp(),
           expiresAt: Timestamp.fromMillis(Date.now() + 48 * 60 * 60 * 1000),
-          used: false
+          used: false,
+          purpose: 'login'
         });
         const link = 'https://payntrecords-gif.github.io/zjeveni-myeshim/?token=' + token;
         try {
           await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
             to_email: email,
             to_name: data.name || '',
-            message: 'Tvůj přihlašovací odkaz (platnost 48 hodin):',
+            message: 'Tvůj přístupový odkaz do aplikace MYEShim (platnost 48 hodin):',
             code: link
           });
+          successEl.textContent = 'Přístupový odkaz byl odeslán na tvůj e-mail.';
         } catch (emailErr) {
-          console.warn('EmailJS failed, redirecting directly:', emailErr);
+          console.error('EmailJS login send failed', emailErr);
+          if (emailErr && emailErr.text) console.error('EmailJS error text:', emailErr.text);
+          errorEl.textContent = 'Odeslání e-mailu se nezdařilo. Zkus to prosím znovu nebo kontaktuj admina.';
         }
-        window.location.href = link;
       } catch (error) {
         console.error(error);
         errorEl.textContent = 'Přihlášení se nezdařilo. Zkus to prosím znovu.';
