@@ -1,4 +1,4 @@
-const PBKDF2_ITERATIONS = 120000;
+const PBKDF2_ITERATIONS = 600000;
 const SALT_LENGTH = 16;
 
 function bytesToHex(bytes) {
