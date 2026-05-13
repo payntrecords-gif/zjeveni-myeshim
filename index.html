@@ -30,25 +30,36 @@ function redirectTo(path) {
   window.location.replace(path);
 }
 
+function unlockGate() {
+  document.documentElement.classList.remove('auth-gate-pending');
+}
+
+async function isApprovedById(id) {
+  if (!id) return false;
+  const approvedSnap = await getDoc(doc(db, 'approvedUsers', id));
+  return approvedSnap.exists() && approvedSnap.data().status === 'approved';
+}
+
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    redirectTo('./login.html');
-    return;
-  }
-
   try {
-    const approvedRef = doc(db, 'approvedUsers', user.uid);
-    const approvedSnap = await getDoc(approvedRef);
-    const status = approvedSnap.exists() ? approvedSnap.data().status : 'pending';
-
-    if (status !== 'approved') {
-      redirectTo('./waiting.html');
+    if (user && (await isApprovedById(user.uid))) {
+      unlockGate();
       return;
     }
 
-    document.documentElement.classList.remove('auth-gate-pending');
+    const emailFromSession = user && user.email ? user.email.trim().toLowerCase() : '';
+    const emailFromStorage = (localStorage.getItem('myeshim_user_email') || '').trim().toLowerCase();
+    const candidateEmail = emailFromSession || emailFromStorage;
+
+    if (candidateEmail && (await isApprovedById(candidateEmail))) {
+      localStorage.setItem('myeshim_user_email', candidateEmail);
+      unlockGate();
+      return;
+    }
+
+    redirectTo(user ? './waiting.html' : './login.html');
   } catch (error) {
-    redirectTo('./waiting.html');
+    redirectTo('./login.html');
   }
 });
 </script>

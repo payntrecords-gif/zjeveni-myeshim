@@ -12,6 +12,7 @@
     textarea{width:100%;min-height:220px;background:#120f15;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
     input[type="file"]{margin:10px 0}
     button{padding:11px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210;font-weight:700;cursor:pointer}
+    button[disabled]{opacity:.65;cursor:wait}
     .status{min-height:22px;margin-top:12px}
     a{color:#f2dc98}
   </style>
@@ -29,8 +30,7 @@
 
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const FIREBASE_AUTH_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -42,13 +42,11 @@
     };
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
-    const auth = getAuth(app);
     const db = getFirestore(app);
     const fileInput = document.getElementById('csv-file');
     const input = document.getElementById('email-input');
     const statusEl = document.getElementById('status');
     const importBtn = document.getElementById('import-btn');
-    let currentUid = '';
 
     function setStatus(text, isError = false) {
       statusEl.style.color = isError ? '#ff9ea1' : '#c8f7b0';
@@ -75,6 +73,21 @@
       return [...emails];
     }
 
+    async function ensureAdminAccess() {
+      const adminEmail = (localStorage.getItem('myeshim_user_email') || '').trim().toLowerCase();
+      if (!adminEmail) {
+        window.location.replace('./admin.html');
+        return false;
+      }
+
+      const adminSnap = await getDoc(doc(db, 'admins', adminEmail));
+      if (!adminSnap.exists()) {
+        setStatus('Přístup odepřen', true);
+        return false;
+      }
+      return true;
+    }
+
     fileInput.addEventListener('change', async () => {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
@@ -82,7 +95,8 @@
     });
 
     importBtn.addEventListener('click', async () => {
-      if (!currentUid) return;
+      if (!(await ensureAdminAccess())) return;
+
       const emails = parseEmails(input.value);
       if (!emails.length) {
         setStatus('CSV neobsahuje žádné platné e-maily.', true);
@@ -91,13 +105,20 @@
 
       importBtn.disabled = true;
       try {
-        await Promise.all(emails.map((email) => (
-          setDoc(doc(db, 'preApprovedEmails', email), {
+        const batch = writeBatch(db);
+        emails.forEach((email) => {
+          batch.set(doc(db, 'approvedUsers', email), {
             email,
-            addedAt: serverTimestamp(),
-            addedBy: currentUid
-          }, { merge: true })
-        )));
+            status: 'approved',
+            importedAt: serverTimestamp()
+          }, { merge: true });
+          batch.set(doc(db, 'pendingUsers', email), {
+            email,
+            status: 'approved',
+            importedAt: serverTimestamp()
+          }, { merge: true });
+        });
+        await batch.commit();
         setStatus(`Import dokončen: ${emails.length} e-mailů.`);
       } catch (error) {
         setStatus('Import selhal. Zkus to prosím znovu.', true);
@@ -106,17 +127,7 @@
       }
     });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.replace('./login.html');
-        return;
-      }
-      currentUid = user.uid;
-      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-      if (!adminSnap.exists()) {
-        window.location.replace('./index.html');
-      }
-    });
+    ensureAdminAccess();
   </script>
 </body>
 </html>
