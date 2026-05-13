@@ -92,13 +92,13 @@
           });
         } catch (firestoreError) {
           await deleteUser(credential.user).catch((cleanupError) => {
-            console.error('Failed to delete newly created account after Firestore error:', cleanupError);
+            console.error('Failed to delete newly created account after Firestore error:', { uid: credential.user.uid, email, cleanupError });
           });
           throw firestoreError;
         }
 
         await signOut(auth).catch((signOutError) => {
-          console.warn('Registration saved but automatic sign-out failed:', signOutError);
+          console.warn('Registration saved but automatic sign-out failed:', { uid: credential.user.uid, email, signOutError });
         });
         window.location.replace('./waiting.html');
       } catch (error) {

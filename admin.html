@@ -67,7 +67,7 @@
 
     function formatDate(value) {
       if (!value) return 'neuvedeno';
-      if (typeof value.toDate === 'function') return value.toDate().toLocaleString('cs-CZ');
+      if (value?.toDate instanceof Function) return value.toDate().toLocaleString('cs-CZ');
       if (typeof value === 'string') return value;
       return 'neuvedeno';
     }
@@ -133,7 +133,7 @@
           try {
             await approveUser(item);
           } catch (error) {
-            console.error(error);
+            console.error('Approve user failed:', error);
             setStatus('Schválení se nezdařilo. Zkus to znovu.', true);
             approveBtn.disabled = false;
             rejectBtn.disabled = false;
@@ -150,7 +150,7 @@
           try {
             await rejectUser(item);
           } catch (error) {
-            console.error(error);
+            console.error('Reject user failed:', error);
             setStatus('Zamítnutí se nezdařilo. Zkus to znovu.', true);
             approveBtn.disabled = false;
             rejectBtn.disabled = false;
@@ -200,7 +200,7 @@
           return;
         }
       } catch (error) {
-        console.error(error);
+        console.error('Admin check failed:', error);
         window.location.replace('./admin-login.html');
         return;
       }
@@ -208,14 +208,14 @@
       onSnapshot(query(collection(db, 'pendingUsers'), where('status', '==', 'pending')), (snap) => {
         renderPending(snap.docs.map((entry) => ({ uid: entry.id, ...entry.data() })));
       }, (error) => {
-        console.error(error);
+        console.error('Load pending users failed:', error);
         setStatus('Nepodařilo se načíst čekající žádosti.', true);
       });
 
       onSnapshot(query(collection(db, 'approvedUsers'), where('status', '==', 'approved')), (snap) => {
         renderApproved(snap.docs.map((entry) => ({ uid: entry.id, ...entry.data() })));
       }, (error) => {
-        console.error(error);
+        console.error('Load approved users failed:', error);
         setStatus('Nepodařilo se načíst schválené uživatele.', true);
       });
     });
