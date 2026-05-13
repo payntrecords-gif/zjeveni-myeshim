@@ -54,6 +54,7 @@
     const errorEl = document.getElementById('error');
     const successEl = document.getElementById('success');
     const submitBtn = document.getElementById('submit-btn');
+    const SUCCESS_REDIRECT_DELAY_MS = 900;
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -88,7 +89,7 @@
         });
 
         successEl.textContent = 'Tvoje žádost byla odeslána. Vyčkej na schválení administrátorem.';
-        setTimeout(() => window.location.replace('./waiting.html'), 900);
+        setTimeout(() => window.location.replace('./waiting.html'), SUCCESS_REDIRECT_DELAY_MS);
       } catch (error) {
         errorEl.textContent = 'Registrace se nezdařila. Zkus to prosím znovu.';
       } finally {

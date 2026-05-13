@@ -108,12 +108,16 @@
         const batch = writeBatch(db);
         emails.forEach((email) => {
           batch.set(doc(db, 'approvedUsers', email), {
+            name: '',
             email,
+            poslani: '',
             status: 'approved',
             importedAt: serverTimestamp()
           }, { merge: true });
           batch.set(doc(db, 'pendingUsers', email), {
+            name: '',
             email,
+            poslani: '',
             status: 'approved',
             importedAt: serverTimestamp()
           }, { merge: true });

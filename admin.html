@@ -82,6 +82,7 @@
     const EMAILJS_SERVICE_ID = 'service_ritfist';
     const EMAILJS_TEMPLATE_ID = 'template_64wrero';
     const EMAILJS_PUBLIC_KEY = 'E1vj9Uv9CqN8xYOHS';
+    const APP_URL = 'https://payntrecords-gif.github.io/zjeveni-myeshim/';
 
     const FIREBASE_AUTH_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -135,7 +136,20 @@
     }
 
     function generateCode() {
-      return String(Math.floor(100000 + Math.random() * 900000));
+      const randomBuffer = new Uint32Array(1);
+      const maxAcceptable = Math.floor(0x100000000 / 900000) * 900000;
+      let randomValue = 0;
+      do {
+        window.crypto.getRandomValues(randomBuffer);
+        randomValue = randomBuffer[0];
+      } while (randomValue >= maxAcceptable);
+      return String((randomValue % 900000) + 100000);
+    }
+
+    function ensureEmailJsReady() {
+      if (!window.emailjs || typeof window.emailjs.send !== 'function') {
+        throw new Error('emailjs-unavailable');
+      }
     }
 
     async function isAdminEmail(email) {
@@ -144,6 +158,7 @@
     }
 
     async function sendOtpCode(email) {
+      ensureEmailJsReady();
       const code = generateCode();
       const now = Date.now();
 
@@ -168,10 +183,11 @@
 
     async function sendWelcomeEmail(userData) {
       try {
+        ensureEmailJsReady();
         await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
           to_email: userData.email,
           to_name: userData.name || userData.email,
-          message: 'Tvůj účet byl schválen! Přihlas se na ' + window.location.origin,
+          message: 'Tvůj účet byl schválen! Přihlas se na ' + APP_URL,
           code: ''
         });
       } catch (error) {
@@ -333,7 +349,7 @@
           }, { merge: true });
         });
         await batch.commit();
-        await Promise.all(latestPending.map((item) => sendWelcomeEmail(item)));
+        await Promise.allSettled(latestPending.map((item) => sendWelcomeEmail(item)));
         await loadLists();
       } catch (error) {
         setError('Hromadné schválení selhalo.');
@@ -359,7 +375,11 @@
 
         await sendOtpCode(email);
       } catch (error) {
-        setError('Odeslání OTP selhalo.');
+        if (error && error.message === 'emailjs-unavailable') {
+          setError('E-mailová služba je dočasně nedostupná. Zkus to prosím za chvíli.');
+        } else {
+          setError('Odeslání OTP selhalo.');
+        }
       } finally {
         sendCodeBtn.disabled = false;
       }
@@ -412,7 +432,11 @@
       try {
         await sendOtpCode(currentEmail);
       } catch (error) {
-        setError('Nový kód se nepodařilo odeslat.');
+        if (error && error.message === 'emailjs-unavailable') {
+          setError('E-mailová služba je dočasně nedostupná. Zkus to prosím za chvíli.');
+        } else {
+          setError('Nový kód se nepodařilo odeslat.');
+        }
       } finally {
         resendBtn.disabled = false;
       }

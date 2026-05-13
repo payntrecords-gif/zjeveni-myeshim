@@ -34,7 +34,7 @@ function unlockGate() {
   document.documentElement.classList.remove('auth-gate-pending');
 }
 
-async function isApprovedById(id) {
+async function isApprovedByIdentifier(id) {
   if (!id) return false;
   const approvedSnap = await getDoc(doc(db, 'approvedUsers', id));
   return approvedSnap.exists() && approvedSnap.data().status === 'approved';
@@ -42,7 +42,7 @@ async function isApprovedById(id) {
 
 onAuthStateChanged(auth, async (user) => {
   try {
-    if (user && (await isApprovedById(user.uid))) {
+    if (user && (await isApprovedByIdentifier(user.uid))) {
       unlockGate();
       return;
     }
@@ -51,7 +51,7 @@ onAuthStateChanged(auth, async (user) => {
     const emailFromStorage = (localStorage.getItem('myeshim_user_email') || '').trim().toLowerCase();
     const candidateEmail = emailFromSession || emailFromStorage;
 
-    if (candidateEmail && (await isApprovedById(candidateEmail))) {
+    if (candidateEmail && (await isApprovedByIdentifier(candidateEmail))) {
       localStorage.setItem('myeshim_user_email', candidateEmail);
       unlockGate();
       return;

@@ -91,10 +91,24 @@
     }
 
     function generateCode() {
-      return String(Math.floor(100000 + Math.random() * 900000));
+      const randomBuffer = new Uint32Array(1);
+      const maxAcceptable = Math.floor(0x100000000 / 900000) * 900000;
+      let randomValue = 0;
+      do {
+        window.crypto.getRandomValues(randomBuffer);
+        randomValue = randomBuffer[0];
+      } while (randomValue >= maxAcceptable);
+      return String((randomValue % 900000) + 100000);
+    }
+
+    function ensureEmailJsReady() {
+      if (!window.emailjs || typeof window.emailjs.send !== 'function') {
+        throw new Error('emailjs-unavailable');
+      }
     }
 
     async function sendOtpCode(email, name) {
+      ensureEmailJsReady();
       const code = generateCode();
       const now = Date.now();
 
@@ -142,7 +156,11 @@
 
         await sendOtpCode(email, approvedData.name || email);
       } catch (error) {
-        setError('Odeslání kódu selhalo. Zkus to prosím znovu.');
+        if (error && error.message === 'emailjs-unavailable') {
+          setError('E-mailová služba je dočasně nedostupná. Zkus to prosím za chvíli.');
+        } else {
+          setError('Odeslání kódu selhalo. Zkus to prosím znovu.');
+        }
       } finally {
         sendCodeBtn.disabled = false;
       }
@@ -188,7 +206,11 @@
       try {
         await sendOtpCode(currentEmail, currentName);
       } catch (error) {
-        setError('Nový kód se nepodařilo odeslat.');
+        if (error && error.message === 'emailjs-unavailable') {
+          setError('E-mailová služba je dočasně nedostupná. Zkus to prosím za chvíli.');
+        } else {
+          setError('Nový kód se nepodařilo odeslat.');
+        }
       } finally {
         resendBtn.disabled = false;
       }
