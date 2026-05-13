@@ -67,7 +67,7 @@
 
     function formatDate(value) {
       if (!value) return 'neuvedeno';
-      if (value?.toDate instanceof Function) return value.toDate().toLocaleString('cs-CZ');
+      if (typeof value?.toDate === 'function') return value.toDate().toLocaleString('cs-CZ');
       if (typeof value === 'string') return value;
       return 'neuvedeno';
     }
