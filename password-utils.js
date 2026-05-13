@@ -12,6 +12,19 @@ function hexToBytes(hex) {
   return new Uint8Array(pairs.map((pair) => parseInt(pair, 16)));
 }
 
+function constantTimeEqual(left, right) {
+  const leftLength = left.length;
+  const rightLength = right.length;
+  const maxLength = Math.max(leftLength, rightLength);
+  let mismatch = leftLength ^ rightLength;
+  for (let index = 0; index < maxLength; index += 1) {
+    const leftCode = index < leftLength ? left.charCodeAt(index) : 0;
+    const rightCode = index < rightLength ? right.charCodeAt(index) : 0;
+    mismatch |= leftCode ^ rightCode;
+  }
+  return mismatch === 0;
+}
+
 async function derivePasswordHash(password, saltHex) {
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
@@ -43,5 +56,5 @@ export async function createPasswordRecord(password) {
 export async function verifyPassword(password, passwordHash, passwordSalt) {
   if (!passwordHash || !passwordSalt) return false;
   const inputHash = await derivePasswordHash(password, passwordSalt);
-  return inputHash === passwordHash;
+  return constantTimeEqual(inputHash, passwordHash);
 }

@@ -71,7 +71,7 @@
       try {
         const approvedSnap = await getDoc(doc(db, 'approvedUsers', email));
         if (!approvedSnap.exists()) {
-          errorEl.textContent = 'E-mail nenalezen. Zaregistruj se.';
+          errorEl.textContent = 'Neplatný e-mail nebo heslo.';
           return;
         }
         const data = approvedSnap.data();
@@ -81,7 +81,7 @@
         }
         const isPasswordValid = await verifyPassword(password, data.passwordHash, data.passwordSalt);
         if (!isPasswordValid) {
-          errorEl.textContent = 'Nesprávné heslo.';
+          errorEl.textContent = 'Neplatný e-mail nebo heslo.';
           return;
         }
         const token = crypto.randomUUID();
