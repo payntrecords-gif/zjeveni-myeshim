@@ -65,6 +65,7 @@ async function sendReminderToToken(token, message) {
         title: message.title,
         body: message.body,
         ref: message.ref || '',
+        source: DAILY_REMINDER_TAG,
         url: APP_URL,
         tag: DAILY_REMINDER_TAG
       },
