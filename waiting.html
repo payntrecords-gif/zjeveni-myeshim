@@ -135,7 +135,7 @@
             const updateData = {
               uid,
               name,
-              email: auth.currentUser.email || pendingData.email || '',
+              email: auth.currentUser.email || '',
               poslani,
               status: 'pending',
               updatedAt: serverTimestamp()
