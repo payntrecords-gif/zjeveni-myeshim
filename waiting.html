@@ -10,15 +10,154 @@
     .card{width:min(560px,100%);background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:18px;padding:28px;text-align:center}
     h1{margin:0 0 12px;font-size:1.45rem}
     p{margin:0 0 16px;color:var(--sub);line-height:1.6}
-    .btn{display:inline-block;margin-top:8px;padding:12px 18px;border:none;border-radius:12px;background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210;font-weight:700;text-decoration:none}
+    .btn{display:inline-block;margin-top:8px;padding:12px 18px;border:none;border-radius:12px;background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210;font-weight:700;text-decoration:none;cursor:pointer;font-size:1rem}
+    label{display:block;font-size:.92rem;margin-bottom:6px;text-align:left}
+    input,textarea{width:100%;margin-bottom:12px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#120f15;color:var(--text);font:inherit}
+    textarea{min-height:96px;resize:vertical}
+    .error{min-height:20px;color:#ff8d8d;font-size:.9rem;margin-bottom:10px}
+    .success{color:#c8f7b0;margin-top:10px;font-size:.95rem}
+    .link{display:block;margin-top:14px;color:#f2dc98;text-align:center;text-decoration:none;font-size:.9rem}
+    .hidden{display:none}
   </style>
 </head>
 <body>
-  <div class="card">
+  <!-- Shown when not signed in (e.g. right after new registration) or status = pending -->
+  <div class="card" id="card-waiting">
     <h1>Čeká se na schválení</h1>
     <p>Tvoje registrace čeká na schválení administrátorem.</p>
     <p>Jakmile bude účet schválen, můžeš se přihlásit svým e-mailem a heslem.</p>
-    <a class="btn" href="./login.html">Zpět na přihlášení</a>
+    <a class="btn" href="./login.html">Přejít na přihlášení</a>
+    <a class="link hidden" id="sign-out-pending" href="#">Odhlásit se</a>
   </div>
+
+  <!-- Shown when signed in and access was revoked / rejected / no pending document -->
+  <div class="card hidden" id="card-reapply">
+    <h1 id="reapply-title">Přístup odebrán</h1>
+    <p id="reapply-desc">Tvůj přístup byl administrátorem odebrán. Pokud chceš znovu požádat o přístup, vyplň formulář níže.</p>
+    <form id="reapply-form">
+      <div class="error" id="reapply-error"></div>
+      <label for="reapply-name">Celé jméno</label>
+      <input id="reapply-name" type="text" required autocomplete="name">
+      <label for="reapply-poslani">Poslání</label>
+      <textarea id="reapply-poslani" required placeholder="např. mládež, domácí skupina, starší..."></textarea>
+      <button class="btn" type="submit" id="reapply-btn">Požádat o schválení</button>
+    </form>
+    <p class="success hidden" id="reapply-success">Žádost odeslána. Čeká se na schválení administrátorem.</p>
+    <a class="link" id="sign-out-reapply" href="#">Odhlásit se</a>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+      authDomain: "myeshim-app.firebaseapp.com",
+      projectId: "myeshim-app",
+      storageBucket: "myeshim-app.firebasestorage.app",
+      messagingSenderId: "360259005980",
+      appId: "1:360259005980:web:610695f8b44de04dc079d9"
+    };
+
+    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    async function doSignOut() {
+      await signOut(auth).catch(() => {});
+      window.location.replace('./login.html');
+    }
+
+    document.getElementById('sign-out-pending').addEventListener('click', (e) => { e.preventDefault(); doSignOut(); });
+    document.getElementById('sign-out-reapply').addEventListener('click', (e) => { e.preventDefault(); doSignOut(); });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // Not signed in – static waiting card is already visible (default state after new registration)
+        return;
+      }
+
+      try {
+        const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
+        if (approvedSnap.exists() && approvedSnap.data()?.status === 'approved') {
+          window.location.replace('./index.html');
+          return;
+        }
+
+        const pendingSnap = await getDoc(doc(db, 'pendingUsers', user.uid));
+        const pendingStatus = pendingSnap.exists() ? pendingSnap.data()?.status : null;
+        const pendingData = pendingSnap.exists() ? pendingSnap.data() : {};
+
+        if (pendingStatus === 'pending') {
+          // Waiting for approval – show waiting card with sign-out option
+          document.getElementById('sign-out-pending').classList.remove('hidden');
+          return;
+        }
+
+        // Status is revoked, rejected, approved-but-no-approvedUsers, or no document
+        if (pendingStatus === 'revoked') {
+          document.getElementById('reapply-title').textContent = 'Přístup odebrán';
+          document.getElementById('reapply-desc').textContent = 'Tvůj přístup byl administrátorem odebrán. Pokud chceš znovu požádat o přístup, vyplň formulář níže.';
+        } else if (pendingStatus === 'rejected') {
+          document.getElementById('reapply-title').textContent = 'Žádost zamítnuta';
+          document.getElementById('reapply-desc').textContent = 'Tvoje žádost o přístup byla zamítnuta. Pokud chceš podat novou žádost, vyplň formulář níže.';
+        } else {
+          document.getElementById('reapply-title').textContent = 'Žádost o přístup';
+          document.getElementById('reapply-desc').textContent = 'Vyplň formulář níže pro podání žádosti o přístup.';
+        }
+
+        document.getElementById('reapply-name').value = pendingData.name || user.displayName || '';
+        document.getElementById('reapply-poslani').value = pendingData.poslani || '';
+        document.getElementById('card-waiting').classList.add('hidden');
+        document.getElementById('card-reapply').classList.remove('hidden');
+
+        document.getElementById('reapply-form').addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const errorEl = document.getElementById('reapply-error');
+          const successEl = document.getElementById('reapply-success');
+          const reapplyBtn = document.getElementById('reapply-btn');
+          errorEl.textContent = '';
+          reapplyBtn.disabled = true;
+
+          const name = document.getElementById('reapply-name').value.trim();
+          const poslani = document.getElementById('reapply-poslani').value.trim();
+          const uid = auth.currentUser?.uid;
+
+          if (!uid) {
+            errorEl.textContent = 'Nejsi přihlášen. Přihlas se znovu.';
+            reapplyBtn.disabled = false;
+            return;
+          }
+
+          try {
+            const existingSnap = await getDoc(doc(db, 'pendingUsers', uid));
+            const updateData = {
+              uid,
+              name,
+              email: auth.currentUser.email || '',
+              poslani,
+              status: 'pending',
+              updatedAt: serverTimestamp()
+            };
+            if (!existingSnap.exists()) {
+              updateData.createdAt = serverTimestamp();
+            }
+            console.log('Reapply: setting pendingUsers status=pending for uid:', uid, 'email:', auth.currentUser.email);
+            await setDoc(doc(db, 'pendingUsers', uid), updateData, { merge: true });
+            document.getElementById('reapply-form').classList.add('hidden');
+            successEl.classList.remove('hidden');
+          } catch (error) {
+            console.error('Reapply failed:', { uid, error });
+            errorEl.textContent = 'Žádost se nepodařilo odeslat. Zkus to znovu.';
+            reapplyBtn.disabled = false;
+          }
+        });
+      } catch (error) {
+        console.error('Waiting page status check failed:', error);
+        // Show default waiting card on error
+      }
+    });
+  </script>
 </body>
 </html>
