@@ -44,13 +44,12 @@ self.addEventListener('fetch', event => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         return response;
-      }).catch(() =>
-        caches.match(event.request)
-          .then(cached => cached
-            || caches.match('./index.html')
-            || caches.match('./')
-            || caches.match('./offline.html'))
-      )
+      }).catch(async () => {
+        return (await caches.match(event.request))
+          || (await caches.match('./index.html'))
+          || (await caches.match('./'))
+          || (await caches.match('./offline.html'));
+      })
     );
     return;
   }
