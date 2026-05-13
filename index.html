@@ -4778,14 +4778,14 @@ const FCM_SENDER_ID = '360259005980';
     const overlay = document.getElementById('welcome-overlay');
     const sheet = document.getElementById('welcome-sheet');
     if (!overlay || !sheet) return;
-    const CLOSE_DISTANCE = 90;
-    const CLOSE_VELOCITY = 0.55;
+    const CLOSE_DISTANCE = 90; // px: enough travel to feel intentional before closing
+    const CLOSE_VELOCITY = 0.55; // px/ms: allows quick flick-to-close gestures
     const MIN_CLOSE_DRAG = 30;
-    const TOP_DRAG_ZONE = 108;
+    const TOP_DRAG_ZONE = 108; // px from the top where drag-to-close should take priority
     const HORIZONTAL_IGNORE_PX = 14;
     const MAX_OVERLAY_OPACITY = 0.45;
     const MIN_OVERLAY_OPACITY = 0.1;
-    const OVERLAY_FADE_DISTANCE = 320;
+    const OVERLAY_FADE_DISTANCE = 320; // px before the overlay reaches its minimum drag opacity
     const supportsPointer = 'PointerEvent' in window;
     let startX = 0;
     let startY = 0;
@@ -4841,6 +4841,7 @@ const FCM_SENDER_ID = '360259005980';
       const dy = clientY - startY;
       const now = Date.now();
       const dt = Math.max(1, now - lastMoveAt);
+      // velocityY is tracked in px/ms so it can be compared to CLOSE_VELOCITY.
       velocityY = (clientY - lastY) / dt;
       lastY = clientY;
       lastMoveAt = now;
@@ -4884,7 +4885,7 @@ const FCM_SENDER_ID = '360259005980';
         if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
         if (!beginDrag(e.clientX, e.clientY, e.target, e.pointerId)) return;
         if (sheet.setPointerCapture) {
-          try { sheet.setPointerCapture(e.pointerId); } catch (_) {}
+          try { sheet.setPointerCapture(e.pointerId); } catch (_) {} // Safe fallback for browsers that reject capture during sheet drags.
         }
       });
       sheet.addEventListener('pointermove', function(e) {
