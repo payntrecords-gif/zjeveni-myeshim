@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>MYEShim – Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
     *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
@@ -56,6 +57,9 @@
       messagingSenderId: "360259005980",
       appId: "1:360259005980:web:610695f8b44de04dc079d9"
     };
+    const EMAILJS_SERVICE_ID = 'service_ritfist';
+    const EMAILJS_TEMPLATE_ID = 'template_64wrero';
+    const EMAILJS_PUBLIC_KEY = 'E1vj9Uv9CqN8xYOHS';
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
     const auth = getAuth(app);
@@ -72,9 +76,25 @@
       return 'neuvedeno';
     }
 
-    async function setUserStatus(uid, status) {
+    async function sendApprovalEmail(name, email) {
+      if (!email || !window.emailjs || typeof window.emailjs.send !== 'function') return;
+      try {
+        await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          to_email: email,
+          to_name: name || '',
+          message: 'Tvůj účet byl schválen! Přihlas se do aplikace MYEShim zde: https://payntrecords-gif.github.io/zjeveni-myeshim/'
+        }, EMAILJS_PUBLIC_KEY);
+      } catch (error) {
+        console.error('EmailJS notification failed:', error);
+      }
+    }
+
+    async function setUserStatus(uid, status, userData = null) {
       await setDoc(doc(db, 'pendingUsers', uid), { status }, { merge: true });
       await setDoc(doc(db, 'approvedUsers', uid), { status }, { merge: true });
+      if (status === 'approved' && userData) {
+        await sendApprovalEmail(userData.name, userData.email);
+      }
     }
 
     function renderPending(items) {
@@ -94,12 +114,12 @@
         const approveBtn = document.createElement('button');
         approveBtn.className = 'btn btn-gold';
         approveBtn.textContent = '✅ Schválit';
-        approveBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'approved'); });
+        approveBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'approved', item); });
 
         const rejectBtn = document.createElement('button');
         rejectBtn.className = 'btn btn-red';
         rejectBtn.textContent = '❌ Zamítnout';
-        rejectBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected'); });
+        rejectBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected', item); });
 
         actions.append(approveBtn, rejectBtn);
         el.appendChild(actions);
@@ -120,7 +140,7 @@
         const revokeBtn = document.createElement('button');
         revokeBtn.className = 'btn btn-sub';
         revokeBtn.textContent = 'Odvolat přístup';
-        revokeBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected'); });
+        revokeBtn.addEventListener('click', async () => { await setUserStatus(item.uid, 'rejected', item); });
         el.appendChild(revokeBtn);
         approvedList.appendChild(el);
       });
@@ -134,6 +154,7 @@
         batch.set(doc(db, 'approvedUsers', item.uid), { status: 'approved' }, { merge: true });
       });
       await batch.commit();
+      await Promise.all(latestPending.map((item) => sendApprovalEmail(item.name, item.email)));
     });
 
     onAuthStateChanged(auth, async (user) => {
