@@ -5160,7 +5160,9 @@ const FCM_SENDER_ID = '360259005980';
     if (!normalizedRef || !Array.isArray(window.VERSES)) return false;
     const m = normalizedRef.match(/(\d+):(\d+)/);
     if (!m) return false;
-    const idx = window.VERSES.findIndex(v => v.c == m[1] && v.v == m[2]);
+    const chapter = Number(m[1]);
+    const verse = Number(m[2]);
+    const idx = window.VERSES.findIndex(v => v.c === chapter && v.v === verse);
     if (idx < 0) return false;
     if (typeof window.state !== 'undefined') {
       window.state.idx = idx;
