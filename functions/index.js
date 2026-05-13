@@ -124,7 +124,7 @@ async function getLastOpenDateForNotifDoc(notifDoc) {
 }
 
 exports.dailyReminder = onSchedule(
-  { schedule: '0 17 * * *', timeZone: 'Europe/Prague', region: 'europe-west1', timeoutSeconds: 540 },
+  { schedule: '0 8 * * *', timeZone: 'Europe/Prague', region: 'europe-west1', timeoutSeconds: 540 },
   async () => {
     const todayYmd = getPragueYmd();
     const reminderMessage = pickReminderMessage(todayYmd);
