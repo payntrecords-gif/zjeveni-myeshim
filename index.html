@@ -20,7 +20,8 @@ const _authGateTimeout = setTimeout(() => {
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
 const FIREBASE_AUTH_CONFIG = {
   apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -30,6 +31,9 @@ const FIREBASE_AUTH_CONFIG = {
   messagingSenderId: "360259005980",
   appId: "1:360259005980:web:610695f8b44de04dc079d9"
 };
+
+// VAPID key from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+const VAPID_PUBLIC_KEY = 'BNkpx_SJASrkt48mXCZQBoDRJt_CUlDNXiM4MfJO6aO0Qc1dc84pYcNLXCVQj23EPJKCuLm15QOMJLCleeol_fk';
 
 const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
 const auth = getAuth(app);
@@ -44,6 +48,32 @@ function redirectTo(path) {
 function releaseAuthGate() {
   clearTimeout(_authGateTimeout);
   document.documentElement.classList.remove('auth-gate-pending');
+}
+
+async function initFcmForApprovedUser(user) {
+  if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+  if (Notification.permission === 'denied') {
+    console.warn('[FCM] Notification.permission === denied – přeskakuji registraci tokenu pro uid:', user.uid);
+    return;
+  }
+  try {
+    const messaging = getMessaging(app);
+    // Register foreground message handler to keep FCM subscription active and enable token refresh awareness
+    onMessage(messaging, () => {});
+    if (Notification.permission !== 'granted') return;
+    const swReg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './firebase-cloud-messaging-push-scope' });
+    const token = await getToken(messaging, { vapidKey: VAPID_PUBLIC_KEY, serviceWorkerRegistration: swReg });
+    if (token) {
+      await setDoc(
+        doc(db, 'users', user.uid, 'data', 'notifications'),
+        { fcmToken: token, enabled: true, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+      console.log('[FCM] Token uložen pro uid:', user.uid, token.substring(0, 20) + '...');
+    }
+  } catch (e) {
+    console.warn('[FCM] Token registration selhal:', e && e.message ? e.message : e);
+  }
 }
 
 try {
@@ -69,6 +99,7 @@ onAuthStateChanged(auth, async (user) => {
     }
     console.log('MYEShim auth gate ok – releasing');
     releaseAuthGate();
+    initFcmForApprovedUser(user);
   } catch (error) {
     console.error('Auth gate check failed:', error);
     redirectTo('./waiting.html');
@@ -4687,6 +4718,7 @@ const FCM_SENDER_ID = '360259005980';
         fcmToken: token,
         updatedAt: notifNow
       }, { merge: true });
+      console.log('[FCM] Token uložen pro uid:', uid, token.substring(0, 20) + '...');
     } catch(e) { reportNonCriticalError('FCM Firestore sync selhal:', e); }
   }
 
@@ -5462,6 +5494,9 @@ const FCM_SENDER_ID = '360259005980';
       safeLSSet('notif_enabled', 'true');
       showToast('🔔 Notifikace zapnuty!', 2000);
       checkDailyNotif();
+      ensureFcmToken();
+    } else {
+      console.warn('[FCM] Notification.permission nebyl granted:', perm);
     }
   });
 
@@ -5588,9 +5623,13 @@ const FCM_SENDER_ID = '360259005980';
       if (Notification.permission === 'denied') { this.checked = false; syncNotifSettings(); return; }
       if (Notification.permission === 'default') {
         const p = await Notification.requestPermission();
-        if (p !== 'granted') { this.checked = false; syncNotifSettings(); return; }
+        if (p !== 'granted') {
+          console.warn('[FCM] Notification.permission nebyl granted:', p);
+          this.checked = false; syncNotifSettings(); return;
+        }
       }
       safeLSSet('notif_enabled', 'true');
+      ensureFcmToken();
     } else {
       safeLSSet('notif_enabled', 'false');
     }
