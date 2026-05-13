@@ -8,7 +8,7 @@
     :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
     *{box-sizing:border-box} body{margin:0;min-height:100dvh;display:grid;place-items:center;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
     .card{width:min(460px,100%);background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:18px;padding:24px}
-    h1{margin:0 0 8px;font-size:1.4rem} p{margin:0 0 18px;color:var(--sub)}
+    h1{margin:0 0 8px;font-size:1.4rem} p{margin:0 0 18px;color:var(--sub);line-height:1.6}
     label{display:block;font-size:.92rem;margin-bottom:6px}
     input,textarea{width:100%;margin-bottom:12px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#120f15;color:var(--text);font:inherit}
     textarea{min-height:96px;resize:vertical}
@@ -21,7 +21,7 @@
 <body>
   <form class="card" id="register-form">
     <h1>Registrace</h1>
-    <p>Vyplň jméno, e-mail a poslání. Po odeslání žádosti počkej na schválení adminem.</p>
+    <p>Vyplň své údaje. Po registraci se žádost uloží ke schválení administrátorem.</p>
     <div class="error" id="error"></div>
     <label for="name">Celé jméno</label>
     <input id="name" type="text" required autocomplete="name">
@@ -31,14 +31,14 @@
     <input id="password" type="password" required minlength="8" placeholder="Minimálně 8 znaků" autocomplete="new-password">
     <label for="poslani">Poslání</label>
     <textarea id="poslani" required placeholder="např. mládež, domácí skupina, starší..."></textarea>
-    <button id="submit-btn" type="submit">Odeslat žádost</button>
+    <button id="submit-btn" type="submit">Vytvořit účet</button>
     <a class="link" href="./login.html">Už máš účet? Přihlas se</a>
   </form>
 
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { createPasswordRecord } from './password-utils.js';
+    import { getAuth, createUserWithEmailAndPassword, deleteUser, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const FIREBASE_AUTH_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -50,10 +50,24 @@
     };
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
+    const auth = getAuth(app);
     const db = getFirestore(app);
     const form = document.getElementById('register-form');
     const errorEl = document.getElementById('error');
     const submitBtn = document.getElementById('submit-btn');
+
+    function getRegisterErrorMessage(error) {
+      switch (error?.code) {
+        case 'auth/email-already-in-use':
+          return 'Účet s tímto e-mailem už existuje. Zkus se přihlásit.';
+        case 'auth/invalid-email':
+          return 'Zadaný e-mail nemá platný formát.';
+        case 'auth/weak-password':
+          return 'Heslo je příliš slabé. Zvol delší a bezpečnější heslo.';
+        default:
+          return 'Registrace se nezdařila. Zkontroluj údaje a zkus to znovu.';
+      }
+    }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -66,27 +80,25 @@
       const poslani = document.getElementById('poslani').value.trim();
 
       try {
-        const pendingRef = doc(db, 'pendingUsers', email);
-        const pendingSnap = await getDoc(pendingRef);
-        if (pendingSnap.exists()) {
-          errorEl.textContent = 'Tento e-mail je již zaregistrován.';
-          submitBtn.disabled = false;
-          return;
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        try {
+          await setDoc(doc(db, 'pendingUsers', credential.user.uid), {
+            uid: credential.user.uid,
+            name,
+            email,
+            poslani,
+            status: 'pending',
+            createdAt: serverTimestamp()
+          });
+        } catch (firestoreError) {
+          await deleteUser(credential.user).catch(() => {});
+          throw firestoreError;
         }
 
-        const { passwordHash, passwordSalt } = await createPasswordRecord(password);
-        await setDoc(pendingRef, {
-          name,
-          email,
-          poslani,
-          passwordHash,
-          passwordSalt,
-          createdAt: serverTimestamp(),
-          status: 'pending'
-        });
+        await signOut(auth).catch(() => {});
         window.location.replace('./waiting.html');
       } catch (error) {
-        errorEl.textContent = 'Registrace se nezdařila. Zkontrolujte údaje a zkuste to znovu.';
+        errorEl.textContent = getRegisterErrorMessage(error);
       } finally {
         submitBtn.disabled = false;
       }
