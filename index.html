@@ -11,7 +11,7 @@ document.documentElement.classList.add('auth-gate-pending');
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const FIREBASE_AUTH_CONFIG = {
   apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -30,91 +30,36 @@ function redirectTo(path) {
   window.location.replace(path);
 }
 
-function showTokenError(msg) {
+function releaseAuthGate() {
   document.documentElement.classList.remove('auth-gate-pending');
-  document.body.style.visibility = 'visible';
-  const div = document.createElement('div');
-  div.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#120f15;color:#f7f1ff;font-family:-apple-system,sans-serif;padding:24px;text-align:center;font-size:1.1rem;z-index:9999';
-  div.textContent = msg;
-  document.body.prepend(div);
 }
 
-// 1. Check invite token in URL
-const urlToken = new URLSearchParams(window.location.search).get('token');
-if (urlToken) {
-  (async () => {
-    try {
-      const tokenRef = doc(db, 'inviteTokens', urlToken);
-      const tokenSnap = await getDoc(tokenRef);
-      if (!tokenSnap.exists()) {
-        showTokenError('Neplatný odkaz.');
-        return;
-      }
-      const tokenData = tokenSnap.data();
-      if (tokenData.used) {
-        showTokenError('Tento odkaz byl již použit. Přihlas se svým e-mailem.');
-        return;
-      }
-      const expiresAt = tokenData.expiresAt && tokenData.expiresAt.toMillis ? tokenData.expiresAt.toMillis() : null;
-      if (expiresAt === null || Date.now() > expiresAt) {
-        showTokenError('Odkaz expiroval. Požádej o nový přes přihlášení.');
-        return;
-      }
-      // Mark token as used
-      await setDoc(tokenRef, { used: true }, { merge: true });
-      // Save user info to localStorage
-      localStorage.setItem('myeshim_user_email', tokenData.email);
-      localStorage.setItem('myeshim_user_name', tokenData.name || '');
-      // Remove token from URL without reload
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState({}, '', cleanUrl);
-      // Proceed into app
-      document.documentElement.classList.remove('auth-gate-pending');
-    } catch (error) {
-      console.error('Token check failed:', error);
-      showTokenError('Chyba při ověření odkazu. Zkus to prosím znovu.');
-    }
-  })();
-} else {
-  // 2. Check localStorage
-  const savedEmail = localStorage.getItem('myeshim_user_email');
-  if (savedEmail) {
-    (async () => {
-      try {
-        const approvedSnap = await getDoc(doc(db, 'approvedUsers', savedEmail.trim().toLowerCase()));
-        const status = approvedSnap.exists() ? approvedSnap.data().status : '';
-        if (status === 'approved') {
-          document.documentElement.classList.remove('auth-gate-pending');
-          return;
-        }
-      } catch (error) {}
-      // localStorage email not valid → clear and redirect
-      localStorage.removeItem('myeshim_user_email');
-      localStorage.removeItem('myeshim_user_name');
-      redirectTo('./login.html');
-    })();
-  } else {
-    // 3. Fall back to Firebase Auth (for admin)
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        redirectTo('./login.html');
-        return;
-      }
-      try {
-        const approvedRef = doc(db, 'approvedUsers', user.uid);
-        const approvedSnap = await getDoc(approvedRef);
-        const status = approvedSnap.exists() ? approvedSnap.data().status : 'pending';
-        if (status !== 'approved') {
-          redirectTo('./waiting.html');
-          return;
-        }
-        document.documentElement.classList.remove('auth-gate-pending');
-      } catch (error) {
-        redirectTo('./waiting.html');
-      }
-    });
-  }
+try {
+  localStorage.removeItem('myeshim_user_email');
+  localStorage.removeItem('myeshim_user_name');
+} catch (error) {
+  console.warn('Failed to cleanup localStorage keys myeshim_user_email and myeshim_user_name.', error);
 }
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    redirectTo('./login.html');
+    return;
+  }
+
+  try {
+    const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
+    const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
+    if (!isApproved) {
+      redirectTo('./waiting.html');
+      return;
+    }
+    releaseAuthGate();
+  } catch (error) {
+    console.error('Auth gate check failed:', error);
+    redirectTo('./waiting.html');
+  }
+});
 </script>
 <title>MYEShim – Zjevení</title>
 <meta name="description" content="MYEShim – mobilní studijní aplikace pro knihu Zjevení">

@@ -7,45 +7,47 @@
   <style>
     :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
     *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
-    .wrap{max-width:900px;margin:0 auto}
-    .card{background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px}
-    h1,h2{margin:0 0 12px} .row{display:flex;gap:10px;flex-wrap:wrap}
+    .wrap{max-width:960px;margin:0 auto}
+    .card{background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+    h1,h2{margin:0 0 12px}
+    p{margin:0;color:var(--sub);line-height:1.6}
+    .status{min-height:22px;margin-top:12px;font-size:.92rem}
+    .status.error{color:#ff9ea1}
+    .status.ok{color:#c8f7b0}
+    .list{display:grid;gap:12px}
+    .item{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(18,15,21,.55)}
+    .head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+    .meta{display:grid;gap:4px}
+    .muted{color:var(--sub)}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .btn{padding:10px 14px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
     .btn-gold{background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210}
     .btn-red{background:#672738;color:#ffd7e0}
-    .btn-sub{background:#2d2434;color:#fff;border:1px solid var(--line)}
-    .muted{color:var(--sub)}
-    .item{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
-    .head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .top-actions{display:flex;gap:10px;flex-wrap:wrap}
-    a{color:#f2dc98}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
       <h1>Admin panel</h1>
-      <p class="muted">Správa čekajících a schválených členů.</p>
-      <div class="top-actions">
-        <button class="btn btn-gold" id="approve-all-btn" type="button">Schválit všechny čekající</button>
-        <a href="./import-members.html">Import e-mailů (CSV)</a>
-      </div>
+      <p>Ruční schvalování registrací přes Firebase Auth a Firestore.</p>
+      <div class="status" id="status"></div>
     </div>
+
     <div class="card">
       <h2>Čekající žádosti</h2>
-      <div id="pending-list" class="muted">Načítám…</div>
+      <div id="pending-list" class="list muted">Načítám…</div>
     </div>
+
     <div class="card">
       <h2>Schválení uživatelé</h2>
-      <div id="approved-list" class="muted">Načítám…</div>
+      <div id="approved-list" class="list muted">Načítám…</div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
+    import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -55,93 +57,106 @@
       messagingSenderId: "360259005980",
       appId: "1:360259005980:web:610695f8b44de04dc079d9"
     };
-    const EMAILJS_SERVICE_ID = 'default_service';
-    const EMAILJS_TEMPLATE_ID = 'template_3x8z61m';
-    const EMAILJS_PUBLIC_KEY = 'E1vj9Uv9CqN8xYOHS';
-
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const pendingList = document.getElementById('pending-list');
     const approvedList = document.getElementById('approved-list');
-    const approveAllBtn = document.getElementById('approve-all-btn');
-    let latestPending = [];
+    const statusEl = document.getElementById('status');
 
     function formatDate(value) {
       if (!value) return 'neuvedeno';
-      if (value.toDate) return value.toDate().toLocaleString('cs-CZ');
+      if (typeof value?.toDate === 'function') return value.toDate().toLocaleString('cs-CZ');
       if (typeof value === 'string') return value;
       return 'neuvedeno';
     }
 
-    async function sendApprovalEmail(name, email, token) {
-      if (!email) return;
-      const link = 'https://payntrecords-gif.github.io/zjeveni-myeshim/?token=' + token;
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_email: email,
-        to_name: name || '',
-        message: 'Tvůj účet byl schválen! Tvůj přístupový odkaz do aplikace MYEShim (platnost 48 hodin):',
-        code: link
-      });
+    function setStatus(text, isError = false) {
+      statusEl.textContent = text;
+      statusEl.className = `status ${text ? (isError ? 'error' : 'ok') : ''}`.trim();
     }
 
-    async function approveUser(email, userData) {
-      const token = crypto.randomUUID();
-      const now = Date.now();
-      await setDoc(doc(db, 'inviteTokens', token), {
-        email,
+    async function approveUser(userData) {
+      const uid = userData.uid;
+      await setDoc(doc(db, 'approvedUsers', uid), {
+        uid,
         name: userData.name || '',
-        createdAt: serverTimestamp(),
-        expiresAt: Timestamp.fromMillis(now + 48 * 60 * 60 * 1000),
-        used: false,
-        purpose: 'login'
-      });
-      await setDoc(doc(db, 'approvedUsers', email), {
-        name: userData.name || '',
-        email,
+        email: userData.email || '',
         poslani: userData.poslani || '',
-        passwordHash: userData.passwordHash || '',
-        passwordSalt: userData.passwordSalt || '',
         status: 'approved',
         approvedAt: serverTimestamp()
       });
-      await setDoc(doc(db, 'pendingUsers', email), { status: 'approved' }, { merge: true });
-      try {
-        await sendApprovalEmail(userData.name, email, token);
-      } catch (err) {
-        console.error('EmailJS admin send failed', err);
-        if (err && err.text) console.error('EmailJS error text:', err.text);
-      }
+      await setDoc(doc(db, 'pendingUsers', uid), { status: 'approved' }, { merge: true });
+      setStatus(`Uživatel ${userData.email || uid} byl schválen.`);
     }
 
-    async function setUserStatus(email, status, userData = null) {
-      if (status === 'approved' && userData) {
-        await approveUser(email, userData);
-      } else {
-        await setDoc(doc(db, 'pendingUsers', email), { status }, { merge: true });
-      }
+    async function rejectUser(userData) {
+      await setDoc(doc(db, 'pendingUsers', userData.uid), { status: 'rejected' }, { merge: true });
+      setStatus(`Uživatel ${userData.email || userData.uid} byl zamítnut.`);
     }
 
     function renderPending(items) {
-      latestPending = items;
-      if (!items.length) { pendingList.textContent = 'Žádné čekající žádosti.'; return; }
+      if (!items.length) {
+        pendingList.textContent = 'Žádné čekající žádosti.';
+        pendingList.className = 'list muted';
+        return;
+      }
+
+      pendingList.className = 'list';
       pendingList.innerHTML = '';
+
       items.forEach((item) => {
         const el = document.createElement('div');
         el.className = 'item';
-        el.innerHTML = `<div class="head"><div><strong>${item.name || 'Bez jména'}</strong><div class="muted">${item.email || ''}</div><div class="muted">Poslání: ${item.poslani || 'neuvedeno'}</div><div class="muted">Registrace: ${formatDate(item.createdAt)}</div></div></div>`;
+        el.innerHTML = `
+          <div class="head">
+            <div class="meta">
+              <strong>${item.name || 'Bez jména'}</strong>
+              <div class="muted">${item.email || ''}</div>
+              <div class="muted">Poslání: ${item.poslani || 'neuvedeno'}</div>
+              <div class="muted">Registrován: ${formatDate(item.createdAt)}</div>
+            </div>
+          </div>
+        `;
+
         const actions = document.createElement('div');
         actions.className = 'row';
+
         const approveBtn = document.createElement('button');
+        approveBtn.type = 'button';
         approveBtn.className = 'btn btn-gold';
-        approveBtn.textContent = '✅ Schválit';
-        approveBtn.addEventListener('click', async () => { await setUserStatus(item.email || item.uid, 'approved', item); });
+        approveBtn.textContent = 'Schválit';
+        approveBtn.addEventListener('click', async () => {
+          approveBtn.disabled = true;
+          rejectBtn.disabled = true;
+          try {
+            await approveUser(item);
+          } catch (error) {
+            console.error('Approve user failed:', error);
+            setStatus('Schválení se nezdařilo. Zkus to znovu.', true);
+            approveBtn.disabled = false;
+            rejectBtn.disabled = false;
+          }
+        });
+
         const rejectBtn = document.createElement('button');
+        rejectBtn.type = 'button';
         rejectBtn.className = 'btn btn-red';
-        rejectBtn.textContent = '❌ Zamítnout';
-        rejectBtn.addEventListener('click', async () => { await setUserStatus(item.email || item.uid, 'rejected', item); });
+        rejectBtn.textContent = 'Zamítnout';
+        rejectBtn.addEventListener('click', async () => {
+          approveBtn.disabled = true;
+          rejectBtn.disabled = true;
+          try {
+            await rejectUser(item);
+          } catch (error) {
+            console.error('Reject user failed:', error);
+            setStatus('Zamítnutí se nezdařilo. Zkus to znovu.', true);
+            approveBtn.disabled = false;
+            rejectBtn.disabled = false;
+          }
+        });
+
         actions.append(approveBtn, rejectBtn);
         el.appendChild(actions);
         pendingList.appendChild(el);
@@ -149,42 +164,59 @@
     }
 
     function renderApproved(items) {
-      if (!items.length) { approvedList.textContent = 'Zatím nejsou žádní schválení uživatelé.'; return; }
+      if (!items.length) {
+        approvedList.textContent = 'Zatím nejsou žádní schválení uživatelé.';
+        approvedList.className = 'list muted';
+        return;
+      }
+
+      approvedList.className = 'list';
       approvedList.innerHTML = '';
       items.forEach((item) => {
         const el = document.createElement('div');
         el.className = 'item';
-        el.innerHTML = `<div class="head"><div><strong>${item.name || 'Bez jména'}</strong><div class="muted">${item.email || ''}</div></div></div>`;
-        const revokeBtn = document.createElement('button');
-        revokeBtn.className = 'btn btn-sub';
-        revokeBtn.textContent = 'Odvolat přístup';
-        revokeBtn.addEventListener('click', async () => { await setUserStatus(item.email || item.uid, 'rejected', item); });
-        el.appendChild(revokeBtn);
+        el.innerHTML = `
+          <div class="meta">
+            <strong>${item.name || 'Bez jména'}</strong>
+            <div class="muted">${item.email || ''}</div>
+            <div class="muted">Poslání: ${item.poslani || 'neuvedeno'}</div>
+            <div class="muted">Schváleno: ${formatDate(item.approvedAt)}</div>
+          </div>
+        `;
         approvedList.appendChild(el);
       });
     }
 
-    approveAllBtn.addEventListener('click', async () => {
-      if (!latestPending.length) return;
-      approveAllBtn.disabled = true;
-      const errors = [];
-      await Promise.all(latestPending.map(async (item) => {
-        try { await approveUser(item.email || item.uid, item); }
-        catch (err) { errors.push(item.email || item.uid); console.error(err); }
-      }));
-      if (errors.length) alert('Schválení se nezdařilo pro: ' + errors.join(', '));
-      approveAllBtn.disabled = false;
-    });
-
     onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.replace('./admin-login.html'); return; }
-      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-      if (!adminSnap.exists()) { window.location.replace('./index.html'); return; }
+      if (!user) {
+        window.location.replace('./admin-login.html');
+        return;
+      }
+
+      try {
+        const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+        if (!adminSnap.exists()) {
+          window.location.replace('./index.html');
+          return;
+        }
+      } catch (error) {
+        console.error('Admin check failed:', error);
+        window.location.replace('./admin-login.html');
+        return;
+      }
+
       onSnapshot(query(collection(db, 'pendingUsers'), where('status', '==', 'pending')), (snap) => {
-        renderPending(snap.docs.map(d => ({ uid: d.id, ...d.data() })));
+        renderPending(snap.docs.map((entry) => ({ uid: entry.id, ...entry.data() })));
+      }, (error) => {
+        console.error('Load pending users failed:', error);
+        setStatus('Nepodařilo se načíst čekající žádosti.', true);
       });
-      onSnapshot(query(collection(db, 'pendingUsers'), where('status', '==', 'approved')), (snap) => {
-        renderApproved(snap.docs.map(d => ({ uid: d.id, ...d.data() })));
+
+      onSnapshot(query(collection(db, 'approvedUsers'), where('status', '==', 'approved')), (snap) => {
+        renderApproved(snap.docs.map((entry) => ({ uid: entry.id, ...entry.data() })));
+      }, (error) => {
+        console.error('Load approved users failed:', error);
+        setStatus('Nepodařilo se načíst schválené uživatele.', true);
       });
     });
   </script>
