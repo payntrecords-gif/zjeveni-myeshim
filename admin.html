@@ -212,7 +212,7 @@
         setStatus('Nepodařilo se načíst čekající žádosti.', true);
       });
 
-      onSnapshot(collection(db, 'approvedUsers'), (snap) => {
+      onSnapshot(query(collection(db, 'approvedUsers'), where('status', '==', 'approved')), (snap) => {
         renderApproved(snap.docs.map((entry) => ({ uid: entry.id, ...entry.data() })));
       }, (error) => {
         console.error(error);
