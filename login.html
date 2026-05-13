@@ -27,6 +27,8 @@
     <div class="success" id="success"></div>
     <label for="email">E-mail</label>
     <input id="email" type="email" required autocomplete="email">
+    <label for="password">Heslo</label>
+    <input id="password" type="password" required minlength="6" placeholder="Minimálně 6 znaků" autocomplete="current-password">
     <button id="submit-btn" type="submit">Poslat přístupový odkaz</button>
     <a class="link" href="./register.html">Ještě nemáš účet? Zaregistruj se</a>
     <a class="link-small" href="./admin-login.html">Admin přihlášení</a>
@@ -58,13 +60,28 @@
     const successEl = document.getElementById('success');
     const submitBtn = document.getElementById('submit-btn');
 
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       errorEl.textContent = '';
       successEl.textContent = '';
       submitBtn.disabled = true;
       const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
       try {
+        if (password.length < 6) {
+          errorEl.textContent = 'Heslo musí mít alespoň 6 znaků.';
+          return;
+        }
+
         const approvedSnap = await getDoc(doc(db, 'approvedUsers', email));
         if (!approvedSnap.exists()) {
           errorEl.textContent = 'E-mail nenalezen. Zaregistruj se.';
@@ -73,6 +90,11 @@
         const data = approvedSnap.data();
         if (data.status !== 'approved') {
           errorEl.textContent = 'Tvůj účet ještě nebyl schválen.';
+          return;
+        }
+        const inputHash = await hashPassword(password);
+        if (!data.passwordHash || data.passwordHash !== inputHash) {
+          errorEl.textContent = 'Nesprávné heslo.';
           return;
         }
         const token = crypto.randomUUID();

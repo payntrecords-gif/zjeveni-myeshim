@@ -27,6 +27,8 @@
     <input id="name" type="text" required autocomplete="name">
     <label for="email">E-mail</label>
     <input id="email" type="email" required autocomplete="email">
+    <label for="password">Heslo</label>
+    <input id="password" type="password" required minlength="6" placeholder="Minimálně 6 znaků" autocomplete="new-password">
     <label for="poslani">Poslání</label>
     <textarea id="poslani" required placeholder="např. mládež, domácí skupina, starší..."></textarea>
     <button id="submit-btn" type="submit">Odeslat žádost</button>
@@ -52,6 +54,15 @@
     const errorEl = document.getElementById('error');
     const submitBtn = document.getElementById('submit-btn');
 
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map((byte) => byte.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       errorEl.textContent = '';
@@ -59,9 +70,16 @@
 
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
       const poslani = document.getElementById('poslani').value.trim();
 
       try {
+        if (password.length < 6) {
+          errorEl.textContent = 'Heslo musí mít alespoň 6 znaků.';
+          submitBtn.disabled = false;
+          return;
+        }
+
         const pendingRef = doc(db, 'pendingUsers', email);
         const pendingSnap = await getDoc(pendingRef);
         if (pendingSnap.exists()) {
@@ -70,10 +88,12 @@
           return;
         }
 
+        const passwordHash = await hashPassword(password);
         await setDoc(pendingRef, {
           name,
           email,
           poslani,
+          passwordHash,
           createdAt: serverTimestamp(),
           status: 'pending'
         });
