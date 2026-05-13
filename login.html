@@ -38,6 +38,7 @@
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getFirestore, doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
+    import { verifyPassword } from './password-utils.js';
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -60,15 +61,6 @@
     const successEl = document.getElementById('success');
     const submitBtn = document.getElementById('submit-btn');
 
-    async function hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer))
-        .map((byte) => byte.toString(16).padStart(2, '0'))
-        .join('');
-    }
-
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       errorEl.textContent = '';
@@ -77,11 +69,6 @@
       const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
       try {
-        if (password.length < 6) {
-          errorEl.textContent = 'Heslo musí mít alespoň 6 znaků.';
-          return;
-        }
-
         const approvedSnap = await getDoc(doc(db, 'approvedUsers', email));
         if (!approvedSnap.exists()) {
           errorEl.textContent = 'E-mail nenalezen. Zaregistruj se.';
@@ -92,8 +79,8 @@
           errorEl.textContent = 'Tvůj účet ještě nebyl schválen.';
           return;
         }
-        const inputHash = await hashPassword(password);
-        if (!data.passwordHash || data.passwordHash !== inputHash) {
+        const isPasswordValid = await verifyPassword(password, data.passwordHash, data.passwordSalt);
+        if (!isPasswordValid) {
           errorEl.textContent = 'Nesprávné heslo.';
           return;
         }

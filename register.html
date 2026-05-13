@@ -38,6 +38,7 @@
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { createPasswordRecord } from './password-utils.js';
 
     const FIREBASE_AUTH_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -54,15 +55,6 @@
     const errorEl = document.getElementById('error');
     const submitBtn = document.getElementById('submit-btn');
 
-    async function hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer))
-        .map((byte) => byte.toString(16).padStart(2, '0'))
-        .join('');
-    }
-
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       errorEl.textContent = '';
@@ -74,12 +66,6 @@
       const poslani = document.getElementById('poslani').value.trim();
 
       try {
-        if (password.length < 6) {
-          errorEl.textContent = 'Heslo musí mít alespoň 6 znaků.';
-          submitBtn.disabled = false;
-          return;
-        }
-
         const pendingRef = doc(db, 'pendingUsers', email);
         const pendingSnap = await getDoc(pendingRef);
         if (pendingSnap.exists()) {
@@ -88,12 +74,13 @@
           return;
         }
 
-        const passwordHash = await hashPassword(password);
+        const { passwordHash, passwordSalt } = await createPasswordRecord(password);
         await setDoc(pendingRef, {
           name,
           email,
           poslani,
           passwordHash,
+          passwordSalt,
           createdAt: serverTimestamp(),
           status: 'pending'
         });
