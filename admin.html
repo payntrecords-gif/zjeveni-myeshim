@@ -81,6 +81,7 @@
 
     async function approveUser(userData) {
       const uid = userData.uid;
+      console.log('Admin: approving user uid:', uid, 'email:', userData.email || '');
       await setDoc(doc(db, 'approvedUsers', uid), {
         uid,
         name: userData.name || '',
@@ -94,6 +95,7 @@
     }
 
     async function rejectUser(userData) {
+      console.log('Admin: rejecting user uid:', userData.uid, 'email:', userData.email || '');
       await setDoc(doc(db, 'pendingUsers', userData.uid), { status: 'rejected' }, { merge: true });
       setStatus(`Uživatel ${userData.email || userData.uid} byl zamítnut.`);
     }
@@ -108,6 +110,7 @@
       const uid = userData.uid;
       const email = userData.email || uid;
       if (!confirm(`Opravdu odebrat přístup uživateli ${email}?\nDokument approvedUsers bude smazán. Pokud existuje žádost, její stav bude nastaven na 'revoked'.`)) return;
+      console.log('Admin: revoking access for uid:', uid, 'email:', email);
       await deleteDoc(doc(db, 'approvedUsers', uid));
       const pendingSnap = await getDoc(doc(db, 'pendingUsers', uid));
       if (pendingSnap.exists()) {

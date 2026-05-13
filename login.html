@@ -86,10 +86,7 @@
           return;
         }
 
-        // Keep unapproved users on the waiting flow until they explicitly sign in again after approval.
-        await signOut(auth).catch((signOutError) => {
-          console.warn('Failed to sign out unapproved user:', signOutError);
-        });
+        // Not approved – keep user signed in so waiting.html can show re-apply form.
         window.location.replace('./waiting.html');
       } catch (error) {
         errorEl.textContent = getLoginErrorMessage(error);
