@@ -14,6 +14,7 @@
     .status{min-height:22px;margin-top:12px;font-size:.92rem}
     .status.error{color:#ff9ea1}
     .status.ok{color:#c8f7b0}
+    .notice{margin-top:10px;font-size:.85rem;color:var(--sub);border-top:1px solid var(--line);padding-top:10px}
     .list{display:grid;gap:12px}
     .item{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(18,15,21,.55)}
     .head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
@@ -30,6 +31,7 @@
     <div class="card">
       <h1>Admin panel</h1>
       <p>Ruční schvalování registrací přes Firebase Auth a Firestore.</p>
+      <p class="notice">⚠️ Pozn.: Smazání v admin panelu maže přístup a Firestore data, ale <strong>nemaže Firebase Authentication účet</strong>.</p>
       <div class="status" id="status"></div>
     </div>
 
@@ -47,7 +49,7 @@
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, deleteDoc, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -94,6 +96,40 @@
     async function rejectUser(userData) {
       await setDoc(doc(db, 'pendingUsers', userData.uid), { status: 'rejected' }, { merge: true });
       setStatus(`Uživatel ${userData.email || userData.uid} byl zamítnut.`);
+    }
+
+    async function deletePendingRequest(uid, email) {
+      if (!confirm(`Opravdu smazat žádost uživatele ${email || uid}?\nTato akce je nevratná.`)) return;
+      await deleteDoc(doc(db, 'pendingUsers', uid));
+      setStatus(`Žádost uživatele ${email || uid} byla smazána.`);
+    }
+
+    async function revokeAccess(userData) {
+      const uid = userData.uid;
+      const email = userData.email || uid;
+      if (!confirm(`Opravdu odebrat přístup uživateli ${email}?\nDokument approvedUsers bude smazán. Pokud existuje žádost, její stav bude nastaven na 'revoked'.`)) return;
+      await deleteDoc(doc(db, 'approvedUsers', uid));
+      const pendingSnap = await getDoc(doc(db, 'pendingUsers', uid));
+      if (pendingSnap.exists()) {
+        await setDoc(doc(db, 'pendingUsers', uid), { status: 'revoked' }, { merge: true });
+      }
+      setStatus(`Přístup uživatele ${email} byl odebrán.`);
+    }
+
+    async function deleteApproval(uid, email) {
+      if (!confirm(`Opravdu smazat schválení uživatele ${email || uid}?\nBude smazán pouze dokument approvedUsers.`)) return;
+      await deleteDoc(doc(db, 'approvedUsers', uid));
+      setStatus(`Schválení uživatele ${email || uid} bylo smazáno.`);
+    }
+
+    async function deleteUserFromDB(uid, email) {
+      if (!confirm(`Opravdu smazat uživatele ${email || uid} kompletně z databáze?\nBudou smazány záznamy approvedUsers, pendingUsers a users (pokud existují). Tato akce je nevratná.`)) return;
+      const batch = writeBatch(db);
+      batch.delete(doc(db, 'approvedUsers', uid));
+      batch.delete(doc(db, 'pendingUsers', uid));
+      batch.delete(doc(db, 'users', uid));
+      await batch.commit();
+      setStatus(`Uživatel ${email || uid} byl smazán z databáze.`);
     }
 
     function renderPending(items) {
@@ -157,7 +193,22 @@
           }
         });
 
-        actions.append(approveBtn, rejectBtn);
+        const deleteRequestBtn = document.createElement('button');
+        deleteRequestBtn.type = 'button';
+        deleteRequestBtn.className = 'btn btn-red';
+        deleteRequestBtn.textContent = 'Smazat žádost';
+        deleteRequestBtn.addEventListener('click', async () => {
+          deleteRequestBtn.disabled = true;
+          try {
+            await deletePendingRequest(item.uid, item.email);
+          } catch (error) {
+            console.error('Delete pending request failed:', error);
+            setStatus('Smazání žádosti se nezdařilo. Zkus to znovu.', true);
+            deleteRequestBtn.disabled = false;
+          }
+        });
+
+        actions.append(approveBtn, rejectBtn, deleteRequestBtn);
         el.appendChild(actions);
         pendingList.appendChild(el);
       });
@@ -183,6 +234,57 @@
             <div class="muted">Schváleno: ${formatDate(item.approvedAt)}</div>
           </div>
         `;
+
+        const actions = document.createElement('div');
+        actions.className = 'row';
+
+        const revokeBtn = document.createElement('button');
+        revokeBtn.type = 'button';
+        revokeBtn.className = 'btn btn-red';
+        revokeBtn.textContent = 'Odebrat přístup';
+        revokeBtn.addEventListener('click', async () => {
+          revokeBtn.disabled = true;
+          try {
+            await revokeAccess(item);
+          } catch (error) {
+            console.error('Revoke access failed:', error);
+            setStatus('Odebrání přístupu se nezdařilo. Zkus to znovu.', true);
+            revokeBtn.disabled = false;
+          }
+        });
+
+        const deleteApprovalBtn = document.createElement('button');
+        deleteApprovalBtn.type = 'button';
+        deleteApprovalBtn.className = 'btn btn-red';
+        deleteApprovalBtn.textContent = 'Smazat schválení';
+        deleteApprovalBtn.addEventListener('click', async () => {
+          deleteApprovalBtn.disabled = true;
+          try {
+            await deleteApproval(item.uid, item.email);
+          } catch (error) {
+            console.error('Delete approval failed:', error);
+            setStatus('Smazání schválení se nezdařilo. Zkus to znovu.', true);
+            deleteApprovalBtn.disabled = false;
+          }
+        });
+
+        const deleteUserBtn = document.createElement('button');
+        deleteUserBtn.type = 'button';
+        deleteUserBtn.className = 'btn btn-red';
+        deleteUserBtn.textContent = 'Smazat uživatele z databáze';
+        deleteUserBtn.addEventListener('click', async () => {
+          deleteUserBtn.disabled = true;
+          try {
+            await deleteUserFromDB(item.uid, item.email);
+          } catch (error) {
+            console.error('Delete user from DB failed:', error);
+            setStatus('Smazání uživatele se nezdařilo. Zkus to znovu.', true);
+            deleteUserBtn.disabled = false;
+          }
+        });
+
+        actions.append(revokeBtn, deleteApprovalBtn, deleteUserBtn);
+        el.appendChild(actions);
         approvedList.appendChild(el);
       });
     }
