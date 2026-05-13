@@ -7,7 +7,16 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style id="auth-gate-style">html.auth-gate-pending body{visibility:hidden}</style>
 <script type="module" id="auth-gate-script">
+console.log('MYEShim boot start');
 document.documentElement.classList.add('auth-gate-pending');
+
+// Safety timeout: if Firebase or auth never resolves, show fallback UI
+const _authGateTimeout = setTimeout(() => {
+  console.warn('MYEShim: auth gate timeout – releasing gate and showing fallback UI');
+  document.documentElement.classList.remove('auth-gate-pending');
+  const fb = document.getElementById('app-load-fallback');
+  if (fb) fb.style.display = 'flex';
+}, 15000);
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -25,12 +34,15 @@ const FIREBASE_AUTH_CONFIG = {
 const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
 const auth = getAuth(app);
 const db = getFirestore(app);
+console.log('Firebase init ok');
 
 function redirectTo(path) {
+  clearTimeout(_authGateTimeout);
   window.location.replace(path);
 }
 
 function releaseAuthGate() {
+  clearTimeout(_authGateTimeout);
   document.documentElement.classList.remove('auth-gate-pending');
 }
 
@@ -42,6 +54,7 @@ try {
 }
 
 onAuthStateChanged(auth, async (user) => {
+  console.log('MYEShim onAuthStateChanged:', user ? 'user=' + user.uid : 'no user');
   if (!user) {
     redirectTo('./login.html');
     return;
@@ -54,6 +67,7 @@ onAuthStateChanged(auth, async (user) => {
       redirectTo('./waiting.html');
       return;
     }
+    console.log('MYEShim auth gate ok – releasing');
     releaseAuthGate();
   } catch (error) {
     console.error('Auth gate check failed:', error);
@@ -2433,6 +2447,11 @@ body.dark .mm-l4-wrong-token{
 
 </head>
 <body>
+<div id="app-load-fallback" style="display:none;position:fixed;inset:0;background:#f8f9fc;align-items:center;justify-content:center;font-family:sans-serif;font-size:1rem;color:#333;text-align:center;padding:2rem;z-index:99999;flex-direction:column;gap:1rem;">
+  <div>⚠️</div>
+  <div>Aplikaci se nepodařilo načíst. Obnov stránku.</div>
+  <button onclick="window.location.reload()" style="padding:.6rem 1.4rem;border:none;border-radius:.5rem;background:#e5458e;color:#fff;font-size:1rem;cursor:pointer;">Obnovit</button>
+</div>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
 <div id="topbar">
   <!-- Only logo + brand name remain at the top -->
@@ -4547,7 +4566,9 @@ render();
       location.reload();
     });
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('service-worker.js', { scope: './' }).catch(function(){});
+      navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+        .then(function(reg){ console.log('MYEShim SW registered, scope:', reg.scope); })
+        .catch(function(err){ console.error('MYEShim SW registration failed:', err); });
     });
   }
   // TWA / standalone mode detection
