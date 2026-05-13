@@ -5138,26 +5138,64 @@ const FCM_SENDER_ID = '360259005980';
           icon: './icon-192.png',
           badge: './icon-96.png',
           tag: 'myeshim-welcome',
-          data: { url: reg.scope }
+          data: { url: reg.scope, source: 'welcome-notification' }
         });
       }).catch(() => {});
     }, 180000); // 3 minutes
+  }
+
+  function normalizeNotificationRef(ref) {
+    if (typeof ref !== 'string') return '';
+    const trimmed = ref.trim().replace(/^#/, '');
+    if (!trimmed) return '';
+    try {
+      return decodeURIComponent(trimmed);
+    } catch (e) {
+      return trimmed;
+    }
+  }
+
+  function navigateToNotificationRef(ref, syncHash) {
+    const normalizedRef = normalizeNotificationRef(ref);
+    if (!normalizedRef || !Array.isArray(window.VERSES)) return false;
+    const m = normalizedRef.match(/(\d+):(\d+)/);
+    if (!m) return false;
+    const idx = window.VERSES.findIndex(v => v.c == m[1] && v.v == m[2]);
+    if (idx < 0) return false;
+    if (typeof window.state !== 'undefined') {
+      window.state.idx = idx;
+      if (typeof window.render === 'function') window.render();
+      if (typeof window.focusCurrentVerse === 'function') window.focusCurrentVerse();
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (typeof window.go === 'function') {
+      const cur = typeof window.state !== 'undefined' ? window.state.idx : 0;
+      window.go(idx - cur);
+    }
+    if (syncHash !== false) {
+      try {
+        const hashValue = '#' + encodeURIComponent(normalizedRef);
+        if (window.location.hash !== hashValue) history.replaceState(history.state, '', hashValue);
+      } catch (e) {}
+    }
+    return true;
+  }
+
+  function applyNotificationTargetFromUrl() {
+    return navigateToNotificationRef(window.location.hash, false);
   }
 
   // Listen for messages from SW (navigate to verse, update toast, token refresh)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', function(event) {
       if (event.data && event.data.type === 'NAVIGATE_TO_REF') {
-        const ref = event.data.ref;
-        if (ref && Array.isArray(window.VERSES)) {
-          const m = ref.match(/(\d+):(\d+)/);
-          if (m) {
-            const idx = window.VERSES.findIndex(v => v.c == m[1] && v.v == m[2]);
-            if (idx >= 0 && typeof window.go === 'function') {
-              const cur = typeof window.state !== 'undefined' ? window.state.idx : 0;
-              window.go(idx - cur);
-            }
-          }
+        navigateToNotificationRef(event.data.ref);
+      } else if (event.data && event.data.type === 'NAVIGATE_TO_NOTIFICATION') {
+        if (event.data.data && event.data.data.ref) navigateToNotificationRef(event.data.data.ref);
+        else if (event.data.targetUrl) {
+          try {
+            const target = new URL(event.data.targetUrl, window.location.href);
+            if (target.hash) navigateToNotificationRef(target.hash);
+          } catch (e) {}
         }
       } else if (event.data && event.data.type === 'SW_UPDATED') {
         const toast = document.getElementById('sw-update-toast');
@@ -5176,10 +5214,14 @@ const FCM_SENDER_ID = '360259005980';
   function init() {
     if (Array.isArray(window.VERSES) && window.VERSES.length) {
       initStreak();
+      applyNotificationTargetFromUrl();
     } else {
       // VERSES defined in the same script block; retry once after short delay
       setTimeout(() => {
-        if (Array.isArray(window.VERSES) && window.VERSES.length) initStreak();
+        if (Array.isArray(window.VERSES) && window.VERSES.length) {
+          initStreak();
+          applyNotificationTargetFromUrl();
+        }
       }, 200);
     }
     document.addEventListener('myeshim-auth-ready', function(event) {
@@ -5193,6 +5235,7 @@ const FCM_SENDER_ID = '360259005980';
       if (document.visibilityState === 'visible') refreshFcmTokenSilently();
     });
     window.addEventListener('online', refreshFcmTokenSilently);
+    window.addEventListener('hashchange', applyNotificationTargetFromUrl);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
@@ -5303,7 +5346,7 @@ const FCM_SENDER_ID = '360259005980';
         icon: './icon-192.png',
         badge: './icon-96.png',
         tag: 'myeshim-daily',
-        data: { url: reg.scope, ref: _ref }
+        data: { url: reg.scope, ref: _ref, verseId: _ref, source: 'manual-daily-reminder' }
       });
     }).catch(() => {});
   }

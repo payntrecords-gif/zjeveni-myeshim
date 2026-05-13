@@ -1,4 +1,5 @@
 const CACHE_NAME = 'myeshim-v46-cache';
+const APP_ROOT_URL = new URL('./', self.location.href).href;
 const APP_SHELL = [
   './',
   './index.html',
@@ -87,7 +88,114 @@ self.addEventListener('periodicsync', event => {
       badge: './icon-96.png',
       tag: 'daily-reminder',
       renotify: false,
-      data: { ref: ref, url: self.registration.scope }
+      data: { ref: ref, verseId: ref, source: 'daily-reminder', url: APP_ROOT_URL }
     });
   })());
+});
+
+function isAppClientUrl(url) {
+  try {
+    const clientUrl = new URL(url);
+    const appUrl = new URL(APP_ROOT_URL);
+    return clientUrl.origin === appUrl.origin && clientUrl.pathname.startsWith(appUrl.pathname);
+  } catch (error) {
+    return false;
+  }
+}
+
+function resolveNotificationTarget(data) {
+  const appUrl = new URL(APP_ROOT_URL);
+  const rawUrl = data && typeof data.url === 'string' ? data.url.trim() : '';
+  let targetUrl = APP_ROOT_URL;
+  try {
+    const candidate = new URL(rawUrl || APP_ROOT_URL, APP_ROOT_URL);
+    if (candidate.origin === appUrl.origin && candidate.pathname.startsWith(appUrl.pathname)) {
+      targetUrl = candidate.href;
+    }
+  } catch (error) {}
+  if (data && data.ref) {
+    const candidate = new URL(targetUrl);
+    if (!candidate.hash) candidate.hash = data.ref;
+    targetUrl = candidate.href;
+  }
+  return targetUrl;
+}
+
+function postNotificationTarget(client, data, targetUrl) {
+  if (!client || typeof client.postMessage !== 'function') return;
+  try {
+    client.postMessage({
+      type: 'NAVIGATE_TO_NOTIFICATION',
+      targetUrl: targetUrl,
+      data: data || {}
+    });
+  } catch (error) {}
+  if (!data || !data.ref) return;
+  try {
+    client.postMessage({
+      type: 'NAVIGATE_TO_REF',
+      ref: data.ref,
+      data: data
+    });
+  } catch (error) {}
+}
+
+async function openNotificationWindow(targetUrl) {
+  try {
+    return await clients.openWindow(targetUrl);
+  } catch (error) {
+    if (targetUrl === APP_ROOT_URL) return null;
+  }
+  try {
+    return await clients.openWindow(APP_ROOT_URL);
+  } catch (error) {
+    return null;
+  }
+}
+
+async function activateNotificationTarget(targetUrl, data) {
+  const windowClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+  const appClients = windowClients.filter(client => isAppClientUrl(client.url));
+  const activeClient = appClients.find(client => client.url === targetUrl) || appClients[0];
+  if (!activeClient) return openNotificationWindow(targetUrl);
+
+  let clientRef = activeClient;
+  const currentUrl = (() => {
+    try {
+      return new URL(clientRef.url).href;
+    } catch (error) {
+      return clientRef.url || '';
+    }
+  })();
+  if (currentUrl !== targetUrl) {
+    if (typeof clientRef.navigate === 'function') {
+      try {
+        const navigatedClient = await clientRef.navigate(targetUrl);
+        if (navigatedClient) clientRef = navigatedClient;
+      } catch (error) {
+        return openNotificationWindow(targetUrl);
+      }
+    } else {
+      postNotificationTarget(clientRef, data, targetUrl);
+    }
+  }
+
+  if (typeof clientRef.focus === 'function') {
+    try {
+      const focusedClient = await clientRef.focus();
+      if (focusedClient) clientRef = focusedClient;
+    } catch (error) {
+      return openNotificationWindow(targetUrl);
+    }
+  }
+
+  postNotificationTarget(clientRef, data, targetUrl);
+  return clientRef;
+}
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const data = event.notification && event.notification.data ? event.notification.data : {};
+  const targetUrl = resolveNotificationTarget(data);
+  event.waitUntil(activateNotificationTarget(targetUrl, data));
 });
