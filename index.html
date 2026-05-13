@@ -31,6 +31,19 @@ function redirectTo(path) {
 }
 
 onAuthStateChanged(auth, async (user) => {
+  const approvedEmail = localStorage.getItem('myeshim_approved_email');
+  if (approvedEmail) {
+    try {
+      const approvedRefByEmail = doc(db, 'approvedUsers', approvedEmail.trim().toLowerCase());
+      const approvedSnapByEmail = await getDoc(approvedRefByEmail);
+      const emailStatus = approvedSnapByEmail.exists() ? approvedSnapByEmail.data().status : 'pending';
+      if (emailStatus === 'approved') {
+        document.documentElement.classList.remove('auth-gate-pending');
+        return;
+      }
+    } catch (error) {}
+  }
+
   if (!user) {
     redirectTo('./login.html');
     return;
