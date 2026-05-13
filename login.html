@@ -4,36 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>MYEShim – Přihlášení</title>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
     *{box-sizing:border-box} body{margin:0;min-height:100dvh;display:grid;place-items:center;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
     .card{width:min(420px,100%);background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:18px;padding:24px}
     h1{margin:0 0 8px;font-size:1.4rem} p{margin:0 0 18px;color:var(--sub)}
     label{display:block;font-size:.92rem;margin-bottom:6px}
-    input{width:100%;margin-bottom:12px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#120f15;color:var(--text)}
+    input{width:100%;margin-bottom:12px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#120f15;color:var(--text);font:inherit}
     button{width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210;font-weight:700;cursor:pointer}
     button[disabled]{opacity:.65;cursor:wait}
     .link{display:block;margin-top:14px;color:#f2dc98;text-align:center;text-decoration:none}
+    .link-small{display:block;margin-top:10px;color:var(--sub);text-align:center;text-decoration:none;font-size:.85rem}
     .error{min-height:20px;color:#ff8d8d;font-size:.9rem;margin-bottom:10px}
+    .success{min-height:20px;color:#7ecf8e;font-size:.9rem;margin-bottom:10px}
   </style>
 </head>
 <body>
   <form class="card" id="login-form">
     <h1>Přihlášení</h1>
-    <p>Přihlaste se do interní aplikace MYEShim.</p>
+    <p>Zadej svůj e-mail a pošleme ti přihlašovací odkaz.</p>
     <div class="error" id="error"></div>
+    <div class="success" id="success"></div>
     <label for="email">E-mail</label>
     <input id="email" type="email" required autocomplete="email">
-    <label for="password">Heslo</label>
-    <input id="password" type="password" required autocomplete="current-password">
-    <button id="submit-btn" type="submit">Přihlásit se</button>
+    <button id="submit-btn" type="submit">Poslat přístupový odkaz</button>
     <a class="link" href="./register.html">Ještě nemáš účet? Zaregistruj se</a>
+    <a class="link-small" href="./admin-login.html">Admin přihlášení</a>
   </form>
 
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const FIREBASE_AUTH_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -43,36 +45,68 @@
       messagingSenderId: "360259005980",
       appId: "1:360259005980:web:610695f8b44de04dc079d9"
     };
+    const EMAILJS_SERVICE_ID = 'service_ritfist';
+    const EMAILJS_TEMPLATE_ID = 'template_64wrero';
+    const EMAILJS_PUBLIC_KEY = 'E1vj9Uv9CqN8xYOHS';
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
-    const auth = getAuth(app);
     const db = getFirestore(app);
     const form = document.getElementById('login-form');
     const errorEl = document.getElementById('error');
+    const successEl = document.getElementById('success');
     const submitBtn = document.getElementById('submit-btn');
-
-    async function routeByStatus(uid) {
-      const approvedSnap = await getDoc(doc(db, 'approvedUsers', uid));
-      const status = approvedSnap.exists() ? approvedSnap.data().status : 'pending';
-      window.location.replace(status === 'approved' ? './index.html' : './waiting.html');
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try { await routeByStatus(user.uid); } catch (error) { console.warn('Routing by approval status failed:', error); }
-    });
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       errorEl.textContent = '';
+      successEl.textContent = '';
       submitBtn.disabled = true;
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
+
       try {
-        const email = document.getElementById('email').value.trim().toLowerCase();
-        const password = document.getElementById('password').value;
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        await routeByStatus(result.user.uid);
+        const approvedSnap = await getDoc(doc(db, 'approvedUsers', email));
+        if (!approvedSnap.exists()) {
+          errorEl.textContent = 'E-mail nenalezen. Zaregistruj se.';
+          return;
+        }
+        const data = approvedSnap.data();
+        if (data.status !== 'approved') {
+          errorEl.textContent = 'Tvůj účet ještě nebyl schválen.';
+          return;
+        }
+
+        const token = crypto.randomUUID();
+        const now = Date.now();
+        await setDoc(doc(db, 'inviteTokens', token), {
+          email,
+          name: data.name || '',
+          createdAt: serverTimestamp(),
+          expiresAt: Timestamp.fromMillis(now + 48 * 60 * 60 * 1000),
+          used: false
+        });
+
+        const link = 'https://payntrecords-gif.github.io/zjeveni-myeshim/?token=' + token;
+        if (window.emailjs && typeof window.emailjs.send === 'function') {
+          try {
+            await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+              to_email: email,
+              to_name: data.name || '',
+              message: 'Tvůj přihlašovací odkaz (platnost 48 hodin):',
+              code: link
+            }, EMAILJS_PUBLIC_KEY);
+          } catch (emailError) {
+            console.error('EmailJS send failed:', emailError);
+            errorEl.textContent = 'Nepodařilo se odeslat e-mail. Zkus to prosím znovu.';
+            return;
+          }
+        }
+
+        successEl.textContent = 'Poslali jsme ti přihlášovací odkaz na e-mail. Klikni na něj.';
+        form.reset();
       } catch (error) {
-        errorEl.textContent = 'Přihlášení se nezdařilo. Zkontrolujte e-mail a heslo.';
+        errorEl.textContent = 'Něco se pokazilo. Zkus to prosím znovu.';
+        console.error(error);
       } finally {
         submitBtn.disabled = false;
       }

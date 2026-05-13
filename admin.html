@@ -47,7 +47,7 @@
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, setDoc, serverTimestamp, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     const FIREBASE_AUTH_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -76,24 +76,47 @@
       return 'neuvedeno';
     }
 
-    async function sendApprovalEmail(name, email) {
+    async function sendApprovalEmail(name, email, token) {
       if (!email || !window.emailjs || typeof window.emailjs.send !== 'function') return;
+      const link = 'https://payntrecords-gif.github.io/zjeveni-myeshim/?token=' + token;
       try {
         await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
           to_email: email,
           to_name: name || '',
-          message: 'Tvůj účet byl schválen! Přihlas se do aplikace MYEShim zde: https://payntrecords-gif.github.io/zjeveni-myeshim/'
+          message: 'Tvůj účet byl schválen! Klikni na následující odkaz pro přístup do aplikace (platnost 48 hodin):',
+          code: link
         }, EMAILJS_PUBLIC_KEY);
       } catch (error) {
         console.error('EmailJS notification failed:', error);
       }
     }
 
-    async function setUserStatus(uid, status, userData = null) {
-      await setDoc(doc(db, 'pendingUsers', uid), { status }, { merge: true });
-      await setDoc(doc(db, 'approvedUsers', uid), { status }, { merge: true });
+    async function approveUser(email, userData) {
+      const token = crypto.randomUUID();
+      const now = Date.now();
+      await setDoc(doc(db, 'inviteTokens', token), {
+        email,
+        name: userData.name || '',
+        createdAt: serverTimestamp(),
+        expiresAt: Timestamp.fromMillis(now + 48 * 60 * 60 * 1000),
+        used: false
+      });
+      await setDoc(doc(db, 'approvedUsers', email), {
+        name: userData.name || '',
+        email,
+        poslani: userData.poslani || '',
+        status: 'approved',
+        approvedAt: serverTimestamp()
+      });
+      await setDoc(doc(db, 'pendingUsers', email), { status: 'approved' }, { merge: true });
+      await sendApprovalEmail(userData.name, email, token);
+    }
+
+    async function setUserStatus(email, status, userData = null) {
       if (status === 'approved' && userData) {
-        await sendApprovalEmail(userData.name, userData.email);
+        await approveUser(email, userData);
+      } else {
+        await setDoc(doc(db, 'pendingUsers', email), { status }, { merge: true });
       }
     }
 
@@ -148,18 +171,25 @@
 
     approveAllBtn.addEventListener('click', async () => {
       if (!latestPending.length) return;
-      const batch = writeBatch(db);
-      latestPending.forEach((item) => {
-        batch.set(doc(db, 'pendingUsers', item.uid), { status: 'approved' }, { merge: true });
-        batch.set(doc(db, 'approvedUsers', item.uid), { status: 'approved' }, { merge: true });
-      });
-      await batch.commit();
-      await Promise.all(latestPending.map((item) => sendApprovalEmail(item.name, item.email)));
+      approveAllBtn.disabled = true;
+      const errors = [];
+      await Promise.all(latestPending.map(async (item) => {
+        try {
+          await approveUser(item.uid, item);
+        } catch (err) {
+          errors.push(item.email || item.uid);
+          console.error('Approval failed for', item.email || item.uid, err);
+        }
+      }));
+      if (errors.length) {
+        alert('Schválení se nezdařilo pro: ' + errors.join(', '));
+      }
+      approveAllBtn.disabled = false;
     });
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        window.location.replace('./login.html');
+        window.location.replace('./admin-login.html');
         return;
       }
 
