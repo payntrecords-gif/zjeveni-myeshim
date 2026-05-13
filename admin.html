@@ -101,6 +101,8 @@
         name: userData.name || '',
         email,
         poslani: userData.poslani || '',
+        passwordHash: userData.passwordHash || '',
+        passwordSalt: userData.passwordSalt || '',
         status: 'approved',
         approvedAt: serverTimestamp()
       });
