@@ -176,6 +176,15 @@ async function activateNotificationTarget(targetUrl, data) {
         return openNotificationWindow(targetUrl);
       }
     } else {
+      try {
+        const current = new URL(currentUrl, APP_ROOT_URL);
+        const target = new URL(targetUrl, APP_ROOT_URL);
+        if (current.origin !== target.origin || current.pathname !== target.pathname || current.search !== target.search) {
+          return openNotificationWindow(targetUrl);
+        }
+      } catch (error) {
+        return openNotificationWindow(targetUrl);
+      }
       postNotificationTarget(clientRef, data, targetUrl);
     }
   }
