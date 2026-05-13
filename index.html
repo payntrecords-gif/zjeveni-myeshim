@@ -719,6 +719,7 @@ body.dark #streak-badge{background:rgba(40,24,36,.72);border-color:rgba(255,150,
   background:rgba(0,0,0,.45);
   display:none;align-items:flex-end;justify-content:center;
   padding-bottom:env(safe-area-inset-bottom);
+  transition:background .22s ease;
 }
 #welcome-overlay.open{display:flex;animation:wov-in .22s ease}
 @keyframes wov-in{from{opacity:0}to{opacity:1}}
@@ -728,10 +729,22 @@ body.dark #streak-badge{background:rgba(40,24,36,.72);border-color:rgba(255,150,
   padding:28px 20px 32px;
   animation:wsh-up .28s cubic-bezier(.22,1,.36,1);
   position:relative;
+  max-height:min(92vh,720px);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+  will-change:transform;
+  transition:transform .28s cubic-bezier(.22,1,.36,1);
 }
 body.dark #welcome-sheet{background:#1c161d}
+#welcome-sheet.dragging{transition:none}
 @keyframes wsh-up{from{transform:translateY(60px);opacity:.4}to{transform:translateY(0);opacity:1}}
-.ws-handle{width:40px;height:4px;border-radius:999px;background:rgba(0,0,0,.12);margin:0 auto 18px}
+.ws-handle{
+  width:40px;height:4px;border-radius:999px;background:rgba(0,0,0,.12);margin:0 auto 18px;
+  cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;
+}
+#welcome-sheet.dragging .ws-handle{cursor:grabbing}
 body.dark .ws-handle{background:rgba(255,255,255,.15)}
 .ws-streak{font-size:2rem;text-align:center;margin-bottom:4px}
 .ws-streak-label{text-align:center;font-size:1.02rem;font-weight:900;color:var(--pink,#e5458e);margin-bottom:14px}
@@ -4709,12 +4722,19 @@ const FCM_SENDER_ID = '360259005980';
     if (!isNewDay) return;
     const verse = pickDailyVerse();
     const overlay = document.getElementById('welcome-overlay');
+    const sheet = document.getElementById('welcome-sheet');
     const streakLabel = document.getElementById('ws-streak-label');
     const verseText = document.getElementById('ws-verse-text');
     const verseRef = document.getElementById('ws-verse-ref');
     const motto = document.getElementById('ws-motto');
     const streakEmoji = document.getElementById('ws-streak-emoji');
     if (!overlay) return;
+    if (sheet) {
+      sheet.classList.remove('dragging');
+      sheet.style.transform = '';
+      sheet.scrollTop = 0;
+    }
+    overlay.style.background = '';
     if (streakLabel) {
       if (streak >= 30) streakLabel.textContent = 'Jsi tady 🔥 ' + streak + ' dní v řadě!';
       else if (streak >= 7) streakLabel.textContent = 'Úžasné! 🔥 ' + streak + ' dní v řadě!';
@@ -4741,12 +4761,162 @@ const FCM_SENDER_ID = '360259005980';
 
   window.closeWelcome = function() {
     const overlay = document.getElementById('welcome-overlay');
+    const sheet = document.getElementById('welcome-sheet');
     if (overlay) overlay.classList.remove('open');
+    if (overlay) overlay.style.background = '';
+    if (sheet) {
+      sheet.classList.remove('dragging');
+      sheet.style.transform = '';
+    }
     document.body.style.overflow = '';
   };
   document.getElementById('welcome-overlay')?.addEventListener('click', function(e) {
     if (e.target === this) window.closeWelcome();
   });
+
+  (function() {
+    const overlay = document.getElementById('welcome-overlay');
+    const sheet = document.getElementById('welcome-sheet');
+    if (!overlay || !sheet) return;
+    const CLOSE_DISTANCE = 90;
+    const CLOSE_VELOCITY = 0.55;
+    const MIN_CLOSE_DRAG = 30;
+    const TOP_DRAG_ZONE = 108;
+    const HORIZONTAL_IGNORE_PX = 14;
+    const MAX_OVERLAY_OPACITY = 0.45;
+    const MIN_OVERLAY_OPACITY = 0.1;
+    const OVERLAY_FADE_DISTANCE = 320;
+    const supportsPointer = 'PointerEvent' in window;
+    let startX = 0;
+    let startY = 0;
+    let dragY = 0;
+    let lastY = 0;
+    let lastMoveAt = 0;
+    let velocityY = 0;
+    let dragging = false;
+    let activePointerId = null;
+
+    function isInteractive(target) {
+      return !!(target && target.closest && target.closest('button,a,input,textarea,select,label'));
+    }
+
+    function isPriorityZone(target, clientY) {
+      if (target && target.closest && target.closest('.ws-handle')) return true;
+      const rect = sheet.getBoundingClientRect();
+      return clientY - rect.top <= TOP_DRAG_ZONE;
+    }
+
+    function canStartDrag(target, clientY) {
+      if (isInteractive(target)) return false;
+      return isPriorityZone(target, clientY) || sheet.scrollTop <= 0;
+    }
+
+    function resetDragState() {
+      dragging = false;
+      dragY = 0;
+      velocityY = 0;
+      activePointerId = null;
+      sheet.classList.remove('dragging');
+      sheet.style.transform = '';
+      overlay.style.background = '';
+    }
+
+    function beginDrag(clientX, clientY, target, pointerId) {
+      if (!overlay.classList.contains('open') || !canStartDrag(target, clientY)) return false;
+      startX = clientX;
+      startY = clientY;
+      dragY = 0;
+      lastY = clientY;
+      lastMoveAt = Date.now();
+      velocityY = 0;
+      dragging = true;
+      activePointerId = pointerId == null ? null : pointerId;
+      sheet.classList.add('dragging');
+      return true;
+    }
+
+    function updateDrag(clientX, clientY) {
+      if (!dragging) return;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+      const now = Date.now();
+      const dt = Math.max(1, now - lastMoveAt);
+      velocityY = (clientY - lastY) / dt;
+      lastY = clientY;
+      lastMoveAt = now;
+      if (Math.abs(dx) > HORIZONTAL_IGNORE_PX && Math.abs(dy) < Math.abs(dx)) return;
+      if (dy <= 0) {
+        dragY = 0;
+        sheet.style.transform = '';
+        overlay.style.background = '';
+        return;
+      }
+      dragY = dy;
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+      overlay.style.background = 'rgba(0,0,0,' + Math.max(MIN_OVERLAY_OPACITY, MAX_OVERLAY_OPACITY - (dy / OVERLAY_FADE_DISTANCE)) + ')';
+    }
+
+    function animateClose() {
+      dragging = false;
+      dragY = 0;
+      velocityY = 0;
+      activePointerId = null;
+      sheet.classList.remove('dragging');
+      sheet.style.transform = 'translateY(calc(100% + 24px))';
+      overlay.style.background = 'rgba(0,0,0,0)';
+      setTimeout(function() {
+        window.closeWelcome();
+      }, 220);
+    }
+
+    function finishDrag() {
+      if (!dragging) return;
+      sheet.classList.remove('dragging');
+      if (dragY > CLOSE_DISTANCE || (dragY > MIN_CLOSE_DRAG && velocityY > CLOSE_VELOCITY)) {
+        animateClose();
+        return;
+      }
+      resetDragState();
+    }
+
+    if (supportsPointer) {
+      sheet.addEventListener('pointerdown', function(e) {
+        if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
+        if (!beginDrag(e.clientX, e.clientY, e.target, e.pointerId)) return;
+        if (sheet.setPointerCapture) {
+          try { sheet.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+      });
+      sheet.addEventListener('pointermove', function(e) {
+        if (!dragging || e.pointerId !== activePointerId) return;
+        const dy = e.clientY - startY;
+        if (dy > 0) e.preventDefault();
+        updateDrag(e.clientX, e.clientY);
+      });
+      function finishPointerDrag(e) {
+        if (activePointerId != null && e.pointerId !== activePointerId) return;
+        finishDrag();
+      }
+      sheet.addEventListener('pointerup', finishPointerDrag);
+      sheet.addEventListener('pointercancel', finishPointerDrag);
+    } else {
+      sheet.addEventListener('touchstart', function(e) {
+        const touch = e.changedTouches && e.changedTouches[0];
+        if (!touch) return;
+        beginDrag(touch.clientX, touch.clientY, e.target, null);
+      }, { passive: true });
+      sheet.addEventListener('touchmove', function(e) {
+        if (!dragging) return;
+        const touch = e.changedTouches && e.changedTouches[0];
+        if (!touch) return;
+        const dy = touch.clientY - startY;
+        if (dy > 0) e.preventDefault();
+        updateDrag(touch.clientX, touch.clientY);
+      }, { passive: false });
+      sheet.addEventListener('touchend', finishDrag, { passive: true });
+      sheet.addEventListener('touchcancel', finishDrag, { passive: true });
+    }
+  })();
 
   // ── STREAK DETAIL MODAL ──
   function pluralDays(n) {
