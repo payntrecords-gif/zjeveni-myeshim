@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>MYEShim – Admin přihlášení</title>
+  <style>
+    :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
+    *{box-sizing:border-box} body{margin:0;min-height:100dvh;display:grid;place-items:center;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
+    .card{width:min(420px,100%);background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:18px;padding:24px}
+    h1{margin:0 0 8px;font-size:1.4rem} p{margin:0 0 18px;color:var(--sub)}
+    label{display:block;font-size:.92rem;margin-bottom:6px}
+    input{width:100%;margin-bottom:12px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#120f15;color:var(--text);font:inherit}
+    button{width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210;font-weight:700;cursor:pointer}
+    button[disabled]{opacity:.65;cursor:wait}
+    .link{display:block;margin-top:14px;color:#f2dc98;text-align:center;text-decoration:none}
+    .error{min-height:20px;color:#ff8d8d;font-size:.9rem;margin-bottom:10px}
+  </style>
+</head>
+<body>
+  <form class="card" id="admin-login-form">
+    <h1>Admin přihlášení</h1>
+    <p>Přihlášení pro správce aplikace MYEShim.</p>
+    <div class="error" id="error"></div>
+    <label for="email">E-mail</label>
+    <input id="email" type="email" required autocomplete="email">
+    <label for="password">Heslo</label>
+    <input id="password" type="password" required autocomplete="current-password">
+    <button id="submit-btn" type="submit">Přihlásit se</button>
+    <a class="link" href="./login.html">← Zpět na přihlášení</a>
+  </form>
+
+  <script type="module">
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const FIREBASE_AUTH_CONFIG = {
+      apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+      authDomain: "myeshim-app.firebaseapp.com",
+      projectId: "myeshim-app",
+      storageBucket: "myeshim-app.firebasestorage.app",
+      messagingSenderId: "360259005980",
+      appId: "1:360259005980:web:610695f8b44de04dc079d9"
+    };
+
+    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const form = document.getElementById('admin-login-form');
+    const errorEl = document.getElementById('error');
+    const submitBtn = document.getElementById('submit-btn');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      try {
+        const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+        if (adminSnap.exists()) {
+          window.location.replace('./admin.html');
+        }
+      } catch (error) {
+        console.warn('Admin check failed:', error);
+      }
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorEl.textContent = '';
+      submitBtn.disabled = true;
+      try {
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const password = document.getElementById('password').value;
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.replace('./admin.html');
+      } catch (error) {
+        errorEl.textContent = 'Přihlášení se nezdařilo. Zkontrolujte e-mail a heslo.';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
