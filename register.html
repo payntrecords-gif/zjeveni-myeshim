@@ -91,11 +91,15 @@
             createdAt: serverTimestamp()
           });
         } catch (firestoreError) {
-          await deleteUser(credential.user).catch(() => {});
+          await deleteUser(credential.user).catch((cleanupError) => {
+            console.error('Nepodařilo se smazat nově vytvořený účet po chybě Firestore:', cleanupError);
+          });
           throw firestoreError;
         }
 
-        await signOut(auth).catch(() => {});
+        await signOut(auth).catch((signOutError) => {
+          console.warn('Registrace byla uložena, ale automatické odhlášení se nezdařilo:', signOutError);
+        });
         window.location.replace('./waiting.html');
       } catch (error) {
         errorEl.textContent = getRegisterErrorMessage(error);
