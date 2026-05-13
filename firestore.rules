@@ -4,6 +4,7 @@ service cloud.firestore {
     match /approvedUsers/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['status'])
         && request.resource.data.status == 'pending';
       allow update, delete: if isAdmin();
     }
