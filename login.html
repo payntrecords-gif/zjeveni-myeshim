@@ -36,6 +36,7 @@
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getAuth, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
     import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
@@ -47,6 +48,10 @@
     };
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+    const appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider('6Ld1ZegsAAAAAHvNq0yL6nFhzD_mMUJ2kKR1zcq7'),
+      isTokenAutoRefreshEnabled: true
+    });
     const auth = getAuth(app);
     const db = getFirestore(app);
     const form = document.getElementById('login-form');
