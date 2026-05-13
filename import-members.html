@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>MYEShim – Import členů</title>
+  <style>
+    :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
+    .card{max-width:760px;margin:0 auto;background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:16px;padding:20px}
+    h1{margin:0 0 10px} p{color:var(--sub)} textarea,input,button{font:inherit}
+    textarea{width:100%;min-height:220px;background:#120f15;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+    input[type="file"]{margin:10px 0}
+    button{padding:11px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210;font-weight:700;cursor:pointer}
+    .status{min-height:22px;margin-top:12px}
+    a{color:#f2dc98}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hromadný import členů</h1>
+    <p>Nahraj CSV (jeden e-mail na řádek nebo sloupec <strong>email</strong>) nebo vlož e-maily ručně.</p>
+    <input type="file" id="csv-file" accept=".csv,text/csv,text/plain">
+    <textarea id="email-input" placeholder="např. clovek@example.com"></textarea>
+    <button id="import-btn" type="button">Importovat e-maily</button>
+    <div class="status" id="status"></div>
+    <p><a href="./admin.html">← Zpět do admin panelu</a></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const FIREBASE_AUTH_CONFIG = {
+      apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+      authDomain: "myeshim-app.firebaseapp.com",
+      projectId: "myeshim-app",
+      storageBucket: "myeshim-app.firebasestorage.app",
+      messagingSenderId: "360259005980",
+      appId: "1:360259005980:web:610695f8b44de04dc079d9"
+    };
+
+    const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const fileInput = document.getElementById('csv-file');
+    const input = document.getElementById('email-input');
+    const statusEl = document.getElementById('status');
+    const importBtn = document.getElementById('import-btn');
+    let currentUid = '';
+
+    function setStatus(text, isError = false) {
+      statusEl.style.color = isError ? '#ff9ea1' : '#c8f7b0';
+      statusEl.textContent = text;
+    }
+
+    function parseEmails(text) {
+      const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      if (!lines.length) return [];
+
+      const splitLine = (line) => line.split(/[;,\t]/).map((col) => col.trim());
+      const first = splitLine(lines[0]).map((value) => value.toLowerCase());
+      const emailIndex = first.indexOf('email');
+      const sourceLines = emailIndex >= 0 ? lines.slice(1) : lines;
+      const emails = new Set();
+
+      sourceLines.forEach((line) => {
+        const cols = splitLine(line);
+        const candidate = emailIndex >= 0 ? (cols[emailIndex] || '') : cols[0];
+        const normalized = candidate.trim().toLowerCase();
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) emails.add(normalized);
+      });
+
+      return [...emails];
+    }
+
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      input.value = await file.text();
+    });
+
+    importBtn.addEventListener('click', async () => {
+      if (!currentUid) return;
+      const emails = parseEmails(input.value);
+      if (!emails.length) {
+        setStatus('CSV neobsahuje žádné platné e-maily.', true);
+        return;
+      }
+
+      importBtn.disabled = true;
+      try {
+        await Promise.all(emails.map((email) => (
+          setDoc(doc(db, 'preApprovedEmails', email), {
+            email,
+            addedAt: serverTimestamp(),
+            addedBy: currentUid
+          }, { merge: true })
+        )));
+        setStatus(`Import dokončen: ${emails.length} e-mailů.`);
+      } catch (error) {
+        setStatus('Import selhal. Zkus to prosím znovu.', true);
+      } finally {
+        importBtn.disabled = false;
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('./login.html');
+        return;
+      }
+      currentUid = user.uid;
+      const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+      if (!adminSnap.exists()) {
+        window.location.replace('./index.html');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -5,6 +5,53 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<style id="auth-gate-style">html.auth-gate-pending body{visibility:hidden}</style>
+<script type="module" id="auth-gate-script">
+document.documentElement.classList.add('auth-gate-pending');
+
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const FIREBASE_AUTH_CONFIG = {
+  apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+  authDomain: "myeshim-app.firebaseapp.com",
+  projectId: "myeshim-app",
+  storageBucket: "myeshim-app.firebasestorage.app",
+  messagingSenderId: "360259005980",
+  appId: "1:360259005980:web:610695f8b44de04dc079d9"
+};
+
+const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+function redirectTo(path) {
+  window.location.replace(path);
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    redirectTo('./login.html');
+    return;
+  }
+
+  try {
+    const approvedRef = doc(db, 'approvedUsers', user.uid);
+    const approvedSnap = await getDoc(approvedRef);
+    const status = approvedSnap.exists() ? approvedSnap.data().status : 'pending';
+
+    if (status !== 'approved') {
+      redirectTo('./waiting.html');
+      return;
+    }
+
+    document.documentElement.classList.remove('auth-gate-pending');
+  } catch (error) {
+    redirectTo('./waiting.html');
+  }
+});
+</script>
 <title>MYEShim – Zjevení</title>
 <meta name="description" content="MYEShim – mobilní studijní aplikace pro knihu Zjevení">
 <meta property="og:title" content="MYEShim – Zjevení">

@@ -1,8 +1,42 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /approvedUsers/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['status'])
+        && request.resource.data.status == 'pending';
+      allow update, delete: if isAdmin();
+    }
+
+    match /pendingUsers/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read, update: if isAdmin();
+    }
+
+    match /preApprovedEmails/{email} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /admins/{userId} {
+      allow read: if isAdmin();
+    }
+
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId
+        && isApproved();
+    }
+
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isApproved() {
+      return exists(/databases/$(database)/documents/approvedUsers/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/approvedUsers/$(request.auth.uid)).data.status == 'approved';
     }
   }
 }
