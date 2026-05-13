@@ -58,6 +58,7 @@ async function initFcmForApprovedUser(user) {
   }
   try {
     const messaging = getMessaging(app);
+    // Register foreground message handler to keep FCM subscription active and enable token refresh awareness
     onMessage(messaging, () => {});
     if (Notification.permission !== 'granted') return;
     const swReg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './firebase-cloud-messaging-push-scope' });
