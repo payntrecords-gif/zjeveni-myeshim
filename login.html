@@ -93,17 +93,20 @@
           used: false
         });
         const link = 'https://payntrecords-gif.github.io/zjeveni-myeshim/?token=' + token;
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          to_email: email,
-          to_name: data.name || '',
-          message: 'Tvůj přihlašovací odkaz (platnost 48 hodin):',
-          code: link
-        });
-        successEl.textContent = 'Poslali jsme ti přihlašovací odkaz na e-mail. Klikni na něj.';
-        form.reset();
+        try {
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            to_email: email,
+            to_name: data.name || '',
+            message: 'Tvůj přihlašovací odkaz (platnost 48 hodin):',
+            code: link
+          });
+        } catch (emailErr) {
+          console.warn('EmailJS failed, redirecting directly:', emailErr);
+        }
+        window.location.href = link;
       } catch (error) {
         console.error(error);
-        errorEl.textContent = 'Nepodařilo se odeslat e-mail. Zkus to prosím znovu.';
+        errorEl.textContent = 'Přihlášení se nezdařilo. Zkus to prosím znovu.';
       } finally {
         submitBtn.disabled = false;
       }
