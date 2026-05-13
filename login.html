@@ -59,7 +59,7 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) return;
-      try { await routeByStatus(user.uid); } catch (_) {}
+      try { await routeByStatus(user.uid); } catch (error) { console.warn('Routing by approval status failed:', error); }
     });
 
     form.addEventListener('submit', async (event) => {
@@ -67,7 +67,7 @@
       errorEl.textContent = '';
       submitBtn.disabled = true;
       try {
-        const email = document.getElementById('email').value.trim();
+        const email = document.getElementById('email').value.trim().toLowerCase();
         const password = document.getElementById('password').value;
         const result = await signInWithEmailAndPassword(auth, email, password);
         await routeByStatus(result.user.uid);
