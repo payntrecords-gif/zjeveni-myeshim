@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myeshim-v48-20260513';
+const CACHE_NAME = 'myeshim-v49-20260513';
 const APP_ROOT_URL = new URL('./', self.location.href).href;
 const APP_SHELL = [
   './',
