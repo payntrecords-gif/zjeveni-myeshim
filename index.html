@@ -2555,13 +2555,7 @@ body.dark .mm-l4-wrong-token{
     var btn = document.getElementById('iov-continue-btn');
     if (!btn) return;
     btn.addEventListener('click', function() {
-      var overlay = document.getElementById('install-overlay');
-      if (overlay) {
-        overlay.style.display = 'none';
-        overlay.classList.remove('visible');
-      }
-      // Odstraň browser-mode třídu, aby se zobrazila hlavní aplikace
-      document.documentElement.classList.remove('browser-mode');
+      window.location.href = './login.html';
     });
   });
 })();
