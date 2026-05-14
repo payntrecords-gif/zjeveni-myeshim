@@ -6351,10 +6351,10 @@ const FCM_SENDER_ID = '360259005980';
     if (!auth) return;
     closeProfile();
     auth.signOut().then(function() {
-      window.location.replace('./register.html');
+       window.location.replace('./login.html');
     }).catch(function(err) {
       console.warn('Sign out error:', err && err.message ? err.message : err);
-      window.location.replace('./register.html');
+       window.location.replace('./login.html');
     });
   };
 
