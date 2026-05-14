@@ -1,14 +1,8 @@
-const CACHE_NAME = 'myeshim-v50-20260514';
+const CACHE_NAME = 'myeshim-v51-20260514';
 const APP_ROOT_URL = new URL('./', self.location.href).href;
 const APP_SHELL = [
   './',
   './index.html',
-  './login.html',
-  './register.html',
-  './waiting.html',
-  './admin-login.html',
-  './admin.html',
-  './import-members.html',
   './manifest.webmanifest',
   './favicon-16.png',
   './favicon-32.png',
