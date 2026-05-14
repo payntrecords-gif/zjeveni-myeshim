@@ -6263,7 +6263,7 @@ const FCM_SENDER_ID = '360259005980';
   document.addEventListener('DOMContentLoaded', function() {
     var nativeBtn = document.getElementById('iov-native-btn');
     var overlayContainer = document.getElementById('install-overlay');
-    var dismissBtn = document.getElementById('iov-continue-btn');
+    var dismissBtn = overlayContainer ? overlayContainer.querySelector('#iov-continue-btn') : null;
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
         if (typeof window.openInstallInPreferredBrowser === 'function' && window.openInstallInPreferredBrowser()) {
