@@ -6335,7 +6335,12 @@ const FCM_SENDER_ID = '360259005980';
   window.authSignOut = function() {
     if (!auth) return;
     closeProfile();
-    auth.signOut();
+    auth.signOut().then(function() {
+      window.location.replace('./login.html');
+    }).catch(function(err) {
+      console.warn('Sign out error:', err && err.message ? err.message : err);
+      window.location.replace('./login.html');
+    });
   };
 
   // ── Profile Panel ──

@@ -32,7 +32,7 @@
 
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
     import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 
@@ -60,31 +60,66 @@
     const errorEl = document.getElementById('error');
     const submitBtn = document.getElementById('submit-btn');
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try {
-        const adminSnap = await getDoc(doc(db, 'admins', user.uid));
-        if (adminSnap.exists()) {
-          window.location.replace('./admin.html');
+    // If already signed in as admin, redirect directly.
+    let authStateResolved = false;
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (authStateResolved) return;
+      if (user) {
+        try {
+          const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+          if (adminSnap.exists()) {
+            authStateResolved = true;
+            unsubscribeAuth();
+            window.location.replace('./admin.html');
+            return;
+          }
+        } catch (e) {
+          // Ignore; let the user log in normally.
         }
-      } catch (error) {
-        console.warn('Admin check failed:', error);
       }
+      authStateResolved = true;
+      unsubscribeAuth();
     });
 
+    let isSubmitting = false;
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (isSubmitting) return;
+      isSubmitting = true;
       errorEl.textContent = '';
       submitBtn.disabled = true;
       try {
         const email = document.getElementById('email').value.trim().toLowerCase();
         const password = document.getElementById('password').value;
-        await signInWithEmailAndPassword(auth, email, password);
+
+        // Sign out any residual session before signing in to avoid stale-state errors.
+        if (auth.currentUser) {
+          await signOut(auth).catch(() => {});
+        }
+
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        const adminSnap = await getDoc(doc(db, 'admins', credential.user.uid));
+        if (!adminSnap.exists()) {
+          await signOut(auth).catch(() => {});
+          errorEl.textContent = 'Přihlášení se nezdařilo. Účet nemá administrátorská práva.';
+          return;
+        }
         window.location.replace('./admin.html');
       } catch (error) {
-        errorEl.textContent = 'Přihlášení se nezdařilo. Zkontrolujte e-mail a heslo.';
+        let msg = 'Přihlášení se nezdařilo. Zkontrolujte e-mail a heslo.';
+        if (error?.code === 'auth/invalid-credential' || error?.code === 'auth/user-not-found' || error?.code === 'auth/wrong-password') {
+          msg = 'Neplatný e-mail nebo heslo.';
+        } else if (error?.code === 'auth/too-many-requests') {
+          msg = 'Příliš mnoho pokusů. Zkus to prosím znovu za chvíli.';
+        } else if (error?.code === 'auth/network-request-failed') {
+          msg = 'Nepodařilo se připojit k serveru. Zkontroluj internetové připojení.';
+        } else if (error?.code === 'auth/user-disabled') {
+          msg = 'Tento účet byl zablokován.';
+        }
+        errorEl.textContent = msg;
       } finally {
         submitBtn.disabled = false;
+        isSubmitting = false;
       }
     });
   </script>

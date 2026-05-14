@@ -81,6 +81,8 @@
     document.getElementById('sign-out-pending').addEventListener('click', (e) => { e.preventDefault(); doSignOut(); });
     document.getElementById('sign-out-reapply').addEventListener('click', (e) => { e.preventDefault(); doSignOut(); });
 
+    let reapplyListenerAdded = false;
+
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         // Not signed in – static waiting card is already visible (default state after new registration)
@@ -121,47 +123,50 @@
         document.getElementById('card-waiting').classList.add('hidden');
         document.getElementById('card-reapply').classList.remove('hidden');
 
-        document.getElementById('reapply-form').addEventListener('submit', async (event) => {
-          event.preventDefault();
-          const errorEl = document.getElementById('reapply-error');
-          const successEl = document.getElementById('reapply-success');
-          const reapplyBtn = document.getElementById('reapply-btn');
-          errorEl.textContent = '';
-          reapplyBtn.disabled = true;
+        if (!reapplyListenerAdded) {
+          reapplyListenerAdded = true;
+          document.getElementById('reapply-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const errorEl = document.getElementById('reapply-error');
+            const successEl = document.getElementById('reapply-success');
+            const reapplyBtn = document.getElementById('reapply-btn');
+            errorEl.textContent = '';
+            reapplyBtn.disabled = true;
 
-          const name = document.getElementById('reapply-name').value.trim();
-          const poslani = document.getElementById('reapply-poslani').value.trim();
-          const uid = auth.currentUser?.uid;
+            const name = document.getElementById('reapply-name').value.trim();
+            const poslani = document.getElementById('reapply-poslani').value.trim();
+            const uid = auth.currentUser?.uid;
 
-          if (!uid) {
-            errorEl.textContent = 'Nejsi přihlášen. Přihlas se znovu.';
-            reapplyBtn.disabled = false;
-            return;
-          }
-
-          try {
-            const existingSnap = await getDoc(doc(db, 'pendingUsers', uid));
-            const updateData = {
-              uid,
-              name,
-              email: auth.currentUser.email || '',
-              poslani,
-              status: 'pending',
-              updatedAt: serverTimestamp()
-            };
-            if (!existingSnap.exists()) {
-              updateData.createdAt = serverTimestamp();
+            if (!uid) {
+              errorEl.textContent = 'Nejsi přihlášen. Přihlas se znovu.';
+              reapplyBtn.disabled = false;
+              return;
             }
-            console.log('Reapply: setting pendingUsers status=pending for uid:', uid, 'email:', auth.currentUser.email);
-            await setDoc(doc(db, 'pendingUsers', uid), updateData, { merge: true });
-            document.getElementById('reapply-form').classList.add('hidden');
-            successEl.classList.remove('hidden');
-          } catch (error) {
-            console.error('Reapply failed:', { uid, error });
-            errorEl.textContent = 'Žádost se nepodařilo odeslat. Zkus to znovu.';
-            reapplyBtn.disabled = false;
-          }
-        });
+
+            try {
+              const existingSnap = await getDoc(doc(db, 'pendingUsers', uid));
+              const updateData = {
+                uid,
+                name,
+                email: auth.currentUser.email || '',
+                poslani,
+                status: 'pending',
+                updatedAt: serverTimestamp()
+              };
+              if (!existingSnap.exists()) {
+                updateData.createdAt = serverTimestamp();
+              }
+              console.log('Reapply: setting pendingUsers status=pending for uid:', uid, 'email:', auth.currentUser.email);
+              await setDoc(doc(db, 'pendingUsers', uid), updateData, { merge: true });
+              document.getElementById('reapply-form').classList.add('hidden');
+              successEl.classList.remove('hidden');
+            } catch (error) {
+              console.error('Reapply failed:', { uid, error });
+              errorEl.textContent = 'Žádost se nepodařilo odeslat. Zkus to znovu.';
+              reapplyBtn.disabled = false;
+            }
+          });
+        }
       } catch (error) {
         console.error('Waiting page status check failed:', error);
         // Show default waiting card on error
