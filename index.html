@@ -162,6 +162,7 @@ onAuthStateChanged(auth, async (user) => {
         setApprovedCache(user.uid);
       } else {
         clearApprovedCache();
+        redirectTo('./waiting.html');
       }
     }).catch(e => console.warn('Background approved check failed:', e));
     return;
