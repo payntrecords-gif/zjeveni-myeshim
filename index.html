@@ -2308,11 +2308,21 @@ body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba
 .mm-wrong-flash{animation:mm-wrong .45s ease}
 .mm-shake{animation:mm-shake .34s ease}
 .mm-diff-ok{color:#2a7d37;font-weight:700}
-.mm-diff-err{color:#c0392b;font-weight:700;text-decoration:underline wavy #e74c3c}
+.mm-diff-err{color:#c0392b;font-weight:700}
 body.dark .mm-diff-ok{color:#4aba6c}
 body.dark .mm-diff-err{color:#ff6b6b}
+.mm-diff-hint{font-size:.8em;font-weight:700;color:#b52a2a;display:inline-block;margin-left:3px;padding:0 3px;background:rgba(192,57,43,.09);border-radius:4px;white-space:nowrap}
+body.dark .mm-diff-hint{color:#ff9090;background:rgba(255,107,107,.12)}
+.mm-diff-missing{color:#c0392b;font-weight:700;font-style:italic;opacity:.85}
+body.dark .mm-diff-missing{color:#ff6b6b}
+.mm-diff-extra{color:#c0392b;font-weight:700;text-decoration:line-through;opacity:.75}
+body.dark .mm-diff-extra{color:#ff6b6b}
 .mm-diff-legend{font-size:.78rem;color:var(--sub);margin-top:8px;text-align:center}
-.mm-diff-wrap{line-height:1.8;font-size:1rem}
+.mm-diff-wrap{line-height:2;font-size:1rem;word-break:break-word}
+.mm-result-heading{font-size:1rem;font-weight:900;color:var(--text);margin-bottom:10px}
+.mm-result-label{font-size:.75rem;font-weight:900;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px}
+.mm-score-row{font-size:.92rem;font-weight:700;color:var(--sub);margin:8px 0 4px;text-align:center}
+.mm-feedback-row{font-size:.88rem;color:var(--sub);text-align:center;margin:4px 0 8px;padding:0 4px;line-height:1.5}
 .mm-word-bounce{display:inline-block;animation:mm-bounce .35s ease}
 .mm-success-mark{font-size:1.25rem;margin-left:6px;display:inline-block;animation:mm-bounce .38s ease}
 #mm-confetti{
@@ -3255,7 +3265,7 @@ window.shareCurrentVerse=async function(){
     mm.unlocked = Math.min(5, (mm.progress.level || 0) + 1);
     mm.completedThisView = true;
     const isLast = mm.level === 5;
-    setMessage(isLast ? '🎉 Skvělá práce! Máš paměť jako slon! 🏆' : pick(MESSAGES));
+    setMessage(isLast ? '🎉 Výborně! Verš znáš zpaměti. 🏆' : pick(MESSAGES));
     setButtons(true);
     renderLevelGrid();
   }
@@ -3383,12 +3393,31 @@ window.shareCurrentVerse=async function(){
     const chip = chips[levelIndex];
     if (chip) chip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
-  function wordDiff(input, original){
-    const inWords = (input || '').trim().toLowerCase().split(/\s+/);
-    const origWords = (original || '').trim().split(/\s+/);
-    return origWords.map(function(w, i){
-      return { word: w, ok: (inWords[i] || '').replace(/[^a-záčďéěíňóřšťůúýž]/gi,'') === w.toLowerCase().replace(/[^a-záčďéěíňóřšťůúýž]/gi,'') };
-    });
+  function normalizeWord5(w) {
+    // Lowercase + strip leading/trailing non-letter characters; preserve diacritics
+    return (w || '').toLowerCase()
+      .replace(/^[^a-záčďéěíňóřšťůúýž]+/, '')
+      .replace(/[^a-záčďéěíňóřšťůúýž]+$/, '');
+  }
+  function wordDiff(input, original) {
+    // Align user words with original; detect missing, extra and wrong words
+    var inWords = (input || '').trim().split(/\s+/).filter(Boolean);
+    var origWords = (original || '').trim().split(/\s+/).filter(Boolean);
+    var result = [];
+    var len = Math.max(inWords.length, origWords.length);
+    for (var i = 0; i < len; i++) {
+      var orig = origWords[i];
+      var typed = inWords[i];
+      if (orig !== undefined && typed !== undefined) {
+        var ok = normalizeWord5(orig) === normalizeWord5(typed);
+        result.push({ type: ok ? 'ok' : 'wrong', typed: typed, expected: orig, ok: ok, word: orig });
+      } else if (orig !== undefined) {
+        result.push({ type: 'missing', expected: orig, ok: false, word: orig });
+      } else {
+        result.push({ type: 'extra', typed: typed, ok: false, word: typed });
+      }
+    }
+    return result;
   }
   function level4WordParts(word){
     const chars = Array.from((word || '').trim());
@@ -3787,28 +3816,41 @@ window.shareCurrentVerse=async function(){
             '<button type="button" class="mm-btn" data-action="check-verse" style="flex:1;min-width:0">Zkontrolovat</button>' +
           '</div>';
         setTimeout(function(){ const inp = document.getElementById('mm-master-input'); if (inp){ inp.focus(); const len = inp.value.length; inp.setSelectionRange(len,len); } }, 80);
-      } else if (q5.state === 'checked'){
+      } else if (q5.state === 'checked') {
         const diff = wordDiff(q5.typed, mm.verse.t);
+        const origCount = diff.filter(function(d){ return d.type !== 'extra'; }).length;
         const okCount = diff.filter(function(d){ return d.ok; }).length;
-        const score = diff.length > 0 ? Math.round(okCount / diff.length * 100) : 0;
-        const diffHtml = diff.map(function(d){
-          return '<span class="' + (d.ok ? 'mm-diff-ok' : 'mm-diff-err') + '" style="color:' + (d.ok ? '#22c55e' : '#ef4444') + '">' + esc(d.word) + '<sup>' + (d.ok ? '✓' : '✗') + '</sup></span>';
+        const score = origCount > 0 ? Math.round(okCount / origCount * 100) : 0;
+        const diffHtml = diff.map(function(d) {
+          if (d.type === 'ok') {
+            return '<span class="mm-diff-ok">' + esc(d.typed) + '<sup>✓</sup></span>';
+          } else if (d.type === 'wrong') {
+            return '<span class="mm-diff-err">' + esc(d.typed) + '<sup>✗</sup><span class="mm-diff-hint">\u2192\u202f' + esc(d.expected) + '</span></span>';
+          } else if (d.type === 'missing') {
+            return '<span class="mm-diff-missing">[' + esc(d.expected) + ']</span>';
+          } else {
+            return '<span class="mm-diff-extra">' + esc(d.typed) + '<sup>+</sup></span>';
+          }
         }).join(' ');
+        var feedbackMsg = score >= 90
+          ? 'Výborně. Už jsi velmi blízko přesnému znění.'
+          : score >= 60
+            ? 'Dobrá práce. Podívej se na chyby a zkus to znovu.'
+            : score >= 30
+              ? 'Dnes to ještě nebylo ono, ale zlepšuješ se.'
+              : 'Ještě to chce dopilovat. Porovnej svou odpověď s originálem a zkus to znovu.';
         el.content.innerHTML =
+          '<div class="mm-result-heading">Vyhodnocení odpovědi</div>' +
+          '<div class="mm-result-label">Tvoje odpověď</div>' +
           '<div class="mm-verse mm-diff-wrap">' + diffHtml + '</div>' +
-          '<div class="mm-diff-legend">Skóre: <strong>' + score + '%</strong></div>' +
-          '<div style="font-size:.82rem;font-weight:900;color:var(--sub);margin:10px 0 6px">Originál:</div>' +
+          '<div class="mm-score-row">Skóre: <strong>' + score + '\u202f%</strong></div>' +
+          '<div class="mm-feedback-row">' + esc(feedbackMsg) + '</div>' +
+          '<div class="mm-result-label">Originál</div>' +
           '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
-        var footerHtml = '';
-        if (score < 60){
-          footerHtml =
-            '<div style="text-align:center;padding:6px 0 4px;font-size:.88rem;color:var(--sub)">Žnes se to nevlíze, ale zítra tě nezastaví nic! 💪</div>' +
-            '<button type="button" class="mm-btn mm-btn-ghost" data-action="restart-from-level1" style="width:100%;margin-top:4px">Zkusit znovu</button>';
-        }
-        if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end;margin-bottom:6px">' + buildPeekButton() + '</div>' + footerHtml;
-        if (el.next){ el.next.disabled = false; el.next.textContent = 'Další'; el.next.classList.add('mm-next-ready'); }
+        if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end;margin-bottom:6px">' + buildPeekButton() + '</div>';
+        if (el.next) { el.next.disabled = false; el.next.textContent = 'Další'; el.next.classList.add('mm-next-ready'); }
       }
-      setMessage('Úroveň 5: Napiš verš z paměti a zkontroluj se.');
+      if (q5.state !== 'checked') setMessage('Úroveň 5: Napiš verš z paměti a zkontroluj se.');
       if (el.next && q5.state !== 'checked' && (mm.progress.level || 0) < mm.level){ el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
     });
   }
@@ -4016,8 +4058,9 @@ window.shareCurrentVerse=async function(){
           mm.quiz.typed = inp.value;
           mm.quiz.state = 'checked';
           const diff = wordDiff(mm.quiz.typed, mm.verse.t);
+          const origCount = diff.filter(function(d){ return d.type !== 'extra'; }).length;
           const okCount = diff.filter(function(d){ return d.ok; }).length;
-          const score = diff.length > 0 ? Math.round(okCount / diff.length * 100) : 0;
+          const score = origCount > 0 ? Math.round(okCount / origCount * 100) : 0;
           if (score >= 60){ flash(true); if (navigator && navigator.vibrate) navigator.vibrate([12,30,12]); launchMemorizeConfetti(); completeLevel(); }
           else { flash(false); }
           renderLevel();
