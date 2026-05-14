@@ -149,10 +149,14 @@ h1{
   }
 
   // Zachyť Android install prompt co nejdřív
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    deferredPrompt = e;
-  });
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  // Automaticky spusť prompt hned jak je dostupný
+  if(!isIOS && !isTelegram){
+    e.prompt();
+  }
+});
 
   document.addEventListener('DOMContentLoaded', function(){
     var mainBtn = document.getElementById('main-btn');
