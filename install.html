@@ -1,13 +1,79 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="refresh" content="0;url=./index.html">
-<title>MYEShim – přesměrování</title>
-<script>window.location.replace('./index.html');</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>MYEShim – Instalace</title>
+  <style>
+    :root{--bg:#f4eff9;--card:#fff;--text:#1a1210;--sub:#6b5e7a;--accent:#7b3ef4;--pink:#e5458e}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;background:linear-gradient(160deg,#f0e8ff,#fce8f3);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:24px 16px 48px}
+    .wrap{max-width:440px;margin:0 auto;text-align:center}
+    .logo{width:72px;height:72px;border-radius:20px;margin:0 auto 12px;display:block}
+    h2{font-size:1.5rem;font-weight:900;margin:0 0 4px;color:var(--accent)}
+    .tagline{color:var(--sub);font-size:.95rem;margin:0 0 28px}
+    .card{background:var(--card);border-radius:20px;padding:20px;text-align:left;box-shadow:0 2px 16px rgba(0,0,0,.08);margin-bottom:16px}
+    .card h3{font-size:1rem;font-weight:800;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+    .step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0eaf7}
+    .step:last-child{border-bottom:none}
+    .step-icon{font-size:1.3rem;width:28px;text-align:center;flex-shrink:0;margin-top:2px}
+    .step-text{font-size:.9rem;line-height:1.5;color:#3a2d4a}
+    .step-text strong{color:var(--text)}
+    .note{font-size:.82rem;color:var(--sub);text-align:center;margin-top:4px;line-height:1.5}
+    .btn-login{display:block;margin-top:20px;padding:14px;background:linear-gradient(135deg,#7b3ef4,#e5458e);color:#fff;font-weight:900;font-size:1rem;border-radius:14px;text-align:center;text-decoration:none;border:none;width:100%;cursor:pointer}
+    .skip{display:block;margin-top:12px;text-align:center;color:var(--sub);font-size:.85rem;text-decoration:none}
+  </style>
 </head>
 <body>
-<p>Přesměrování… <a href="./index.html">Otevřít MYEShim</a></p>
+  <div class="wrap">
+    <img class="logo" src="./icon-192.png" alt="MYEShim">
+    <h2>MYEShim</h2>
+    <p class="tagline">Jeden krok k označování</p>
+
+    <div class="card">
+      <h3>📲 Přidej aplikaci na plochu</h3>
+      <p style="font-size:.9rem;color:var(--sub);margin:0 0 12px;line-height:1.5">
+        MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.
+      </p>
+
+      <div class="step">
+        <div class="step-icon">🤖</div>
+        <div class="step-text"><strong>Android (Chrome):</strong> klepni na ⋮ v pravém horním rohu a zvol „Přidat na plochu" nebo „Instalovat aplikaci".</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">🍎</div>
+        <div class="step-text"><strong>iPhone / iPad (Safari):</strong> klepni na <span style="font-size:1rem">⎙</span> (Sdílet) ve spodní liště a zvol „Přidat na plochu".</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">✈️</div>
+        <div class="step-text"><strong>Telegram / jiný prohlížeč:</strong> otevři tento odkaz v Chrome nebo Safari — instalace z interního prohlížeče nefunguje.</div>
+      </div>
+
+      <p class="note">Po instalaci otevři aplikaci ikonou z plochy a přihlas se.</p>
+    </div>
+
+    <a class="btn-login" href="./login.html" onclick="markInstallSeen()">
+      Přejít na přihlášení →
+    </a>
+    <a class="skip" href="./login.html" onclick="markInstallSeen()">Přeskočit</a>
+  </div>
+
+  <script>
+    function markInstallSeen() {
+      try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
+    }
+
+    // If already standalone — mark seen and go straight to login
+    var isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.navigator.standalone === true ||
+      document.referrer.startsWith('android-app://');
+
+    if (isStandalone) {
+      markInstallSeen();
+      window.location.replace('./login.html');
+    }
+  </script>
 </body>
 </html>
