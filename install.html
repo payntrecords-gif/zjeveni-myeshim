@@ -1,79 +1,164 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>MYEShim – Instalace</title>
-  <style>
-    :root{--bg:#f4eff9;--card:#fff;--text:#1a1210;--sub:#6b5e7a;--accent:#7b3ef4;--pink:#e5458e}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100dvh;background:linear-gradient(160deg,#f0e8ff,#fce8f3);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:24px 16px 48px}
-    .wrap{max-width:440px;margin:0 auto;text-align:center}
-    .logo{width:72px;height:72px;border-radius:20px;margin:0 auto 12px;display:block}
-    h2{font-size:1.5rem;font-weight:900;margin:0 0 4px;color:var(--accent)}
-    .tagline{color:var(--sub);font-size:.95rem;margin:0 0 28px}
-    .card{background:var(--card);border-radius:20px;padding:20px;text-align:left;box-shadow:0 2px 16px rgba(0,0,0,.08);margin-bottom:16px}
-    .card h3{font-size:1rem;font-weight:800;margin:0 0 12px;display:flex;align-items:center;gap:8px}
-    .step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0eaf7}
-    .step:last-child{border-bottom:none}
-    .step-icon{font-size:1.3rem;width:28px;text-align:center;flex-shrink:0;margin-top:2px}
-    .step-text{font-size:.9rem;line-height:1.5;color:#3a2d4a}
-    .step-text strong{color:var(--text)}
-    .note{font-size:.82rem;color:var(--sub);text-align:center;margin-top:4px;line-height:1.5}
-    .btn-login{display:block;margin-top:20px;padding:14px;background:linear-gradient(135deg,#7b3ef4,#e5458e);color:#fff;font-weight:900;font-size:1rem;border-radius:14px;text-align:center;text-decoration:none;border:none;width:100%;cursor:pointer}
-    .skip{display:block;margin-top:12px;text-align:center;color:var(--sub);font-size:.85rem;text-decoration:none}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MYEShim – Instalace</title>
+<meta name="theme-color" content="#ffffff">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  min-height:100dvh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:40px 24px 56px;
+  background:radial-gradient(ellipse 100% 55% at 50% 0%,rgba(229,69,142,.14) 0%,transparent 65%),
+             radial-gradient(ellipse 70% 45% at 90% 100%,rgba(123,62,244,.08) 0%,transparent 60%),
+             #f8f3f7;
+}
+.logo-wrap{position:relative;margin-bottom:24px}
+.logo-wrap::before{
+  content:'';position:absolute;inset:-20px;
+  background:radial-gradient(circle,rgba(229,69,142,.18) 0%,transparent 70%);
+  border-radius:50%;animation:pulse 3s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.1);opacity:1}}
+.logo-wrap img{width:80px;height:80px;border-radius:24px;box-shadow:0 18px 44px rgba(229,69,142,.28);position:relative;display:block}
+h1{
+  font-size:2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:8px;text-align:center;
+  background:linear-gradient(135deg,#7b3ef4 0%,#e5458e 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.tagline{font-size:.97rem;color:#7a6a76;text-align:center;line-height:1.5;margin-bottom:32px;max-width:260px}
+.card{
+  background:#fff;border:1px solid rgba(229,69,142,.18);border-radius:24px;
+  padding:24px 22px;width:100%;max-width:368px;
+  box-shadow:0 16px 48px rgba(180,80,140,.12);
+}
+.card-title{font-size:1.05rem;font-weight:800;margin-bottom:6px;color:#1c1820}
+.card-sub{font-size:.88rem;color:#7a6a76;margin-bottom:20px;line-height:1.45}
+
+/* Hlavní tlačítko */
+#main-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:15px 20px;margin-bottom:12px;
+  background:linear-gradient(135deg,#f05ca2,#de4089);border:none;border-radius:14px;
+  font:inherit;font-size:1rem;font-weight:900;color:#fff;cursor:pointer;
+  box-shadow:0 8px 22px rgba(229,69,142,.32);
+  transition:transform .14s,box-shadow .14s;
+}
+#main-btn:active{transform:scale(.98)}
+#main-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;flex-shrink:0}
+
+/* iOS instrukce */
+#ios-steps{display:none;background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.ios-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.87rem;color:#5e4f5b;line-height:1.4}
+.ios-step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
+.ios-step-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+
+/* Přeskočit odkaz */
+#skip-btn{
+  display:block;width:100%;padding:12px;
+  background:transparent;border:1.5px solid rgba(229,69,142,.3);border-radius:14px;
+  font:inherit;font-size:.9rem;font-weight:800;color:#c53580;cursor:pointer;text-align:center;
+}
+#skip-btn:active{background:rgba(229,69,142,.06)}
+.note{font-size:.75rem;color:#9a7fa0;text-align:center;margin-top:14px;line-height:1.4}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <img class="logo" src="./icon-192.png" alt="MYEShim">
-    <h2>MYEShim</h2>
-    <p class="tagline">Jeden krok k označování</p>
 
-    <div class="card">
-      <h3>📲 Přidej aplikaci na plochu</h3>
-      <p style="font-size:.9rem;color:var(--sub);margin:0 0 12px;line-height:1.5">
-        MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.
-      </p>
+<div class="logo-wrap">
+  <img src="./icon-512.png" alt="MYEShim">
+</div>
+<h1>MYEShim</h1>
+<p class="tagline">Nainstaluj aplikaci a otevři ji z plochy telefonu</p>
 
-      <div class="step">
-        <div class="step-icon">🤖</div>
-        <div class="step-text"><strong>Android (Chrome):</strong> klepni na ⋮ v pravém horním rohu a zvol „Přidat na plochu" nebo „Instalovat aplikaci".</div>
-      </div>
-      <div class="step">
-        <div class="step-icon">🍎</div>
-        <div class="step-text"><strong>iPhone / iPad (Safari):</strong> klepni na <span style="font-size:1rem">⎙</span> (Sdílet) ve spodní liště a zvol „Přidat na plochu".</div>
-      </div>
-      <div class="step">
-        <div class="step-icon">✈️</div>
-        <div class="step-text"><strong>Telegram / jiný prohlížeč:</strong> otevři tento odkaz v Chrome nebo Safari — instalace z interního prohlížeče nefunguje.</div>
-      </div>
+<div class="card">
+  <div class="card-title" id="card-title">Přidat na plochu</div>
+  <div class="card-sub" id="card-sub">Pro nejlepší zážitek nainstaluj MYEShim jako aplikaci.</div>
 
-      <p class="note">Po instalaci otevři aplikaci ikonou z plochy a přihlas se.</p>
-    </div>
+  <button id="main-btn">
+    <svg viewBox="0 0 24 24"><path d="M12 3v13M5 10l7 7 7-7"/><path d="M3 19h18" stroke-linecap="round"/></svg>
+    <span id="btn-label">Nainstalovat aplikaci</span>
+  </button>
 
-    <a class="btn-login" href="./login.html" onclick="markInstallSeen()">
-      Přejít na přihlášení →
-    </a>
-    <a class="skip" href="./login.html" onclick="markInstallSeen()">Přeskočit</a>
+  <!-- iOS Safari instrukce -->
+  <div id="ios-steps">
+    <div class="ios-step"><span class="ios-step-icon">1️⃣</span><span>Klepni na tlačítko <strong>Sdílet</strong> (čtverec se šipkou) dole v Safari</span></div>
+    <div class="ios-step"><span class="ios-step-icon">2️⃣</span><span>Vyber <strong>„Přidat na plochu"</strong></span></div>
+    <div class="ios-step"><span class="ios-step-icon">3️⃣</span><span>Potvrď klepnutím na <strong>„Přidat"</strong></span></div>
   </div>
 
-  <script>
-    function markInstallSeen() {
-      try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
-    }
+  <button id="skip-btn">Přejít do aplikace bez instalace</button>
+  <p class="note" id="install-note">Aplikace funguje nejlépe jako nainstalovaná PWA.</p>
+</div>
 
-    // If already standalone — mark seen and go straight to login
-    var isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.matchMedia('(display-mode: minimal-ui)').matches ||
-      window.navigator.standalone === true ||
-      document.referrer.startsWith('android-app://');
+<script>
+(function(){
+  var deferredPrompt = null;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-    if (isStandalone) {
-      markInstallSeen();
-      window.location.replace('./login.html');
+  // Zachyť install prompt (Android/Chrome)
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  // Pokud už běží jako standalone → rovnou do appky
+  if(isStandalone){
+    window.location.replace('./index.html');
+    return;
+  }
+
+  var mainBtn = document.getElementById('main-btn');
+  var btnLabel = document.getElementById('btn-label');
+  var iosSteps = document.getElementById('ios-steps');
+  var cardTitle = document.getElementById('card-title');
+  var cardSub = document.getElementById('card-sub');
+  var skipBtn = document.getElementById('skip-btn');
+  var installNote = document.getElementById('install-note');
+
+  // iOS Safari
+  if(isIOS){
+    cardTitle.textContent = 'Přidat na plochu (iOS)';
+    cardSub.textContent = 'V Safari klepni na tlačítko Sdílet a vyber „Přidat na plochu".';
+    btnLabel.textContent = 'Zobrazit postup';
+    mainBtn.addEventListener('click', function(){
+      iosSteps.style.display = 'block';
+      mainBtn.style.display = 'none';
+    });
+    return;
+  }
+
+  // Android/Chrome – čeká na beforeinstallprompt
+  mainBtn.addEventListener('click', function(){
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(result){
+        deferredPrompt = null;
+        if(result.outcome === 'accepted'){
+          // Po instalaci počkej a přesměruj
+          setTimeout(function(){ window.location.replace('./index.html'); }, 1500);
+        }
+      });
+    } else {
+      // prompt ještě není připravený nebo prohlížeč nepodporuje
+      installNote.textContent = 'Přidej stránku ručně přes menu prohlížeče → „Přidat na plochu".';
+      installNote.style.color = '#c53580';
     }
-  </script>
+  });
+
+  // Přeskočit → jdi do index.html (auth gate přesměruje na login pokud není přihlášen)
+  skipBtn.addEventListener('click', function(){
+    window.location.replace('./index.html');
+  });
+
+  // Pokud byl nainstalován odjinud
+  window.addEventListener('appinstalled', function(){
+    setTimeout(function(){ window.location.replace('./index.html'); }, 800);
+  });
+})();
+</script>
 </body>
 </html>
