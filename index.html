@@ -3396,8 +3396,8 @@ window.shareCurrentVerse=async function(){
   function normalizeWord5(w) {
     // Lowercase + strip leading/trailing non-letter characters; preserve diacritics
     return (w || '').toLowerCase()
-      .replace(/^[^a-záčďéěíňóřšťůúýž]+/i, '')
-      .replace(/[^a-záčďéěíňóřšťůúýž]+$/i, '');
+      .replace(/^[^a-záčďéěíňóřšťůúýž]+/, '')
+      .replace(/[^a-záčďéěíňóřšťůúýž]+$/, '');
   }
   function wordDiff(input, original) {
     // Align user words with original; detect missing, extra and wrong words
