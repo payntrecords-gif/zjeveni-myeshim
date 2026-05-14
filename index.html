@@ -8,16 +8,11 @@
 <script id="standalone-gate-script">
 (function(){
   try{
-    var isStandalone = false;
-    if(window.matchMedia){
-      isStandalone = !!window.matchMedia('(display-mode: standalone)').matches;
-    }
-    if(!isStandalone && window.navigator && window.navigator.standalone === true){
-      isStandalone = true;
-    }
-    if(!isStandalone && typeof document.referrer === 'string' && document.referrer.startsWith('android-app://')){
-      isStandalone = true;
-    }
+    var isStandalone = (
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      (window.navigator && window.navigator.standalone === true) ||
+      document.referrer.startsWith('android-app://')
+    );
     document.documentElement.classList.add(isStandalone ? 'standalone-mode' : 'browser-mode');
   }catch(e){
     document.documentElement.classList.add('browser-mode');
