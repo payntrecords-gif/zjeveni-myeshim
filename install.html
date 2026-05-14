@@ -54,14 +54,6 @@ h1{
 .step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
 .step-icon{font-size:1.15rem;flex-shrink:0;margin-top:1px;min-width:24px}
 .step strong{color:#1c1820}
-
-#skip-btn{
-  display:block;width:100%;padding:12px;
-  background:transparent;border:1.5px solid rgba(229,69,142,.3);border-radius:14px;
-  font:inherit;font-size:.9rem;font-weight:800;color:#c53580;cursor:pointer;text-align:center;
-  transition:background .14s;
-}
-#skip-btn:active{background:rgba(229,69,142,.06)}
 .note{font-size:.75rem;color:#9a7fa0;text-align:center;margin-top:12px;line-height:1.4}
 </style>
 </head>
@@ -97,7 +89,6 @@ h1{
     </div>
   </div>
 
-  <button id="skip-btn">Přejít do aplikace bez instalace</button>
   <p class="note" id="install-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
 </div>
 
@@ -122,7 +113,6 @@ h1{
   window.addEventListener('DOMContentLoaded', function(){
     var mainBtn = document.getElementById('main-btn');
     var btnLabel = document.getElementById('btn-label');
-    var skipBtn = document.getElementById('skip-btn');
     var installNote = document.getElementById('install-note');
     var stepTelegram = document.getElementById('step-telegram');
     var stepAndroid = document.getElementById('step-android');
@@ -150,7 +140,6 @@ h1{
             }
           });
         } else {
-          // Prompt není k dispozici — ukaž manuální instrukce
           stepAndroid.style.display = 'flex';
           installNote.textContent = 'Použij postup níže 👆';
           installNote.style.color = '#c53580';
@@ -167,11 +156,6 @@ h1{
         stepIos.scrollIntoView({behavior:'smooth', block:'center'});
       });
     }
-
-    skipBtn.addEventListener('click', function(){
-      try { localStorage.setItem('myeshim-install-seen','1'); } catch(e){}
-      window.location.replace('./index.html');
-    });
 
     window.addEventListener('appinstalled', function(){
       btnLabel.textContent = '✓ Nainstalováno!';
