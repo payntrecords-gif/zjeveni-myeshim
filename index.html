@@ -115,6 +115,7 @@ function clearApprovedCache() {
 function releaseAuthGate() {
   clearTimeout(_authGateTimeout);
   document.documentElement.classList.remove('auth-gate-pending');
+  document.documentElement.classList.add('auth-released'); // ← PŘIDEJ TENTO ŘÁDEK
   const fb = document.getElementById('app-load-fallback');
   if (fb) fb.style.display = 'none';
 }
