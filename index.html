@@ -6015,7 +6015,7 @@ const FCM_SENDER_ID = '360259005980';
       </div>
     </div>
     <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
-    <button class="install-dismiss" type="button">Pokračovat do aplikace</button>
+    <button class="install-dismiss" type="button" aria-label="Zavřít instalační průvodce a pokračovat do aplikace">Pokračovat do aplikace</button>
   </div>
 </div>
 
@@ -6245,7 +6245,7 @@ const FCM_SENDER_ID = '360259005980';
     if (!showInstallOverlayFromHash) return;
     if (typeof window.isStandalone === 'function' && window.isStandalone()) return;
     showInstallOverlay();
-    history.replaceState(null, '', window.location.pathname);
+    history.replaceState(null, document.title, window.location.pathname);
     showInstallOverlayFromHash = false;
   }
 
