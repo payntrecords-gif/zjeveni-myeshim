@@ -6,7 +6,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style id="auth-gate-style">
-html.auth-gate-pending body{visibility:hidden}
+#app-load-fallback{display:none}
+html.auth-gate-pending #app-load-fallback{display:flex}
+@keyframes alf-spin{to{transform:rotate(360deg)}}
 </style>
 <script type="module" id="auth-gate-script">
 console.log('MYEShim boot start');
@@ -2524,10 +2526,10 @@ body.dark .mm-l4-wrong-token{
 
 </head>
 <body>
-<div id="app-load-fallback" style="display:none;position:fixed;inset:0;background:#f8f9fc;align-items:center;justify-content:center;font-family:sans-serif;font-size:1rem;color:#333;text-align:center;padding:2rem;z-index:99999;flex-direction:column;gap:1rem;">
-  <div>⚠️</div>
-  <div>Aplikaci se nepodařilo načíst. Obnov stránku.</div>
-  <button onclick="window.location.reload()" style="padding:.6rem 1.4rem;border:none;border-radius:.5rem;background:#e5458e;color:#fff;font-size:1rem;cursor:pointer;">Obnovit</button>
+<div id="app-load-fallback" style="position:fixed;inset:0;background:#120f15;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:1.2rem;">
+  <img src="logo.png" alt="MYEShim" width="121" height="50" style="opacity:.9">
+  <div style="width:2.5rem;height:2.5rem;border-radius:50%;border:3px solid rgba(229,69,142,.25);border-top-color:#e5458e;animation:alf-spin .8s linear infinite;"></div>
+  <span style="font-family:sans-serif;font-size:.95rem;color:rgba(255,255,255,.7);letter-spacing:.04em;">Načítání…</span>
 </div>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
 <div id="topbar">
