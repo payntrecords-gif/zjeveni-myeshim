@@ -73,7 +73,9 @@
           if (isApproved) {
             authStateResolved = true;
             unsubscribeAuth();
-            window.location.replace('./index.html');
+            let installSeen = false;
+            try { installSeen = localStorage.getItem('myeshim-install-seen') === '1'; } catch(e) {}
+            window.location.replace(installSeen ? './index.html' : './index.html#install');
             return;
           }
         } catch (e) {
@@ -127,7 +129,9 @@
         const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
 
         if (isApproved) {
-          window.location.replace('./index.html');
+          let installSeen = false;
+          try { installSeen = localStorage.getItem('myeshim-install-seen') === '1'; } catch(e) {}
+          window.location.replace(installSeen ? './index.html' : './index.html#install');
           return;
         }
 
