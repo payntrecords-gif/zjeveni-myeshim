@@ -105,7 +105,20 @@
       }
     }
 
-    function redirectApprovedUser() {
+   function redirectApprovedUser() {
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches ||
+    window.navigator.standalone === true ||
+    document.referrer.startsWith('android-app://');
+
+  if (isStandalone) {
+    window.location.replace('./index.html');
+    return;
+  }
+
+  window.location.replace('./install.html');
+}
 <script type="module">
   import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
