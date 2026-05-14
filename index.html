@@ -6263,7 +6263,6 @@ const FCM_SENDER_ID = '360259005980';
   document.addEventListener('DOMContentLoaded', function() {
     var nativeBtn = document.getElementById('iov-native-btn');
     var overlayContainer = document.getElementById('install-overlay');
-    var dismissBtn = overlayContainer ? overlayContainer.querySelector('#iov-continue-btn') : null;
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
         if (typeof window.openInstallInPreferredBrowser === 'function' && window.openInstallInPreferredBrowser()) {
@@ -6276,13 +6275,15 @@ const FCM_SENDER_ID = '360259005980';
         }
       });
     }
-    if (dismissBtn) {
-      dismissBtn.addEventListener('click', function() {
+    maybeShowInstallOverlayFromHash();
+    var continueBtn = document.getElementById('iov-continue-btn');
+    if (continueBtn) {
+      continueBtn.addEventListener('click', function() {
         try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
         hideInstallOverlay(false);
+        history.replaceState(null, '', window.location.pathname);
       });
     }
-    maybeShowInstallOverlayFromHash();
     updateInstallOverlayBtn();
   });
 
