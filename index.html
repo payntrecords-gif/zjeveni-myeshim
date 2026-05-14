@@ -23,7 +23,7 @@ const _authGateTimeout = setTimeout(() => {
 }, 5000);
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalStorage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
@@ -51,6 +51,7 @@ try {
 }
 const auth = getAuth(app);
 const db = getFirestore(app);
+setPersistence(auth, browserLocalStorage).catch(e => console.warn('setPersistence failed:', e));
 console.log('Firebase init ok');
 
 function redirectTo(path) {
@@ -68,6 +69,36 @@ function setCachedUid(uid) {
   } catch (error) {
     console.warn('Failed to update myeshim-uid-cache.', error);
   }
+}
+
+const APPROVED_CACHE_KEY = 'myeshim-approved-cache';
+const APPROVED_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+function getApprovedCache(uid) {
+  try {
+    const raw = localStorage.getItem(APPROVED_CACHE_KEY);
+    if (!raw) return null;
+    const entry = JSON.parse(raw);
+    if (!entry || entry.uid !== uid || !entry.approved) return null;
+    if (Date.now() - entry.cachedAt > APPROVED_CACHE_TTL) return null;
+    return entry;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setApprovedCache(uid) {
+  try {
+    localStorage.setItem(APPROVED_CACHE_KEY, JSON.stringify({ uid, approved: true, cachedAt: Date.now() }));
+  } catch (e) {
+    console.warn('Failed to set myeshim-approved-cache:', e);
+  }
+}
+
+function clearApprovedCache() {
+  try {
+    localStorage.removeItem(APPROVED_CACHE_KEY);
+  } catch (e) { /* ignore */ }
 }
 
 function releaseAuthGate() {
@@ -114,10 +145,30 @@ onAuthStateChanged(auth, async (user) => {
   console.log('MYEShim onAuthStateChanged:', user ? 'user=' + user.uid : 'no user');
   if (!user) {
     setCachedUid(null);
+    clearApprovedCache();
     redirectTo('./login.html');
     return;
   }
 
+  // Fast path: valid approved cache → release gate immediately, refresh in background
+  if (getApprovedCache(user.uid)) {
+    console.log('MYEShim auth gate: approved cache hit – releasing immediately');
+    setCachedUid(user.uid);
+    releaseAuthGate();
+    initFcmForApprovedUser(user);
+    // Background Firestore refresh (non-blocking)
+    getDoc(doc(db, 'approvedUsers', user.uid)).then(snap => {
+      if (snap.exists() && snap.data()?.status === 'approved') {
+        setApprovedCache(user.uid);
+      } else {
+        clearApprovedCache();
+        redirectTo('./waiting.html');
+      }
+    }).catch(e => console.warn('Background approved check failed:', e));
+    return;
+  }
+
+  // No valid cache: do Firestore check as usual
   try {
     const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
     const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
@@ -127,6 +178,7 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
     setCachedUid(user.uid);
+    setApprovedCache(user.uid);
     console.log('MYEShim auth gate ok – releasing');
     releaseAuthGate();
     initFcmForApprovedUser(user);
