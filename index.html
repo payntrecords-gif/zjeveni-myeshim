@@ -6262,8 +6262,8 @@ const FCM_SENDER_ID = '360259005980';
   // Wire up native install button inside the install overlay
   document.addEventListener('DOMContentLoaded', function() {
     var nativeBtn = document.getElementById('iov-native-btn');
-    var dismissBtn = document.getElementById('install-overlay');
-    dismissBtn = dismissBtn ? dismissBtn.querySelector('.install-dismiss') : null;
+    var overlayContainer = document.getElementById('install-overlay');
+    var dismissBtn = overlayContainer ? overlayContainer.querySelector('.install-dismiss') : null;
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
         if (typeof window.openInstallInPreferredBrowser === 'function' && window.openInstallInPreferredBrowser()) {
