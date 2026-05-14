@@ -1523,7 +1523,7 @@ body.dark #bottomnav{
 .auth-card-sub{
   font-size:.88rem;color:#7a6a76;margin-bottom:22px;line-height:1.45;
 }
-.auth-btn-google{
+.auth-btn-login{
   display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;padding:14px 20px;
   background:#fff;border:1.5px solid #ede4ea;border-radius:14px;
@@ -1532,13 +1532,13 @@ body.dark #bottomnav{
   box-shadow:0 4px 18px rgba(0,0,0,.10);
   transition:transform .14s,box-shadow .14s;
 }
-.auth-btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.16)}
-.auth-btn-google:active{transform:translateY(0)}
-.auth-btn-google svg{width:22px;height:22px;flex-shrink:0}
-.auth-btn-google[disabled]{opacity:.72;cursor:wait;transform:none}
+.auth-btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.16)}
+.auth-btn-login:active{transform:translateY(0)}
+.auth-btn-login svg{width:22px;height:22px;flex-shrink:0}
+.auth-btn-login[disabled]{opacity:.72;cursor:wait;transform:none}
 .auth-btn-loading{display:none;align-items:center;gap:8px}
-.auth-btn-google.loading .auth-btn-label{display:none}
-.auth-btn-google.loading .auth-btn-loading{display:inline-flex}
+.auth-btn-login.loading .auth-btn-label{display:none}
+.auth-btn-login.loading .auth-btn-loading{display:inline-flex}
 .auth-spinner{
   width:16px;height:16px;border-radius:50%;
   border:2px solid rgba(31,31,31,.2);border-top-color:#e5458e;
@@ -5957,7 +5957,7 @@ const FCM_SENDER_ID = '360259005980';
   <div class="auth-card">
     <div class="auth-card-title">Vítej v MYEShim 👋</div>
     <div class="auth-card-sub">Přihlas se svým e-mailem a heslem a okamžitě začni studovat.</div>
-    <button class="auth-btn-google" id="auth-google-btn">
+    <button class="auth-btn-login" id="auth-login-btn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M4 12h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         <path d="m12 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -6135,7 +6135,7 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   function setAuthBusy(isBusy) {
-    var btn = document.getElementById('auth-google-btn');
+    var btn = document.getElementById('auth-login-btn');
     if (!btn) return;
     btn.disabled = !!isBusy;
     btn.classList.toggle('loading', !!isBusy);
@@ -6846,8 +6846,8 @@ const FCM_SENDER_ID = '360259005980';
       showAuthOverlay();
     }
     // Wire login button
-    var googleBtn = document.getElementById('auth-google-btn');
-    if (googleBtn) googleBtn.addEventListener('click', openLoginPage);
+    var loginBtn = document.getElementById('auth-login-btn');
+    if (loginBtn) loginBtn.addEventListener('click', openLoginPage);
 
     wireDarkToggle();
     wireProfileFontSlider();
