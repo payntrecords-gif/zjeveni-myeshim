@@ -6179,6 +6179,7 @@ const FCM_SENDER_ID = '360259005980';
       safeLSSet('myeshim-uid-cache', '');
       hideInstallOverlay(/* silent */true);
       clearAvatar();
+      clearApprovedCache();
       window.location.replace('./login.html');
     }
     document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
@@ -6924,6 +6925,7 @@ const FCM_SENDER_ID = '360259005980';
   function safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
   function safeLSGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
   const MEMORIZE_SYNC_TRIGGER = 'manual-sync';
+  var lastMemorizeSnapshot = '';
   function isMemorizeKey(key) {
     return /^memorize_\d+_\d+$/.test(String(key || ''));
   }
@@ -6960,6 +6962,17 @@ const FCM_SENDER_ID = '360259005980';
         localStorage.setItem(key, JSON.stringify(items[key] || {}));
       });
     } catch(e) {}
+  }
+  async function syncMemorizeProgressIfChanged() {
+    var items = collectMemorizeProgressFromLocal();
+    var snapshot = '';
+    try { snapshot = JSON.stringify(items); } catch(e) { snapshot = ''; }
+    if (snapshot === lastMemorizeSnapshot) return;
+    lastMemorizeSnapshot = snapshot;
+    await writeDoc('memorizeProgress', {
+      items: items,
+      updatedAt: new Date().toISOString()
+    });
   }
   function getResolvedNotifTime() {
     var notifTime = safeLSGet('notif_time', '');
@@ -7029,10 +7042,7 @@ const FCM_SENDER_ID = '360259005980';
         updatedAt: notifNow
       });
     } else if (isMemorizeKey(key) || key === 'memorize_progress_bulk') {
-      await writeDoc('memorizeProgress', {
-        items: collectMemorizeProgressFromLocal(),
-        updatedAt: new Date().toISOString()
-      });
+      await syncMemorizeProgressIfChanged();
     }
   }
 
@@ -7075,6 +7085,11 @@ const FCM_SENDER_ID = '360259005980';
       var memorize = docs[5].exists ? (docs[5].data() || {}) : null;
       if (memorize && memorize.items && typeof memorize.items === 'object') {
         applyMemorizeProgressToLocal(memorize.items);
+      }
+      try {
+        lastMemorizeSnapshot = JSON.stringify(collectMemorizeProgressFromLocal());
+      } catch(e) {
+        lastMemorizeSnapshot = '';
       }
       var userData = userDoc.exists ? (userDoc.data() || {}) : null;
       if (userData) {
