@@ -15,7 +15,7 @@ body{
              radial-gradient(ellipse 70% 45% at 90% 100%,rgba(123,62,244,.08) 0%,transparent 60%),
              #f8f3f7;
 }
-.logo-wrap{position:relative;margin-bottom:24px}
+.logo-wrap{position:relative;margin-bottom:20px;flex-shrink:0}
 .logo-wrap::before{
   content:'';position:absolute;inset:-20px;
   background:radial-gradient(circle,rgba(229,69,142,.18) 0%,transparent 70%);
@@ -24,45 +24,45 @@ body{
 @keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.1);opacity:1}}
 .logo-wrap img{width:80px;height:80px;border-radius:24px;box-shadow:0 18px 44px rgba(229,69,142,.28);position:relative;display:block}
 h1{
-  font-size:2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:8px;text-align:center;
+  font-size:2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:6px;text-align:center;
   background:linear-gradient(135deg,#7b3ef4 0%,#e5458e 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.tagline{font-size:.97rem;color:#7a6a76;text-align:center;line-height:1.5;margin-bottom:32px;max-width:260px}
+.tagline{font-size:.94rem;color:#7a6a76;text-align:center;line-height:1.5;margin-bottom:24px;max-width:260px}
 .card{
   background:#fff;border:1px solid rgba(229,69,142,.18);border-radius:24px;
-  padding:24px 22px;width:100%;max-width:368px;
+  padding:22px 20px;width:100%;max-width:368px;
   box-shadow:0 16px 48px rgba(180,80,140,.12);
 }
-.card-title{font-size:1.05rem;font-weight:800;margin-bottom:6px;color:#1c1820}
-.card-sub{font-size:.88rem;color:#7a6a76;margin-bottom:20px;line-height:1.45}
+.card-title{font-size:1.05rem;font-weight:800;margin-bottom:5px;color:#1c1820}
+.card-sub{font-size:.88rem;color:#7a6a76;margin-bottom:18px;line-height:1.45}
 
-/* Hlavní tlačítko */
 #main-btn{
   display:flex;align-items:center;justify-content:center;gap:10px;
-  width:100%;padding:15px 20px;margin-bottom:12px;
+  width:100%;padding:15px 20px;margin-bottom:14px;
   background:linear-gradient(135deg,#f05ca2,#de4089);border:none;border-radius:14px;
   font:inherit;font-size:1rem;font-weight:900;color:#fff;cursor:pointer;
   box-shadow:0 8px 22px rgba(229,69,142,.32);
   transition:transform .14s,box-shadow .14s;
 }
 #main-btn:active{transform:scale(.98)}
+#main-btn:disabled{opacity:.7;cursor:default}
 #main-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;flex-shrink:0}
 
-/* iOS instrukce */
-#ios-steps{display:none;background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:12px}
-.ios-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.87rem;color:#5e4f5b;line-height:1.4}
-.ios-step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
-.ios-step-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.steps{background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:.87rem;color:#5e4f5b;line-height:1.45}
+.step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
+.step-icon{font-size:1.15rem;flex-shrink:0;margin-top:1px;min-width:24px}
+.step strong{color:#1c1820}
 
-/* Přeskočit odkaz */
 #skip-btn{
   display:block;width:100%;padding:12px;
   background:transparent;border:1.5px solid rgba(229,69,142,.3);border-radius:14px;
   font:inherit;font-size:.9rem;font-weight:800;color:#c53580;cursor:pointer;text-align:center;
+  transition:background .14s;
 }
 #skip-btn:active{background:rgba(229,69,142,.06)}
-.note{font-size:.75rem;color:#9a7fa0;text-align:center;margin-top:14px;line-height:1.4}
+.note{font-size:.75rem;color:#9a7fa0;text-align:center;margin-top:12px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -71,41 +71,47 @@ h1{
   <img src="./icon-512.png" alt="MYEShim">
 </div>
 <h1>MYEShim</h1>
-<p class="tagline">Nainstaluj aplikaci a otevři ji z plochy telefonu</p>
+<p class="tagline">Přidej aplikaci na plochu telefonu</p>
 
 <div class="card">
-  <div class="card-title" id="card-title">Přidat na plochu</div>
-  <div class="card-sub" id="card-sub">Pro nejlepší zážitek nainstaluj MYEShim jako aplikaci.</div>
+  <div class="card-title" id="card-title">Přidat na plochu 📲</div>
+  <div class="card-sub" id="card-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
 
   <button id="main-btn">
     <svg viewBox="0 0 24 24"><path d="M12 3v13M5 10l7 7 7-7"/><path d="M3 19h18" stroke-linecap="round"/></svg>
     <span id="btn-label">Nainstalovat aplikaci</span>
   </button>
 
-  <!-- iOS Safari instrukce -->
-  <div id="ios-steps">
-    <div class="ios-step"><span class="ios-step-icon">1️⃣</span><span>Klepni na tlačítko <strong>Sdílet</strong> (čtverec se šipkou) dole v Safari</span></div>
-    <div class="ios-step"><span class="ios-step-icon">2️⃣</span><span>Vyber <strong>„Přidat na plochu"</strong></span></div>
-    <div class="ios-step"><span class="ios-step-icon">3️⃣</span><span>Potvrď klepnutím na <strong>„Přidat"</strong></span></div>
+  <div class="steps" id="install-steps">
+    <div class="step" id="step-telegram">
+      <span class="step-icon">✈️</span>
+      <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři MYEShim v Chrome nebo Safari.</span>
+    </div>
+    <div class="step" id="step-android">
+      <span class="step-icon">🤖</span>
+      <span><strong>Android (Chrome):</strong> klepni na <strong>⋮</strong> v pravém horním rohu a zvol „Přidat na plochu" nebo „Instalovat aplikaci".</span>
+    </div>
+    <div class="step" id="step-ios">
+      <span class="step-icon">🍎</span>
+      <span><strong>iPhone / iPad (Safari):</strong> klepni na <strong>⬆️</strong> (Sdílet) ve spodní liště a zvol „Přidat na plochu".</span>
+    </div>
   </div>
 
   <button id="skip-btn">Přejít do aplikace bez instalace</button>
-  <p class="note" id="install-note">Aplikace funguje nejlépe jako nainstalovaná PWA.</p>
+  <p class="note" id="install-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
 </div>
 
 <script>
 (function(){
   var deferredPrompt = null;
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isAndroid = /android/i.test(navigator.userAgent);
+  var isTelegram = /telegram/i.test(navigator.userAgent);
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-  // Zachyť prompt CO NEJDŘÍV
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();
     deferredPrompt = e;
-    // Ukaž tlačítko jako "připraveno"
-    var btn = document.getElementById('main-btn');
-    if(btn) btn.style.opacity = '1';
   });
 
   if(isStandalone){
@@ -116,46 +122,51 @@ h1{
   window.addEventListener('DOMContentLoaded', function(){
     var mainBtn = document.getElementById('main-btn');
     var btnLabel = document.getElementById('btn-label');
-    var iosSteps = document.getElementById('ios-steps');
     var skipBtn = document.getElementById('skip-btn');
     var installNote = document.getElementById('install-note');
+    var stepTelegram = document.getElementById('step-telegram');
+    var stepAndroid = document.getElementById('step-android');
+    var stepIos = document.getElementById('step-ios');
 
-    if(isIOS){
-      btnLabel.textContent = 'Zobrazit postup instalace';
+    // Skryj nepotřebné kroky podle platformy
+    if(!isTelegram) stepTelegram.style.display = 'none';
+    if(isIOS) stepAndroid.style.display = 'none';
+    if(!isIOS) stepIos.style.display = 'none';
+
+    // Android Chrome — zkus nativní prompt
+    if(isAndroid && !isTelegram){
       mainBtn.addEventListener('click', function(){
-        iosSteps.style.display = 'block';
-        mainBtn.style.display = 'none';
+        if(deferredPrompt){
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function(result){
+            deferredPrompt = null;
+            if(result.outcome === 'accepted'){
+              btnLabel.textContent = '✓ Instaluje se…';
+              mainBtn.disabled = true;
+              installNote.textContent = 'Skvěle! Po instalaci otevři aplikaci z plochy.';
+            } else {
+              installNote.textContent = 'Instalaci spustíš přes menu Chrome → „Instalovat aplikaci".';
+              installNote.style.color = '#c53580';
+            }
+          });
+        } else {
+          // Prompt není k dispozici — ukaž manuální instrukce
+          stepAndroid.style.display = 'flex';
+          installNote.textContent = 'Použij postup níže 👆';
+          installNote.style.color = '#c53580';
+        }
       });
-      return;
     }
 
-    mainBtn.addEventListener('click', function(){
-      if(deferredPrompt){
-        // ✅ Spustí nativní "Přidat na plochu" dialog
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function(result){
-          deferredPrompt = null;
-          if(result.outcome === 'accepted'){
-            btnLabel.textContent = '✓ Instaluje se…';
-            mainBtn.disabled = true;
-            setTimeout(function(){
-              window.location.replace('./index.html');
-            }, 2000);
-          } else {
-            // Uživatel odmítl
-            installNote.textContent = 'Instalaci můžeš kdykoli spustit znovu.';
-          }
-        });
-      } else {
-        // Prompt ještě není připraven — Chrome potřebuje chvíli
-        installNote.textContent = '⏳ Připravuje se… zkus to za chvíli znovu.';
-        installNote.style.color = '#c53580';
-        // Zkus znovu za 2s
-        setTimeout(function(){
-          installNote.textContent = 'Nebo přidej přes menu prohlížeče → „Přidat na plochu"';
-        }, 2500);
-      }
-    });
+    // iOS Safari — vždy manuální
+    if(isIOS){
+      btnLabel.textContent = 'Jak přidat na plochu →';
+      mainBtn.addEventListener('click', function(){
+        stepIos.style.background = 'rgba(229,69,142,.08)';
+        stepIos.style.borderRadius = '10px';
+        stepIos.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+    }
 
     skipBtn.addEventListener('click', function(){
       try { localStorage.setItem('myeshim-install-seen','1'); } catch(e){}
@@ -164,9 +175,10 @@ h1{
 
     window.addEventListener('appinstalled', function(){
       btnLabel.textContent = '✓ Nainstalováno!';
+      installNote.textContent = 'Otevři aplikaci ikonou z plochy 🎉';
       setTimeout(function(){
         window.location.replace('./index.html');
-      }, 1000);
+      }, 1500);
     });
   });
 })();
