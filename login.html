@@ -34,7 +34,7 @@
 
   <script type="module">
     import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
     import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
     import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
 
@@ -62,6 +62,28 @@
     const errorEl = document.getElementById('error');
     const submitBtn = document.getElementById('submit-btn');
 
+    // If a user session is already active and approved, redirect straight to the app.
+    let authStateResolved = false;
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (authStateResolved) return;
+      if (user) {
+        try {
+          const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
+          const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
+          if (isApproved) {
+            authStateResolved = true;
+            unsubscribeAuth();
+            window.location.replace('./index.html');
+            return;
+          }
+        } catch (e) {
+          // Ignore; let the user log in normally.
+        }
+      }
+      authStateResolved = true;
+      unsubscribeAuth();
+    });
+
     function getLoginErrorMessage(error) {
       switch (error?.code) {
         case 'auth/invalid-credential':
@@ -70,15 +92,24 @@
           return 'Neplatný e-mail nebo heslo.';
         case 'auth/invalid-email':
           return 'Zadaný e-mail nemá platný formát.';
+        case 'auth/user-disabled':
+          return 'Tento účet byl zablokován. Kontaktuj administrátora.';
         case 'auth/too-many-requests':
-          return 'Příliš mnoho pokusů. Zkus to prosím znovu později.';
+          return 'Příliš mnoho pokusů. Zkus to prosím znovu za chvíli.';
+        case 'auth/network-request-failed':
+          return 'Nepodařilo se připojit k serveru. Zkontroluj internetové připojení.';
+        case 'auth/operation-not-allowed':
+          return 'Přihlášení e-mailem není povoleno. Kontaktuj administrátora.';
         default:
           return 'Přihlášení se nezdařilo. Zkus to prosím znovu.';
       }
     }
 
+    let isSubmitting = false;
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
+      if (isSubmitting) return;
+      isSubmitting = true;
       errorEl.textContent = '';
       submitBtn.disabled = true;
 
@@ -86,6 +117,11 @@
       const password = document.getElementById('password').value;
 
       try {
+        // Sign out any residual session before signing in to avoid stale-state errors.
+        if (auth.currentUser) {
+          await signOut(auth).catch(() => {});
+        }
+
         const credential = await signInWithEmailAndPassword(auth, email, password);
         const approvedSnap = await getDoc(doc(db, 'approvedUsers', credential.user.uid));
         const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
@@ -101,6 +137,7 @@
         errorEl.textContent = getLoginErrorMessage(error);
       } finally {
         submitBtn.disabled = false;
+        isSubmitting = false;
       }
     });
   </script>
