@@ -1535,16 +1535,6 @@ body.dark #bottomnav{
 .auth-btn-login:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.16)}
 .auth-btn-login:active{transform:translateY(0)}
 .auth-btn-login svg{width:22px;height:22px;flex-shrink:0}
-.auth-btn-login[disabled]{opacity:.72;cursor:wait;transform:none}
-.auth-btn-loading{display:none;align-items:center;gap:8px}
-.auth-btn-login.loading .auth-btn-label{display:none}
-.auth-btn-login.loading .auth-btn-loading{display:inline-flex}
-.auth-spinner{
-  width:16px;height:16px;border-radius:50%;
-  border:2px solid rgba(31,31,31,.2);border-top-color:#e5458e;
-  animation:auth-spin .8s linear infinite;
-}
-@keyframes auth-spin{to{transform:rotate(360deg)}}
 .auth-privacy{
   font-size:.77rem;color:#9a7fa0;margin-top:14px;line-height:1.4;text-align:center;
 }
@@ -5963,7 +5953,6 @@ const FCM_SENDER_ID = '360259005980';
         <path d="m12 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span class="auth-btn-label">Přejít na přihlášení</span>
-      <span class="auth-btn-loading"><span class="auth-spinner" aria-hidden="true"></span> Otevírám přihlášení…</span>
     </button>
     <p class="auth-privacy">Přihlášení slouží pouze k ověření členů církve. Data nejsou sdílena.</p>
   </div>
@@ -6134,13 +6123,6 @@ const FCM_SENDER_ID = '360259005980';
     try { console.warn(label, err && err.message ? err.message : err); } catch(e) {}
   }
 
-  function setAuthBusy(isBusy) {
-    var btn = document.getElementById('auth-login-btn');
-    if (!btn) return;
-    btn.disabled = !!isBusy;
-    btn.classList.toggle('loading', !!isBusy);
-  }
-
   function initAuth() {
     if (!window.firebase || typeof firebase.auth !== 'function' || authInitialized) return;
     authInitialized = true;
@@ -6158,7 +6140,6 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   function onAuthChange(user) {
-    setAuthBusy(false);
     if (user) {
       safeLSSet('myeshim-uid-cache', user.uid);
       hideAuthOverlay();
@@ -6870,7 +6851,6 @@ const FCM_SENDER_ID = '360259005980';
           clearInterval(iv);
           // No auth available – show the overlay so user knows
           showAuthOverlay();
-          setAuthBusy(false);
           showAuthError('Přihlášení je dočasně nedostupné. Zkontroluj internetové připojení a zkus to znovu.');
         }
       }, 100);
