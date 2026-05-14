@@ -6080,6 +6080,7 @@ const FCM_SENDER_ID = '360259005980';
   function onAuthChange(user) {
     setAuthBusy(false);
     if (user) {
+      safeLSSet('myeshim-uid-cache', user.uid);
       hideAuthOverlay();
       updateAvatar(user);
       // Record join date on first sign-in
@@ -6092,6 +6093,7 @@ const FCM_SENDER_ID = '360259005980';
         showInstallOverlay();
       }
     } else {
+      safeLSSet('myeshim-uid-cache', '');
       hideInstallOverlay(/* silent */true);
       showAuthOverlay();
       clearAvatar();
@@ -6767,8 +6769,14 @@ const FCM_SENDER_ID = '360259005980';
 
   // ── Bootstrap ──
   function bootstrap() {
-    showAuthOverlay();
-    setAuthBusy(true);
+    // If the user was previously logged in, skip the overlay on startup and let
+    // Firebase verify the session in the background. onAuthChange will show the
+    // overlay if the session has expired or the user logged out.
+    var hasCachedUser = !!safeLS('myeshim-uid-cache', '');
+    if (!hasCachedUser) {
+      showAuthOverlay();
+      setAuthBusy(true);
+    }
     // Wire Google sign-in button
     var googleBtn = document.getElementById('auth-google-btn');
     if (googleBtn) googleBtn.addEventListener('click', signInWithGoogle);
