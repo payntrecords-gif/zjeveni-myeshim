@@ -5,6 +5,25 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script id="standalone-gate-script">
+(function(){
+  try{
+    var isStandalone = false;
+    if(window.matchMedia){
+      isStandalone = !!window.matchMedia('(display-mode: standalone)').matches;
+    }
+    if(!isStandalone && window.navigator && window.navigator.standalone === true){
+      isStandalone = true;
+    }
+    if(!isStandalone && typeof document.referrer === 'string' && document.referrer.indexOf('android-app://') === 0){
+      isStandalone = true;
+    }
+    document.documentElement.classList.add(isStandalone ? 'standalone-mode' : 'browser-mode');
+  }catch(e){
+    document.documentElement.classList.add('browser-mode');
+  }
+})();
+</script>
 <style id="auth-gate-style">
 #app-load-fallback{display:none}
 html.auth-gate-pending #app-load-fallback{display:flex}
@@ -14,6 +33,21 @@ html.auth-gate-pending #bottomnav,
 html.auth-gate-pending #nav-ov,
 html.auth-gate-pending #auth-overlay,
 html.auth-gate-pending #install-overlay{visibility:hidden !important}
+html.browser-mode #topbar,
+html.browser-mode #app,
+html.browser-mode #bottomnav,
+html.browser-mode #nav-ov,
+html.browser-mode #app-tabs-outer,
+html.browser-mode #app-panels,
+html.browser-mode #ux35-progress-wrap,
+html.browser-mode #installCard,
+html.browser-mode #pwaTip{visibility:hidden !important}
+html.browser-mode #auth-overlay,
+html.browser-mode #auth-overlay-error{display:none !important;visibility:hidden !important}
+html.browser-mode #app-load-fallback{display:none !important}
+html.browser-mode #install-overlay,
+html.browser-mode.auth-gate-pending #install-overlay{display:flex !important;visibility:visible !important}
+html.browser-mode body{overflow:hidden;background:#f8f3f7}
 @keyframes alf-spin{to{transform:rotate(360deg)}}
 </style>
 <script type="module" id="auth-gate-script">
