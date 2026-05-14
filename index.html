@@ -6176,10 +6176,10 @@ const FCM_SENDER_ID = '360259005980';
         showInstallOverlay();
       }
     } else {
+      clearApprovedCache();
       safeLSSet('myeshim-uid-cache', '');
       hideInstallOverlay(/* silent */true);
       clearAvatar();
-      clearApprovedCache();
       window.location.replace('./login.html');
     }
     document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
@@ -6924,8 +6924,9 @@ const FCM_SENDER_ID = '360259005980';
   }
   function safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
   function safeLSGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
-  const MEMORIZE_SYNC_TRIGGER = 'manual-sync';
+  const MEMORIZE_BULK_SYNC_SENTINEL = 'manual-sync';
   var lastMemorizeSnapshot = '';
+  var memorizeSyncTimer = null;
   function isMemorizeKey(key) {
     return /^memorize_\d+_\d+$/.test(String(key || ''));
   }
@@ -6966,13 +6967,20 @@ const FCM_SENDER_ID = '360259005980';
   async function syncMemorizeProgressIfChanged() {
     var items = collectMemorizeProgressFromLocal();
     var snapshot = '';
-    try { snapshot = JSON.stringify(items); } catch(e) { snapshot = ''; }
+    try { snapshot = JSON.stringify(items); } catch(e) { console.warn('Failed to serialize memorize progress:', e); snapshot = ''; }
     if (snapshot === lastMemorizeSnapshot) return;
     lastMemorizeSnapshot = snapshot;
     await writeDoc('memorizeProgress', {
       items: items,
       updatedAt: new Date().toISOString()
     });
+  }
+  function scheduleMemorizeProgressSync(delayMs) {
+    if (memorizeSyncTimer) clearTimeout(memorizeSyncTimer);
+    memorizeSyncTimer = setTimeout(function(){
+      memorizeSyncTimer = null;
+      syncMemorizeProgressIfChanged();
+    }, Number(delayMs) || 250);
   }
   function getResolvedNotifTime() {
     var notifTime = safeLSGet('notif_time', '');
@@ -7041,7 +7049,9 @@ const FCM_SENDER_ID = '360259005980';
         fcmToken: notifToken,
         updatedAt: notifNow
       });
-    } else if (isMemorizeKey(key) || key === 'memorize_progress_bulk') {
+    } else if (isMemorizeKey(key)) {
+      scheduleMemorizeProgressSync(300);
+    } else if (key === 'memorize_progress_bulk') {
       await syncMemorizeProgressIfChanged();
     }
   }
@@ -7089,6 +7099,7 @@ const FCM_SENDER_ID = '360259005980';
       try {
         lastMemorizeSnapshot = JSON.stringify(collectMemorizeProgressFromLocal());
       } catch(e) {
+        console.warn('Failed to initialize memorize snapshot:', e);
         lastMemorizeSnapshot = '';
       }
       var userData = userDoc.exists ? (userDoc.data() || {}) : null;
@@ -7122,7 +7133,7 @@ const FCM_SENDER_ID = '360259005980';
       } catch(e) { try { console.warn('Sync watched key failed:', key, e); } catch(ignore) {} }
     });
     if (shouldSyncNotifications) syncKeyToFirestore('notif_time', safeLSGet('notif_time', ''));
-    syncKeyToFirestore('memorize_progress_bulk', MEMORIZE_SYNC_TRIGGER);
+    syncKeyToFirestore('memorize_progress_bulk', MEMORIZE_BULK_SYNC_SENTINEL);
   }
 
   var originalSetItem = localStorage.setItem.bind(localStorage);
