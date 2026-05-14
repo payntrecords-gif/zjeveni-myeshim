@@ -6180,7 +6180,6 @@ const FCM_SENDER_ID = '360259005980';
       hideInstallOverlay(/* silent */true);
       clearAvatar();
       window.location.replace('./login.html');
-      return;
     }
     document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
   }
@@ -6924,6 +6923,7 @@ const FCM_SENDER_ID = '360259005980';
   }
   function safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
   function safeLSGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
+  const MEMORIZE_SYNC_TRIGGER = 'manual-sync';
   function isMemorizeKey(key) {
     return /^memorize_\d+_\d+$/.test(String(key || ''));
   }
@@ -7107,7 +7107,7 @@ const FCM_SENDER_ID = '360259005980';
       } catch(e) { try { console.warn('Sync watched key failed:', key, e); } catch(ignore) {} }
     });
     if (shouldSyncNotifications) syncKeyToFirestore('notif_time', safeLSGet('notif_time', ''));
-    syncKeyToFirestore('memorize_progress_bulk', '1');
+    syncKeyToFirestore('memorize_progress_bulk', MEMORIZE_SYNC_TRIGGER);
   }
 
   var originalSetItem = localStorage.setItem.bind(localStorage);
