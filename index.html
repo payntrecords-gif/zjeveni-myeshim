@@ -11,7 +11,7 @@
     var isStandalone = (
       (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
       (window.navigator && window.navigator.standalone === true) ||
-      document.referrer.startsWith('android-app://')
+      (document.referrer || '').startsWith('android-app://')
     );
     document.documentElement.classList.add(isStandalone ? 'standalone-mode' : 'browser-mode');
   }catch(e){
@@ -42,7 +42,7 @@ html.browser-mode #auth-overlay-error{display:none !important;visibility:hidden 
 html.browser-mode #app-load-fallback{display:none !important}
 html.browser-mode #install-overlay,
 html.browser-mode.auth-gate-pending #install-overlay{display:flex !important;visibility:visible !important}
-html.browser-mode body{background:#f8f3f7}
+html.browser-mode body{background:var(--bg,#f8f3f7)}
 @keyframes alf-spin{to{transform:rotate(360deg)}}
 </style>
 <script type="module" id="auth-gate-script">
