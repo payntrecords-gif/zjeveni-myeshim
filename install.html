@@ -99,64 +99,75 @@ h1{
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
-  // Zachyť install prompt (Android/Chrome)
+  // Zachyť prompt CO NEJDŘÍV
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();
     deferredPrompt = e;
+    // Ukaž tlačítko jako "připraveno"
+    var btn = document.getElementById('main-btn');
+    if(btn) btn.style.opacity = '1';
   });
 
-  // Pokud už běží jako standalone → rovnou do appky
   if(isStandalone){
     window.location.replace('./index.html');
     return;
   }
 
-  var mainBtn = document.getElementById('main-btn');
-  var btnLabel = document.getElementById('btn-label');
-  var iosSteps = document.getElementById('ios-steps');
-  var cardTitle = document.getElementById('card-title');
-  var cardSub = document.getElementById('card-sub');
-  var skipBtn = document.getElementById('skip-btn');
-  var installNote = document.getElementById('install-note');
+  window.addEventListener('DOMContentLoaded', function(){
+    var mainBtn = document.getElementById('main-btn');
+    var btnLabel = document.getElementById('btn-label');
+    var iosSteps = document.getElementById('ios-steps');
+    var skipBtn = document.getElementById('skip-btn');
+    var installNote = document.getElementById('install-note');
 
-  // iOS Safari
-  if(isIOS){
-    cardTitle.textContent = 'Přidat na plochu (iOS)';
-    cardSub.textContent = 'V Safari klepni na tlačítko Sdílet a vyber „Přidat na plochu".';
-    btnLabel.textContent = 'Zobrazit postup';
-    mainBtn.addEventListener('click', function(){
-      iosSteps.style.display = 'block';
-      mainBtn.style.display = 'none';
-    });
-    return;
-  }
-
-  // Android/Chrome – čeká na beforeinstallprompt
-  mainBtn.addEventListener('click', function(){
-    if(deferredPrompt){
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function(result){
-        deferredPrompt = null;
-        if(result.outcome === 'accepted'){
-          // Po instalaci počkej a přesměruj
-          setTimeout(function(){ window.location.replace('./index.html'); }, 1500);
-        }
+    if(isIOS){
+      btnLabel.textContent = 'Zobrazit postup instalace';
+      mainBtn.addEventListener('click', function(){
+        iosSteps.style.display = 'block';
+        mainBtn.style.display = 'none';
       });
-    } else {
-      // prompt ještě není připravený nebo prohlížeč nepodporuje
-      installNote.textContent = 'Přidej stránku ručně přes menu prohlížeče → „Přidat na plochu".';
-      installNote.style.color = '#c53580';
+      return;
     }
-  });
 
-  // Přeskočit → jdi do index.html (auth gate přesměruje na login pokud není přihlášen)
-  skipBtn.addEventListener('click', function(){
-    window.location.replace('./index.html');
-  });
+    mainBtn.addEventListener('click', function(){
+      if(deferredPrompt){
+        // ✅ Spustí nativní "Přidat na plochu" dialog
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(result){
+          deferredPrompt = null;
+          if(result.outcome === 'accepted'){
+            btnLabel.textContent = '✓ Instaluje se…';
+            mainBtn.disabled = true;
+            setTimeout(function(){
+              window.location.replace('./index.html');
+            }, 2000);
+          } else {
+            // Uživatel odmítl
+            installNote.textContent = 'Instalaci můžeš kdykoli spustit znovu.';
+          }
+        });
+      } else {
+        // Prompt ještě není připraven — Chrome potřebuje chvíli
+        installNote.textContent = '⏳ Připravuje se… zkus to za chvíli znovu.';
+        installNote.style.color = '#c53580';
+        // Zkus znovu za 2s
+        setTimeout(function(){
+          installNote.textContent = 'Nebo přidej přes menu prohlížeče → „Přidat na plochu"';
+        }, 2500);
+      }
+    });
 
-  // Pokud byl nainstalován odjinud
-  window.addEventListener('appinstalled', function(){
-    setTimeout(function(){ window.location.replace('./index.html'); }, 800);
+    skipBtn.addEventListener('click', function(){
+      try { localStorage.setItem('myeshim-install-seen','1'); } catch(e){}
+      window.location.replace('./index.html');
+    });
+
+    window.addEventListener('appinstalled', function(){
+      btnLabel.textContent = '✓ Nainstalováno!';
+      setTimeout(function(){
+        window.location.replace('./index.html');
+      }, 1000);
+    });
   });
 })();
 </script>
