@@ -129,7 +129,7 @@ try {
 onAuthStateChanged(auth, async (user) => {
   console.log('MYEShim onAuthStateChanged:', user ? 'user=' + user.uid : 'no user');
   if (!user) {
-    setCachedUid('');
+    setCachedUid(null);
     redirectTo('./login.html');
     return;
   }
@@ -2534,7 +2534,7 @@ body.dark .mm-l4-wrong-token{
 
 </head>
 <body>
-<div id="app-boot-splash" aria-live="polite" aria-label="Načítání aplikace">
+<div id="app-boot-splash" role="status" aria-live="polite" aria-label="Načítání aplikace">
   <img class="boot-logo" src="logo.png" alt="MYEShim" width="160" height="66">
   <div class="boot-spinner" aria-hidden="true"></div>
   <div class="boot-text">Načítám MYEShim a ověřuji přihlášení…</div>
