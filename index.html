@@ -40,8 +40,8 @@ html.browser-mode #pwaTip{visibility:hidden !important}
 html.browser-mode #auth-overlay,
 html.browser-mode #auth-overlay-error{display:none !important;visibility:hidden !important}
 html.browser-mode #app-load-fallback{display:none !important}
-html.browser-mode #install-overlay,
-html.browser-mode.auth-gate-pending #install-overlay{display:flex !important;visibility:visible !important}
+html.browser-mode:not(.auth-gate-pending) #install-overlay{display:flex !important;visibility:visible !important}
+html.browser-mode.auth-gate-pending #install-overlay{display:none !important;visibility:hidden !important}
 html.browser-mode body{background:var(--bg,#f8f3f7)}
 @keyframes alf-spin{to{transform:rotate(360deg)}}
 </style>
