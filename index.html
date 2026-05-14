@@ -6184,7 +6184,7 @@ const FCM_SENDER_ID = '360259005980';
       safeLSSet('myeshim-uid-cache', '');
       hideInstallOverlay(/* silent */true);
       clearAvatar();
-      window.location.replace('./login.html');
+    window.location.replace('./register.html');
     }
     document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
   }
