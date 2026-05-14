@@ -122,10 +122,12 @@ var isStandalone =
     var installSeen = false;
     try { installSeen = localStorage.getItem('myeshim-install-seen') === '1'; } catch(e) {}
 
-    if (installSeen) {
-      window.location.replace('./index.html');
-    } else {
-      window.location.replace('./install.html');
+   if (isStandalone) {
+  window.location.replace('./index.html');
+  return;
+}
+
+window.location.replace('./install.html');
     }
   }
 );
