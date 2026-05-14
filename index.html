@@ -5,7 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<style id="auth-gate-style">html.auth-gate-pending body{visibility:hidden}</style>
+<style id="auth-gate-style">
+html.auth-gate-pending body{visibility:visible}
+#app-boot-splash{display:none}
+html.auth-gate-pending #app-boot-splash{
+  display:flex;position:fixed;inset:0;z-index:99998;
+  align-items:center;justify-content:center;flex-direction:column;gap:14px;
+  background:linear-gradient(180deg,#f8f9fc 0%,#f3f5fa 100%);
+  color:#7a6a76;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+#app-boot-splash .boot-logo{width:min(160px,42vw);height:auto}
+#app-boot-splash .boot-spinner{
+  width:42px;height:42px;border-radius:50%;border:4px solid rgba(229,69,142,.14);
+  border-top-color:#e5458e;animation:appBootSpin .85s linear infinite;
+}
+#app-boot-splash .boot-text{font-size:1rem;font-weight:700;color:#5f4f5a;text-align:center;padding:0 24px}
+@keyframes appBootSpin{to{transform:rotate(360deg)}}
+</style>
 <script type="module" id="auth-gate-script">
 console.log('MYEShim boot start');
 document.documentElement.classList.add('auth-gate-pending');
@@ -14,6 +30,8 @@ document.documentElement.classList.add('auth-gate-pending');
 const _authGateTimeout = setTimeout(() => {
   console.warn('MYEShim: auth gate timeout – releasing gate and showing fallback UI');
   document.documentElement.classList.remove('auth-gate-pending');
+  const splash = document.getElementById('app-boot-splash');
+  if (splash) splash.style.display = 'none';
   const fb = document.getElementById('app-load-fallback');
   if (fb) fb.style.display = 'flex';
 }, 15000);
@@ -37,10 +55,14 @@ const FIREBASE_AUTH_CONFIG = {
 const VAPID_PUBLIC_KEY = 'BNkpx_SJASrkt48mXCZQBoDRJt_CUlDNXiM4MfJO6aO0Qc1dc84pYcNLXCVQj23EPJKCuLm15QOMJLCleeol_fk';
 
 const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_AUTH_CONFIG);
-const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('6Lfa1-gsAAAAAKGTlACah7A8mN1HGQUH1T1XbCKt'),
-  isTokenAutoRefreshEnabled: true
-});
+try {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6Lfa1-gsAAAAAKGTlACah7A8mN1HGQUH1T1XbCKt'),
+    isTokenAutoRefreshEnabled: true
+  });
+} catch (error) {
+  console.warn('App Check init skipped:', error && error.message ? error.message : error);
+}
 const auth = getAuth(app);
 const db = getFirestore(app);
 console.log('Firebase init ok');
@@ -50,9 +72,25 @@ function redirectTo(path) {
   window.location.replace(path);
 }
 
+function setCachedUid(uid) {
+  try {
+    if (uid) {
+      localStorage.setItem('myeshim-uid-cache', uid);
+    } else {
+      localStorage.removeItem('myeshim-uid-cache');
+    }
+  } catch (error) {
+    console.warn('Failed to update myeshim-uid-cache.', error);
+  }
+}
+
 function releaseAuthGate() {
   clearTimeout(_authGateTimeout);
   document.documentElement.classList.remove('auth-gate-pending');
+  const splash = document.getElementById('app-boot-splash');
+  if (splash) splash.style.display = 'none';
+  const fb = document.getElementById('app-load-fallback');
+  if (fb) fb.style.display = 'none';
 }
 
 async function initFcmForApprovedUser(user) {
@@ -91,6 +129,7 @@ try {
 onAuthStateChanged(auth, async (user) => {
   console.log('MYEShim onAuthStateChanged:', user ? 'user=' + user.uid : 'no user');
   if (!user) {
+    setCachedUid('');
     redirectTo('./login.html');
     return;
   }
@@ -99,9 +138,11 @@ onAuthStateChanged(auth, async (user) => {
     const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
     const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
     if (!isApproved) {
+      setCachedUid(user.uid);
       redirectTo('./waiting.html');
       return;
     }
+    setCachedUid(user.uid);
     console.log('MYEShim auth gate ok – releasing');
     releaseAuthGate();
     initFcmForApprovedUser(user);
@@ -2493,6 +2534,11 @@ body.dark .mm-l4-wrong-token{
 
 </head>
 <body>
+<div id="app-boot-splash" aria-live="polite" aria-label="Načítání aplikace">
+  <img class="boot-logo" src="logo.png" alt="MYEShim" width="160" height="66">
+  <div class="boot-spinner" aria-hidden="true"></div>
+  <div class="boot-text">Načítám MYEShim a ověřuji přihlášení…</div>
+</div>
 <div id="app-load-fallback" style="display:none;position:fixed;inset:0;background:#f8f9fc;align-items:center;justify-content:center;font-family:sans-serif;font-size:1rem;color:#333;text-align:center;padding:2rem;z-index:99999;flex-direction:column;gap:1rem;">
   <div>⚠️</div>
   <div>Aplikaci se nepodařilo načíst. Obnov stránku.</div>

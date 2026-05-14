@@ -62,10 +62,14 @@
     };
 
     const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
-    const appCheck = initializeAppCheck(app, {
-      provider: new ReCaptchaV3Provider('6Lfa1-gsAAAAAKGTlACah7A8mN1HGQUH1T1XbCKt'),
-      isTokenAutoRefreshEnabled: true
-    });
+    try {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Lfa1-gsAAAAAKGTlACah7A8mN1HGQUH1T1XbCKt'),
+        isTokenAutoRefreshEnabled: true
+      });
+    } catch (error) {
+      console.warn('App Check init skipped:', error && error.message ? error.message : error);
+    }
     const auth = getAuth(app);
     const db = getFirestore(app);
     const pendingList = document.getElementById('pending-list');
