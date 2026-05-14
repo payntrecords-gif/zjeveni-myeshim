@@ -106,46 +106,29 @@
     }
 
     function redirectApprovedUser() {
-      let installSeen = false;
-      try { installSeen = localStorage.getItem('myeshim-install-seen') === '1'; } catch(e) {}
-      window.location.replace(installSeen ? './index.html' : './index.html#install');
+var isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.navigator.standalone === true ||
+      document.referrer.startsWith('android-app://');
+
+    if (isStandalone) {
+      // Launched from home screen — go straight to app
+      window.location.replace('./index.html');
+      return;
     }
 
-    let isSubmitting = false;
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      if (isSubmitting) return;
-      isSubmitting = true;
-      errorEl.textContent = '';
-      submitBtn.disabled = true;
+    // In browser — check if user has already seen install guide
+    var installSeen = false;
+    try { installSeen = localStorage.getItem('myeshim-install-seen') === '1'; } catch(e) {}
 
-      const email = document.getElementById('email').value.trim().toLowerCase();
-      const password = document.getElementById('password').value;
-
-      try {
-        // Sign out any residual session before signing in to avoid stale-state errors.
-        if (auth.currentUser) {
-          await signOut(auth).catch(() => {});
-        }
-
-        const credential = await signInWithEmailAndPassword(auth, email, password);
-        const approvedSnap = await getDoc(doc(db, 'approvedUsers', credential.user.uid));
-        const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
-
-        if (isApproved) {
-          redirectApprovedUser();
-          return;
-        }
-
-        // Not approved – keep user signed in so waiting.html can show re-apply form.
-        window.location.replace('./waiting.html');
-      } catch (error) {
-        errorEl.textContent = getLoginErrorMessage(error);
-      } finally {
-        submitBtn.disabled = false;
-        isSubmitting = false;
-      }
-    });
+    if (installSeen) {
+      window.location.replace('./index.html');
+    } else {
+      window.location.replace('./install.html');
+    }
+  }
+);
   </script>
 </body>
 </html>
