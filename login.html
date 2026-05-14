@@ -73,7 +73,7 @@
           if (isApproved) {
             authStateResolved = true;
             unsubscribeAuth();
-            window.location.replace('./index.html');
+            redirectApprovedUser();
             return;
           }
         } catch (e) {
@@ -105,6 +105,12 @@
       }
     }
 
+    function redirectApprovedUser() {
+      let installSeen = false;
+      try { installSeen = localStorage.getItem('myeshim-install-seen') === '1'; } catch(e) {}
+      window.location.replace(installSeen ? './index.html' : './index.html#install');
+    }
+
     let isSubmitting = false;
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -127,7 +133,7 @@
         const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
 
         if (isApproved) {
-          window.location.replace('./index.html');
+          redirectApprovedUser();
           return;
         }
 

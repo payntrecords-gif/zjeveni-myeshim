@@ -6015,6 +6015,7 @@ const FCM_SENDER_ID = '360259005980';
       </div>
     </div>
     <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
+    <button class="install-dismiss" type="button">Pokračovat do aplikace</button>
   </div>
 </div>
 
@@ -6140,6 +6141,7 @@ const FCM_SENDER_ID = '360259005980';
 
   var auth = null;
   var authInitialized = false;
+  var showInstallOverlayFromHash = window.location.hash === '#install';
 
   function safeLS(key, fallback) {
     try { var v = localStorage.getItem(key); return v === null ? fallback : v; } catch(e) { return fallback; }
@@ -6176,11 +6178,6 @@ const FCM_SENDER_ID = '360259005980';
       // Record join date on first sign-in
       if (!safeLS('myeshim-joined', '')) {
         safeLSSet('myeshim-joined', new Date().toISOString().slice(0, 10));
-      }
-      // Step 2 of onboarding: if the app is NOT running in standalone mode,
-      // show the install overlay so the user knows to add it to their home screen.
-      if (typeof window.isStandalone === 'function' && !window.isStandalone()) {
-        showInstallOverlay();
       }
     } else {
       clearApprovedCache();
@@ -6244,6 +6241,14 @@ const FCM_SENDER_ID = '360259005980';
     }
   }
 
+  function maybeShowInstallOverlayFromHash() {
+    if (!showInstallOverlayFromHash) return;
+    if (typeof window.isStandalone === 'function' && window.isStandalone()) return;
+    showInstallOverlay();
+    history.replaceState(null, document.title, window.location.pathname);
+    showInstallOverlayFromHash = false;
+  }
+
   // Show the native install button only when the browser has a deferred prompt ready
   window.updateInstallOverlayBtn = function() {
     var btn = document.getElementById('iov-native-btn');
@@ -6257,6 +6262,8 @@ const FCM_SENDER_ID = '360259005980';
   // Wire up native install button inside the install overlay
   document.addEventListener('DOMContentLoaded', function() {
     var nativeBtn = document.getElementById('iov-native-btn');
+    var overlayContainer = document.getElementById('install-overlay');
+    var dismissBtn = overlayContainer ? overlayContainer.querySelector('.install-dismiss') : null;
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
         if (typeof window.openInstallInPreferredBrowser === 'function' && window.openInstallInPreferredBrowser()) {
@@ -6269,11 +6276,20 @@ const FCM_SENDER_ID = '360259005980';
         }
       });
     }
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', function() {
+        if (typeof window.hideInstallOverlay === 'function') window.hideInstallOverlay();
+      });
+    }
+    maybeShowInstallOverlayFromHash();
     updateInstallOverlayBtn();
   });
 
   // Expose so ux40-pwa-script can close the overlay after standalone is detected
-  window.hideInstallOverlay = function() { hideInstallOverlay(false); };
+  window.hideInstallOverlay = function() {
+    try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
+    hideInstallOverlay(false);
+  };
   window.showInstallOverlay = function() { showInstallOverlay(); };
 
   var AVATAR_ICON_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
