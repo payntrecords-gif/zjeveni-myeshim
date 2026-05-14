@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myeshim-v51-20260514';
+const CACHE_NAME = 'myeshim-v52-20260514';
 const APP_ROOT_URL = new URL('./', self.location.href).href;
 const APP_SHELL = [
   './',
@@ -26,8 +26,6 @@ self.addEventListener('activate', event => {
     caches.keys()
       .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
-      .then(clients => Promise.all(clients.map(client => client.postMessage({ type: 'SW_UPDATED' }))))
   );
 });
 self.addEventListener('fetch', event => {

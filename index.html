@@ -130,7 +130,15 @@ onAuthStateChanged(auth, async (user) => {
     initFcmForApprovedUser(user);
   } catch (error) {
     console.error('Auth gate check failed:', error);
-    redirectTo('./waiting.html');
+    // Pokud máme cachedUid, pustime dál — síť selžela ale
+    // uživatel byl schválený dříve
+    const cachedUid = localStorage.getItem('myeshim-uid-cache');
+    if (cachedUid && cachedUid === user.uid) {
+      console.warn('Auth gate: Firestore failed but cached uid matches – releasing gate');
+      releaseAuthGate();
+    } else {
+      redirectTo('./waiting.html');
+    }
   }
 });
 </script>
@@ -6642,30 +6650,22 @@ const FCM_SENDER_ID = '360259005980';
   };
 
   window.forceAppUpdate = async function() {
-    var btn = document.getElementById('ps-update-btn');
-    if (!btn) return;
-    if (btn.disabled) return;
-    btn.disabled = true;
-    btn.textContent = 'Aktualizuji…';
+    var psUpdateBtn = document.getElementById('ps-update-btn');
+    if (!psUpdateBtn) return;
+    if (psUpdateBtn.disabled) return;
+    psUpdateBtn.disabled = true;
+    psUpdateBtn.textContent = 'Aktualizuji…';
     try {
       if ('serviceWorker' in navigator) {
-        var regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(function(reg) {
-          return reg.unregister().catch(function(err) {
-            reportNonCriticalError('Odregistrace service workera selhala:', err);
-          });
-        }));
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) await reg.update();
       }
-      if ('caches' in window) {
-        var keys = await caches.keys();
-        await Promise.all(keys.map(function(key) { return caches.delete(key); }));
-      }
-    } catch (err) {
-      reportNonCriticalError('Vynucení aktualizace selhalo:', err);
-    }
-    var url = new URL(window.location.href);
-    url.searchParams.set('_cache_bust', Date.now().toString());
-    window.location.href = url.toString();
+    } catch(e) {}
+    // Bezpečný reload: počkáme až Firebase persistuje session
+    // do localStorage, PAK reloadujeme
+    setTimeout(() => {
+      window.location.reload();
+    }, 800);
   };
 
   // ── Dark toggle wiring ──
