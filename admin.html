@@ -76,6 +76,15 @@
     const approvedList = document.getElementById('approved-list');
     const statusEl = document.getElementById('status');
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function formatDate(value) {
       if (!value) return 'neuvedeno';
       if (typeof value?.toDate === 'function') return value.toDate().toLocaleString('cs-CZ');
@@ -155,15 +164,19 @@
       pendingList.innerHTML = '';
 
       items.forEach((item) => {
+        const safeName = escapeHtml(item.name || 'Bez jména');
+        const safeEmail = escapeHtml(item.email || '');
+        const safePoslani = escapeHtml(item.poslani || 'neuvedeno');
+        const safeCreatedAt = escapeHtml(formatDate(item.createdAt));
         const el = document.createElement('div');
         el.className = 'item';
         el.innerHTML = `
           <div class="head">
             <div class="meta">
-              <strong>${item.name || 'Bez jména'}</strong>
-              <div class="muted">${item.email || ''}</div>
-              <div class="muted">Poslání: ${item.poslani || 'neuvedeno'}</div>
-              <div class="muted">Registrován: ${formatDate(item.createdAt)}</div>
+              <strong>${safeName}</strong>
+              <div class="muted">${safeEmail}</div>
+              <div class="muted">Poslání: ${safePoslani}</div>
+              <div class="muted">Registrován: ${safeCreatedAt}</div>
             </div>
           </div>
         `;
@@ -236,14 +249,18 @@
       approvedList.className = 'list';
       approvedList.innerHTML = '';
       items.forEach((item) => {
+        const safeName = escapeHtml(item.name || 'Bez jména');
+        const safeEmail = escapeHtml(item.email || '');
+        const safePoslani = escapeHtml(item.poslani || 'neuvedeno');
+        const safeApprovedAt = escapeHtml(formatDate(item.approvedAt));
         const el = document.createElement('div');
         el.className = 'item';
         el.innerHTML = `
           <div class="meta">
-            <strong>${item.name || 'Bez jména'}</strong>
-            <div class="muted">${item.email || ''}</div>
-            <div class="muted">Poslání: ${item.poslani || 'neuvedeno'}</div>
-            <div class="muted">Schváleno: ${formatDate(item.approvedAt)}</div>
+            <strong>${safeName}</strong>
+            <div class="muted">${safeEmail}</div>
+            <div class="muted">Poslání: ${safePoslani}</div>
+            <div class="muted">Schváleno: ${safeApprovedAt}</div>
           </div>
         `;
 
