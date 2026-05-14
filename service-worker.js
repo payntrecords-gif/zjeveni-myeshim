@@ -1,8 +1,13 @@
-const CACHE_NAME = 'myeshim-v52-20260514';
+const CACHE_NAME = 'myeshim-v53-20260514';
 const APP_ROOT_URL = new URL('./', self.location.href).href;
 const APP_SHELL = [
   './',
   './index.html',
+  './login.html',
+  './register.html',
+  './waiting.html',
+  './admin-login.html',
+  './admin.html',
   './manifest.webmanifest',
   './favicon-16.png',
   './favicon-32.png',
@@ -43,10 +48,18 @@ self.addEventListener('fetch', event => {
         caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
         return response;
       }).catch(async () => {
-        return (await caches.match(event.request))
-          || (await caches.match('./index.html'))
-          || (await caches.match('./'))
-          || (await caches.match('./offline.html'));
+        const cachedRequest = await caches.match(event.request);
+        if (cachedRequest) return cachedRequest;
+
+        const path = url.pathname || '/';
+        const leaf = path.endsWith('/') ? '' : path.split('/').pop();
+        const isSafeHtmlLeaf = /^[A-Za-z0-9_-]+\.html$/.test(leaf);
+        if (isSafeHtmlLeaf) {
+          const cachedLeaf = await caches.match('./' + leaf);
+          if (cachedLeaf) return cachedLeaf;
+        }
+
+        return (await caches.match('./offline.html'));
       })
     );
     return;
