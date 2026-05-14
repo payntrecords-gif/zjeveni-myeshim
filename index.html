@@ -15,7 +15,7 @@
     if(!isStandalone && window.navigator && window.navigator.standalone === true){
       isStandalone = true;
     }
-    if(!isStandalone && typeof document.referrer === 'string' && document.referrer.indexOf('android-app://') === 0){
+    if(!isStandalone && typeof document.referrer === 'string' && document.referrer.startsWith('android-app://')){
       isStandalone = true;
     }
     document.documentElement.classList.add(isStandalone ? 'standalone-mode' : 'browser-mode');
