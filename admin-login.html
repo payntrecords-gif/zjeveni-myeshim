@@ -101,13 +101,14 @@
         const adminSnap = await getDoc(doc(db, 'admins', credential.user.uid));
         if (!adminSnap.exists()) {
           await signOut(auth).catch(() => {});
-          errorEl.textContent = 'Přihlášení se nezdařilo. Účet nemá administrátorská práva.';
-          return;
+          throw Object.assign(new Error('not-admin'), { code: 'auth/not-admin' });
         }
         window.location.replace('./admin.html');
       } catch (error) {
         let msg = 'Přihlášení se nezdařilo. Zkontrolujte e-mail a heslo.';
-        if (error?.code === 'auth/invalid-credential' || error?.code === 'auth/user-not-found' || error?.code === 'auth/wrong-password') {
+        if (error?.code === 'auth/not-admin') {
+          msg = 'Přihlášení se nezdařilo. Účet nemá administrátorská práva.';
+        } else if (error?.code === 'auth/invalid-credential' || error?.code === 'auth/user-not-found' || error?.code === 'auth/wrong-password') {
           msg = 'Neplatný e-mail nebo heslo.';
         } else if (error?.code === 'auth/too-many-requests') {
           msg = 'Příliš mnoho pokusů. Zkus to prosím znovu za chvíli.';

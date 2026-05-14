@@ -81,6 +81,8 @@
     document.getElementById('sign-out-pending').addEventListener('click', (e) => { e.preventDefault(); doSignOut(); });
     document.getElementById('sign-out-reapply').addEventListener('click', (e) => { e.preventDefault(); doSignOut(); });
 
+    // Guard against duplicate form listeners if onAuthStateChanged fires multiple times
+    // for the same session (e.g. on token refresh). The flag resets on every full page load.
     let reapplyListenerAdded = false;
 
     onAuthStateChanged(auth, async (user) => {
