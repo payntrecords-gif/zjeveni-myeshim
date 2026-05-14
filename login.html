@@ -106,31 +106,133 @@
     }
 
     function redirectApprovedUser() {
-var isStandalone =
+<script type="module">
+  import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
+
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+    authDomain: "myeshim-app.firebaseapp.com",
+    projectId: "myeshim-app",
+    storageBucket: "myeshim-app.firebasestorage.app",
+    messagingSenderId: "360259005980",
+    appId: "1:360259005980:web:610695f8b44de04dc079d9"
+  };
+
+  const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
+
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider('6Lfa1-gsAAAAAKGTlACah7A8mN1HGQUH1T1XbCKt'),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch (error) {
+    console.warn('App Check init skipped:', error);
+  }
+
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const form = document.getElementById('login-form');
+  const errorEl = document.getElementById('error');
+  const submitBtn = document.getElementById('submit-btn');
+
+  function getLoginErrorMessage(error) {
+    switch (error?.code) {
+      case 'auth/invalid-credential':
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+        return 'Neplatný e-mail nebo heslo.';
+
+      case 'auth/invalid-email':
+        return 'Zadaný e-mail nemá platný formát.';
+
+      case 'auth/user-disabled':
+        return 'Tento účet byl zablokován.';
+
+      case 'auth/too-many-requests':
+        return 'Příliš mnoho pokusů. Zkus to později.';
+
+      default:
+        return 'Přihlášení se nezdařilo.';
+    }
+  }
+
+  function redirectApprovedUser() {
+    const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       window.matchMedia('(display-mode: minimal-ui)').matches ||
       window.navigator.standalone === true ||
       document.referrer.startsWith('android-app://');
 
     if (isStandalone) {
-      // Launched from home screen — go straight to app
       window.location.replace('./index.html');
       return;
     }
 
-    // In browser — check if user has already seen install guide
-    var installSeen = false;
-    try { installSeen = localStorage.getItem('myeshim-install-seen') === '1'; } catch(e) {}
-
-   if (isStandalone) {
-  window.location.replace('./index.html');
-  return;
-}
-
-window.location.replace('./install.html');
-    }
+    window.location.replace('./install.html');
   }
-);
-  </script>
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    try {
+      const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
+
+      const isApproved =
+        approvedSnap.exists() &&
+        approvedSnap.data()?.status === 'approved';
+
+      if (isApproved) {
+        redirectApprovedUser();
+      } else {
+        await signOut(auth);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    errorEl.textContent = '';
+    submitBtn.disabled = true;
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+
+      const approvedSnap = await getDoc(
+        doc(db, 'approvedUsers', result.user.uid)
+      );
+
+      const isApproved =
+        approvedSnap.exists() &&
+        approvedSnap.data()?.status === 'approved';
+
+      if (!isApproved) {
+        await signOut(auth);
+
+        errorEl.textContent =
+          'Účet ještě nebyl schválen administrátorem.';
+
+        submitBtn.disabled = false;
+        return;
+      }
+
+      redirectApprovedUser();
+
+    } catch (error) {
+      console.error(error);
+      errorEl.textContent = getLoginErrorMessage(error);
+      submitBtn.disabled = false;
+    }
+  });
+</script>
 </body>
 </html>
