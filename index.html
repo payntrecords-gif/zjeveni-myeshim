@@ -1842,15 +1842,15 @@ body.dark .ps-note-item.ps-note-item-clickable.ps-note-item-swiping{background:r
 .iov-title{font-size:1.05rem;font-weight:800;margin-bottom:8px;color:#1c1820}
 .iov-sub{font-size:.88rem;color:#7a6a76;margin-bottom:20px;line-height:1.45}
 /* Install action button (native prompt or external browser handoff) */
-#iov-native-btn{
+.iov-native-btn{
   display:none;width:100%;padding:14px 20px;margin-bottom:14px;
   background:linear-gradient(135deg,#f05ca2,#de4089);border:none;border-radius:14px;
   font:inherit;font-size:.97rem;font-weight:800;color:#fff;cursor:pointer;
   box-shadow:0 8px 22px rgba(229,69,142,.32);transition:transform .14s,box-shadow .14s;
 }
-#iov-native-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(229,69,142,.42)}
-#iov-native-btn:active{transform:scale(.98)}
-#iov-native-btn.visible{display:block}
+.iov-native-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(229,69,142,.42)}
+.iov-native-btn:active{transform:scale(.98)}
+.iov-native-btn.visible{display:block}
 .iov-steps{background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:12px}
 .iov-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.87rem;color:#5e4f5b;line-height:1.4}
 .iov-step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
@@ -5999,7 +5999,7 @@ const FCM_SENDER_ID = '360259005980';
     <div class="iov-title">Přidej aplikaci na plochu 📲</div>
     <div class="iov-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
     <!-- Install action button – native prompt or Telegram browser handoff -->
-    <button id="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
+    <button id="iov-native-btn" class="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
     <div class="iov-steps">
       <div class="iov-step">
         <span class="iov-step-icon">✈️</span>
@@ -6015,7 +6015,7 @@ const FCM_SENDER_ID = '360259005980';
       </div>
     </div>
     <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
-    <button class="install-dismiss" type="button">Pokračovat do aplikace</button>
+    <button id="iov-continue-btn" class="iov-native-btn visible" type="button">Pokračovat do aplikace</button>
   </div>
 </div>
 
@@ -6263,7 +6263,7 @@ const FCM_SENDER_ID = '360259005980';
   document.addEventListener('DOMContentLoaded', function() {
     var nativeBtn = document.getElementById('iov-native-btn');
     var overlayContainer = document.getElementById('install-overlay');
-    var dismissBtn = overlayContainer ? overlayContainer.querySelector('.install-dismiss') : null;
+    var dismissBtn = overlayContainer ? overlayContainer.querySelector('#iov-continue-btn') : null;
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
         if (typeof window.openInstallInPreferredBrowser === 'function' && window.openInstallInPreferredBrowser()) {
@@ -6278,7 +6278,8 @@ const FCM_SENDER_ID = '360259005980';
     }
     if (dismissBtn) {
       dismissBtn.addEventListener('click', function() {
-        if (typeof window.hideInstallOverlay === 'function') window.hideInstallOverlay();
+        try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
+        hideInstallOverlay(false);
       });
     }
     maybeShowInstallOverlayFromHash();
