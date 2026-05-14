@@ -6179,11 +6179,6 @@ const FCM_SENDER_ID = '360259005980';
       if (!safeLS('myeshim-joined', '')) {
         safeLSSet('myeshim-joined', new Date().toISOString().slice(0, 10));
       }
-      // Step 2 of onboarding: if the app is NOT running in standalone mode,
-      // show the install overlay so the user knows to add it to their home screen.
-      if (showInstallOverlayFromHash && typeof window.isStandalone === 'function' && !window.isStandalone()) {
-        showInstallOverlay();
-      }
     } else {
       clearApprovedCache();
       safeLSSet('myeshim-uid-cache', '');
@@ -6246,6 +6241,14 @@ const FCM_SENDER_ID = '360259005980';
     }
   }
 
+  function maybeShowInstallOverlayFromHash() {
+    if (!showInstallOverlayFromHash) return;
+    if (typeof window.isStandalone === 'function' && window.isStandalone()) return;
+    showInstallOverlay();
+    history.replaceState(null, '', window.location.pathname);
+    showInstallOverlayFromHash = false;
+  }
+
   // Show the native install button only when the browser has a deferred prompt ready
   window.updateInstallOverlayBtn = function() {
     var btn = document.getElementById('iov-native-btn');
@@ -6277,13 +6280,7 @@ const FCM_SENDER_ID = '360259005980';
         if (typeof window.hideInstallOverlay === 'function') window.hideInstallOverlay();
       });
     }
-    if (showInstallOverlayFromHash) {
-      if (typeof window.isStandalone !== 'function' || !window.isStandalone()) {
-        showInstallOverlay();
-      }
-      history.replaceState(null, '', window.location.pathname);
-      showInstallOverlayFromHash = false;
-    }
+    maybeShowInstallOverlayFromHash();
     updateInstallOverlayBtn();
   });
 
