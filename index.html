@@ -8,6 +8,12 @@
 <style id="auth-gate-style">
 #app-load-fallback{display:none}
 html.auth-gate-pending #app-load-fallback{display:flex}
+html.auth-gate-pending #topbar,
+html.auth-gate-pending #app,
+html.auth-gate-pending #bottomnav,
+html.auth-gate-pending #nav-ov,
+html.auth-gate-pending #auth-overlay,
+html.auth-gate-pending #install-overlay{visibility:hidden !important}
 @keyframes alf-spin{to{transform:rotate(360deg)}}
 </style>
 <script type="module" id="auth-gate-script">
@@ -71,33 +77,9 @@ function setCachedUid(uid) {
   }
 }
 
-const APPROVED_CACHE_KEY = 'myeshim-approved-cache';
-const APPROVED_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-
-function getApprovedCache(uid) {
-  try {
-    const raw = localStorage.getItem(APPROVED_CACHE_KEY);
-    if (!raw) return null;
-    const entry = JSON.parse(raw);
-    if (!entry || entry.uid !== uid || !entry.approved) return null;
-    if (Date.now() - entry.cachedAt > APPROVED_CACHE_TTL) return null;
-    return entry;
-  } catch (e) {
-    return null;
-  }
-}
-
-function setApprovedCache(uid) {
-  try {
-    localStorage.setItem(APPROVED_CACHE_KEY, JSON.stringify({ uid, approved: true, cachedAt: Date.now() }));
-  } catch (e) {
-    console.warn('Failed to set myeshim-approved-cache:', e);
-  }
-}
-
 function clearApprovedCache() {
   try {
-    localStorage.removeItem(APPROVED_CACHE_KEY);
+    localStorage.removeItem('myeshim-approved-cache');
   } catch (e) { /* ignore */ }
 }
 
@@ -150,25 +132,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Fast path: valid approved cache → release gate immediately, refresh in background
-  if (getApprovedCache(user.uid)) {
-    console.log('MYEShim auth gate: approved cache hit – releasing immediately');
-    setCachedUid(user.uid);
-    releaseAuthGate();
-    initFcmForApprovedUser(user);
-    // Background Firestore refresh (non-blocking)
-    getDoc(doc(db, 'approvedUsers', user.uid)).then(snap => {
-      if (snap.exists() && snap.data()?.status === 'approved') {
-        setApprovedCache(user.uid);
-      } else {
-        clearApprovedCache();
-        redirectTo('./waiting.html');
-      }
-    }).catch(e => console.warn('Background approved check failed:', e));
-    return;
-  }
-
-  // No valid cache: do Firestore check as usual
+  // Strict check: always verify approval in Firestore before releasing UI gate
   try {
     const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
     const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
@@ -178,21 +142,12 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
     setCachedUid(user.uid);
-    setApprovedCache(user.uid);
     console.log('MYEShim auth gate ok – releasing');
     releaseAuthGate();
     initFcmForApprovedUser(user);
   } catch (error) {
     console.error('Auth gate check failed:', error);
-    // Pokud máme cachedUid, pustime dál — síť selžela ale
-    // uživatel byl schválený dříve
-    const cachedUid = localStorage.getItem('myeshim-uid-cache');
-    if (cachedUid && cachedUid === user.uid) {
-      console.warn('Auth gate: Firestore failed but cached uid matches – releasing gate');
-      releaseAuthGate();
-    } else {
-      redirectTo('./waiting.html');
-    }
+    redirectTo('./waiting.html');
   }
 });
 </script>
@@ -6223,8 +6178,9 @@ const FCM_SENDER_ID = '360259005980';
     } else {
       safeLSSet('myeshim-uid-cache', '');
       hideInstallOverlay(/* silent */true);
-      showAuthOverlay();
       clearAvatar();
+      window.location.replace('./login.html');
+      return;
     }
     document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
   }
@@ -6968,6 +6924,43 @@ const FCM_SENDER_ID = '360259005980';
   }
   function safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
   function safeLSGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
+  function isMemorizeKey(key) {
+    return /^memorize_\d+_\d+$/.test(String(key || ''));
+  }
+  function collectMemorizeProgressFromLocal() {
+    var out = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!isMemorizeKey(key)) continue;
+        var raw = localStorage.getItem(key);
+        if (!raw) continue;
+        var parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') continue;
+        out[key] = {
+          level: Number(parsed.level) || 0,
+          completedAt: typeof parsed.completedAt === 'string' ? parsed.completedAt : '',
+          streak: Number(parsed.streak) || 0
+        };
+      }
+    } catch(e) {}
+    return out;
+  }
+  function applyMemorizeProgressToLocal(items) {
+    if (!items || typeof items !== 'object') return;
+    try {
+      var keysToDelete = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (isMemorizeKey(key)) keysToDelete.push(key);
+      }
+      keysToDelete.forEach(function(key){ localStorage.removeItem(key); });
+      Object.keys(items).forEach(function(key){
+        if (!isMemorizeKey(key)) return;
+        localStorage.setItem(key, JSON.stringify(items[key] || {}));
+      });
+    } catch(e) {}
+  }
   function getResolvedNotifTime() {
     var notifTime = safeLSGet('notif_time', '');
     var timeMatch = TIME_RE.exec(String(notifTime));
@@ -7035,6 +7028,11 @@ const FCM_SENDER_ID = '360259005980';
         fcmToken: notifToken,
         updatedAt: notifNow
       });
+    } else if (isMemorizeKey(key) || key === 'memorize_progress_bulk') {
+      await writeDoc('memorizeProgress', {
+        items: collectMemorizeProgressFromLocal(),
+        updatedAt: new Date().toISOString()
+      });
     }
   }
 
@@ -7045,7 +7043,7 @@ const FCM_SENDER_ID = '360259005980';
     var _db = getDb();
     if (!uid || !_db) { loadInProgress = false; return; }
     try {
-      var refs = ['streak', 'notes', 'favorites', 'preferences', 'notifications'];
+      var refs = ['streak', 'notes', 'favorites', 'preferences', 'notifications', 'memorizeProgress'];
       var docs = await Promise.all(refs.map(function(name){
         return _db.collection('users').doc(uid).collection('data').doc(name).get();
       }));
@@ -7073,6 +7071,10 @@ const FCM_SENDER_ID = '360259005980';
           safeLSSet('notif_time', String(notif.time));
         }
         if (notif.fcmToken) safeLSSet('myeshim-fcm-token', String(notif.fcmToken));
+      }
+      var memorize = docs[5].exists ? (docs[5].data() || {}) : null;
+      if (memorize && memorize.items && typeof memorize.items === 'object') {
+        applyMemorizeProgressToLocal(memorize.items);
       }
       var userData = userDoc.exists ? (userDoc.data() || {}) : null;
       if (userData) {
@@ -7105,20 +7107,18 @@ const FCM_SENDER_ID = '360259005980';
       } catch(e) { try { console.warn('Sync watched key failed:', key, e); } catch(ignore) {} }
     });
     if (shouldSyncNotifications) syncKeyToFirestore('notif_time', safeLSGet('notif_time', ''));
+    syncKeyToFirestore('memorize_progress_bulk', '1');
   }
 
   var originalSetItem = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value) {
     originalSetItem(key, value);
-    if (!watchedKeys[key] || syncingFromRemote) return;
+    if ((!watchedKeys[key] && !isMemorizeKey(key)) || syncingFromRemote) return;
     syncKeyToFirestore(key, value);
   };
 
   document.addEventListener('myeshim-auth-ready', function(event) {
     if (event && event.detail && event.detail.loggedIn) {
-      // Immediately write locally-incremented streak to Firestore so it is not
-      // lost if the user closes the app before loadFirestoreData completes.
-      syncCurrentWatchedValues();
       loadFirestoreData().then(syncCurrentWatchedValues);
     }
   });
