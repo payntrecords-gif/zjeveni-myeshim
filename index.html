@@ -6924,7 +6924,6 @@ const FCM_SENDER_ID = '360259005980';
   }
   function safeLSSet(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
   function safeLSGet(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : v; } catch(e) { return d; } }
-  const MEMORIZE_BULK_SYNC_SENTINEL = 'manual-sync';
   var lastMemorizeSnapshot = '';
   var memorizeSyncTimer = null;
   function isMemorizeKey(key) {
@@ -7053,8 +7052,6 @@ const FCM_SENDER_ID = '360259005980';
       });
     } else if (isMemorizeKey(key)) {
       scheduleMemorizeProgressSync(300);
-    } else if (key === 'memorize_progress_bulk') {
-      await syncMemorizeProgressIfChanged();
     }
   }
 
@@ -7135,7 +7132,9 @@ const FCM_SENDER_ID = '360259005980';
       } catch(e) { try { console.warn('Sync watched key failed:', key, e); } catch(ignore) {} }
     });
     if (shouldSyncNotifications) syncKeyToFirestore('notif_time', safeLSGet('notif_time', ''));
-    syncKeyToFirestore('memorize_progress_bulk', MEMORIZE_BULK_SYNC_SENTINEL);
+    syncMemorizeProgressIfChanged().catch(function(err){
+      console.warn('Bulk memorize sync failed:', err);
+    });
   }
 
   var originalSetItem = localStorage.setItem.bind(localStorage);
@@ -7151,7 +7150,6 @@ const FCM_SENDER_ID = '360259005980';
         .then(syncCurrentWatchedValues)
         .catch(function(err){
           console.warn('Initial Firestore load failed:', err);
-          syncCurrentWatchedValues();
         });
     }
   });

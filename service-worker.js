@@ -53,7 +53,7 @@ self.addEventListener('fetch', event => {
 
         const path = url.pathname || '/';
         const leaf = path.endsWith('/') ? '' : path.split('/').pop();
-        const isSafeHtmlLeaf = /^[A-Za-z0-9._-]+\.html$/.test(leaf) && !leaf.includes('..');
+        const isSafeHtmlLeaf = /^[A-Za-z0-9_-]+\.html$/.test(leaf);
         if (isSafeHtmlLeaf) {
           const cachedLeaf = await caches.match('./' + leaf);
           if (cachedLeaf) return cachedLeaf;
