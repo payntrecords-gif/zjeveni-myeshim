@@ -1,124 +1,183 @@
-<script type="module">
-import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>MYEShim – Přihlášení</title>
 
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
-  authDomain: "myeshim-app.firebaseapp.com",
-  projectId: "myeshim-app",
-  storageBucket: "myeshim-app.firebasestorage.app",
-  messagingSenderId: "360259005980",
-  appId: "1:360259005980:web:610695f8b44de04dc079d9"
-};
-
-const app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
-
-try {
-  initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('6Lfa1-gsAAAAAKGTlACah7A8mN1HGQUH1T1XbCKt'),
-    isTokenAutoRefreshEnabled: true
-  });
-} catch (error) {
-  console.warn('App Check init skipped:', error);
-}
-
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-const form = document.getElementById('login-form');
-const errorEl = document.getElementById('error');
-const submitBtn = document.getElementById('submit-btn');
-
-function redirectApprovedUser() {
-  const isStandalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.matchMedia('(display-mode: minimal-ui)').matches ||
-    window.navigator.standalone === true ||
-    document.referrer.startsWith('android-app://');
-
-  if (isStandalone) {
-    window.location.replace('./index.html');
-    return;
-  }
-
-  window.location.replace('./install.html');
-}
-
-function getLoginErrorMessage(error) {
-  switch (error?.code) {
-    case 'auth/invalid-credential':
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-      return 'Neplatný e-mail nebo heslo.';
-    case 'auth/invalid-email':
-      return 'Zadaný e-mail nemá platný formát.';
-    case 'auth/user-disabled':
-      return 'Tento účet byl zablokován.';
-    case 'auth/too-many-requests':
-      return 'Příliš mnoho pokusů. Zkus to později.';
-    default:
-      return 'Přihlášení se nezdařilo.';
-  }
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
-
-  try {
-    const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
-
-    const isApproved =
-      approvedSnap.exists() &&
-      approvedSnap.data()?.status === 'approved';
-
-    if (isApproved) {
-      redirectApprovedUser();
-    } else {
-      await signOut(auth);
-    }
-  } catch (error) {
-    console.error(error);
-  }
-});
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  errorEl.textContent = '';
-  submitBtn.disabled = true;
-
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-
-  try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-
-    const approvedSnap = await getDoc(
-      doc(db, 'approvedUsers', result.user.uid)
-    );
-
-    const isApproved =
-      approvedSnap.exists() &&
-      approvedSnap.data()?.status === 'approved';
-
-    if (!isApproved) {
-      await signOut(auth);
-
-      errorEl.textContent =
-        'Účet ještě nebyl schválen administrátorem.';
-
-      submitBtn.disabled = false;
-      return;
+  <style>
+    :root{
+      --bg:#120f15;
+      --card:#1d1723;
+      --line:#3b3044;
+      --text:#f7f1ff;
+      --sub:#b9a9c6;
+      --accent:#d4af37;
     }
 
-    redirectApprovedUser();
+    *{box-sizing:border-box}
 
-  } catch (error) {
-    console.error(error);
-    errorEl.textContent = getLoginErrorMessage(error);
-    submitBtn.disabled = false;
-  }
-});
-</script>
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background:radial-gradient(circle at top,#2a1f31,var(--bg));
+      font-family:system-ui, sans-serif;
+      color:var(--text);
+      padding:20px;
+    }
+
+    .card{
+      width:min(420px,100%);
+      background:rgba(29,23,35,.92);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:24px;
+    }
+
+    h1{margin:0 0 8px}
+    p{color:var(--sub);margin:0 0 18px;line-height:1.5}
+
+    input{
+      width:100%;
+      padding:12px;
+      margin-bottom:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#120f15;
+      color:var(--text);
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:12px;
+      background:linear-gradient(135deg,#e3c76a,var(--accent));
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    button:disabled{opacity:.6}
+
+    .error{
+      min-height:20px;
+      color:#ff8d8d;
+      margin-bottom:10px;
+      font-size:0.9rem;
+    }
+
+    a{
+      display:block;
+      margin-top:12px;
+      text-align:center;
+      color:#f2dc98;
+      text-decoration:none;
+      font-size:0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <form class="card" id="login-form">
+    <h1>Přihlášení</h1>
+    <p>Přihlas se e-mailem a heslem. Přístup je možný až po schválení administrátorem.</p>
+
+    <div class="error" id="error"></div>
+
+    <input id="email" type="email" placeholder="E-mail" required>
+    <input id="password" type="password" placeholder="Heslo" required minlength="6">
+
+    <button id="submit-btn" type="submit">Přihlásit se</button>
+
+    <a href="./register.html">Nemáš účet? Registrace</a>
+  </form>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+      authDomain: "myeshim-app.firebaseapp.com",
+      projectId: "myeshim-app",
+      storageBucket: "myeshim-app.firebasestorage.app",
+      messagingSenderId: "360259005980",
+      appId: "1:360259005980:web:610695f8b44de04dc079d9"
+    };
+
+    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("login-form");
+    const errorEl = document.getElementById("error");
+    const btn = document.getElementById("submit-btn");
+
+    function redirect() {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone;
+
+      window.location.replace(isStandalone ? "./index.html" : "./install.html");
+    }
+
+    function errorMessage(code) {
+      switch(code){
+        case "auth/invalid-email":
+          return "Neplatný e-mail.";
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+          return "Špatný e-mail nebo heslo.";
+        default:
+          return "Chyba při přihlášení.";
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      const snap = await getDoc(doc(db, "approvedUsers", user.uid));
+      const approved = snap.exists() && snap.data().status === "approved";
+
+      if (approved) redirect();
+      else await signOut(auth);
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      errorEl.textContent = "";
+      btn.disabled = true;
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+
+        const snap = await getDoc(doc(db, "approvedUsers", result.user.uid));
+        const approved = snap.exists() && snap.data().status === "approved";
+
+        if (!approved) {
+          await signOut(auth);
+          errorEl.textContent = "Účet ještě není schválen.";
+          btn.disabled = false;
+          return;
+        }
+
+        redirect();
+
+      } catch (err) {
+        errorEl.textContent = errorMessage(err.code);
+        btn.disabled = false;
+      }
+    });
+
+  </script>
+
+</body>
+</html>
