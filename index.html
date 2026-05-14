@@ -6979,7 +6979,9 @@ const FCM_SENDER_ID = '360259005980';
     if (memorizeSyncTimer) clearTimeout(memorizeSyncTimer);
     memorizeSyncTimer = setTimeout(function(){
       memorizeSyncTimer = null;
-      syncMemorizeProgressIfChanged();
+      syncMemorizeProgressIfChanged().catch(function(err){
+        console.warn('Memorize progress sync failed:', err);
+      });
     }, Number(delayMs) || 250);
   }
   function getResolvedNotifTime() {
@@ -7145,7 +7147,12 @@ const FCM_SENDER_ID = '360259005980';
 
   document.addEventListener('myeshim-auth-ready', function(event) {
     if (event && event.detail && event.detail.loggedIn) {
-      loadFirestoreData().then(syncCurrentWatchedValues);
+      loadFirestoreData()
+        .then(syncCurrentWatchedValues)
+        .catch(function(err){
+          console.warn('Initial Firestore load failed:', err);
+          syncCurrentWatchedValues();
+        });
     }
   });
   setTimeout(function(){
