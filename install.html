@@ -49,6 +49,14 @@ h1{
 #main-btn:disabled{opacity:.7;cursor:default}
 #main-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;flex-shrink:0}
 
+#skip-btn{
+  display:block;width:100%;padding:11px 20px;
+  background:none;border:1.5px solid rgba(229,69,142,.3);border-radius:14px;
+  font:inherit;font-size:.93rem;font-weight:700;color:#c53580;cursor:pointer;
+  transition:background .14s,border-color .14s;margin-bottom:14px;
+}
+#skip-btn:active{background:rgba(229,69,142,.06)}
+
 .steps{background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:14px}
 .step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:.87rem;color:#5e4f5b;line-height:1.45}
 .step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
@@ -88,33 +96,35 @@ h1{
   <img src="./icon-512.png" alt="MYEShim">
 </div>
 <h1>MYEShim</h1>
-<p class="tagline">Přidej aplikaci na plochu telefonu</p>
+<p class="tagline">Jeden krok k označování</p>
 
 <div id="status-badge">
   <span>⏳</span><span id="status-text">Připravuji instalaci…</span>
 </div>
 
 <div class="card">
-  <div class="card-title" id="card-title">Přidat na plochu 📲</div>
-  <div class="card-sub" id="card-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná přímo z plochy.</div>
+  <div class="card-title" id="card-title">Přidej aplikaci na plochu 📲</div>
+  <div class="card-sub" id="card-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
 
   <button id="main-btn">
     <svg viewBox="0 0 24 24"><path d="M12 3v13M5 10l7 7 7-7"/><path d="M3 19h18" stroke-linecap="round"/></svg>
     <span id="btn-label">Nainstalovat aplikaci</span>
   </button>
 
+  <button id="skip-btn">Přejít do aplikace bez instalace</button>
+
   <div class="steps" id="install-steps">
     <div class="step" id="step-telegram" style="display:none">
       <span class="step-icon">✈️</span>
-      <span><strong>Telegram:</strong> instalace nefunguje v interním prohlížeči. Klepni na tlačítko výše a otevři MYEShim v Chrome.</span>
+      <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři MYEShim v Chrome nebo Safari.</span>
     </div>
     <div class="step" id="step-android" style="display:none">
       <span class="step-icon">🤖</span>
-      <span><strong>Android (Chrome):</strong> klepni na <strong>⋮</strong> vpravo nahoře → „Přidat na plochu" nebo „Instalovat aplikaci".</span>
+      <span><strong>Android (Chrome):</strong> klepni na <strong>⋮</strong> v pravém horním rohu a zvol „Přidat na plochu" nebo „Instalovat aplikaci".</span>
     </div>
     <div class="step" id="step-ios" style="display:none">
       <span class="step-icon">🍎</span>
-      <span><strong>iPhone / iPad:</strong> klepni na <strong>⬆️ Sdílet</strong> ve spodní liště Safari → „Přidat na plochu".</span>
+      <span><strong>iPhone / iPad (Safari):</strong> klepni na <strong>⬆️</strong> (Sdílet) ve spodní liště a zvol „Přidat na plochu".</span>
     </div>
     <div class="step" id="step-desktop" style="display:none">
       <span class="step-icon">💻</span>
@@ -122,7 +132,7 @@ h1{
     </div>
   </div>
 
-  <p class="note" id="install-note">Po instalaci otevři aplikaci ikonou z plochy a přihlas se svým účtem.</p>
+  <p class="note" id="install-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
 </div>
 
 <!-- iOS animovaná šipka -->
@@ -137,7 +147,7 @@ h1{
   var ua = navigator.userAgent;
   var isIOS = /iphone|ipad|ipod/i.test(ua);
   var isAndroid = /android/i.test(ua);
-  var isTelegram = /telegram/i.test(ua);
+  var isTelegram = /telegram|tgwebview/i.test(ua);
   var isSafari = /safari/i.test(ua) && !/chrome/i.test(ua);
   var isDesktop = !isIOS && !isAndroid;
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -148,15 +158,24 @@ h1{
     return;
   }
 
-  // Zachyť Android install prompt co nejdřív
-window.addEventListener('beforeinstallprompt', function(e){
-  e.preventDefault();
-  deferredPrompt = e;
-  // Automaticky spusť prompt hned jak je dostupný
-  if(!isIOS && !isTelegram){
-    e.prompt();
+  // Zachyť beforeinstallprompt co nejdřív — BEZ automatického volání prompt()
+  // prompt() smí být volán POUZE z přímé user gesture (klik na tlačítko)
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault(); // zabraň výchozímu mini-info baru
+    deferredPrompt = e;
+    // Aktualizuj UI pokud je DOM připraven
+    if(document.readyState !== 'loading'){
+      onPromptReady();
+    }
+  });
+
+  function onPromptReady(){
+    var mainBtn = document.getElementById('main-btn');
+    var btnLabel = document.getElementById('btn-label');
+    if(!mainBtn || !btnLabel) return;
+    btnLabel.textContent = 'Nainstalovat jedním klepnutím';
+    showBadge('✅', 'Připraveno k instalaci!');
   }
-});
 
   document.addEventListener('DOMContentLoaded', function(){
     var mainBtn = document.getElementById('main-btn');
@@ -165,6 +184,17 @@ window.addEventListener('beforeinstallprompt', function(e){
     var statusBadge = document.getElementById('status-badge');
     var statusText = document.getElementById('status-text');
     var iosArrow = document.getElementById('ios-arrow');
+    var skipBtn = document.getElementById('skip-btn');
+
+    // Přejít bez instalace
+    if(skipBtn){
+      skipBtn.addEventListener('click', function(){
+        window.location.href = './index.html';
+      });
+    }
+
+    // Pokud byl prompt zachycen ještě před DOMContentLoaded
+    if(deferredPrompt) onPromptReady();
 
     // ── TELEGRAM ──
     if(isTelegram){
@@ -184,7 +214,7 @@ window.addEventListener('beforeinstallprompt', function(e){
     // ── iOS SAFARI ──
     if(isIOS){
       document.getElementById('step-ios').style.display = 'flex';
-      btnLabel.textContent = 'Jak přidat na plochu →';
+      btnLabel.textContent = 'Zobrazit návod →';
       mainBtn.addEventListener('click', function(){
         iosArrow.style.display = 'block';
         document.getElementById('step-ios').style.background = 'rgba(229,69,142,.08)';
@@ -198,36 +228,31 @@ window.addEventListener('beforeinstallprompt', function(e){
     if(isAndroid){
       document.getElementById('step-android').style.display = 'flex';
 
-      // Zkus automaticky spustit prompt po 300ms
-      setTimeout(function(){
-        if(deferredPrompt){
-          showBadge('✅', 'Připraveno k instalaci!');
-          btnLabel.textContent = 'Nainstalovat jedním klepnutím';
-        } else {
-          showBadge('ℹ️', 'Použij postup níže');
-        }
-      }, 300);
-
       mainBtn.addEventListener('click', function(){
         if(deferredPrompt){
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(function(result){
-            deferredPrompt = null;
+          // ✅ Tady se SMÍ volat prompt() — je to přímá reakce na klik
+          var p = deferredPrompt;
+          deferredPrompt = null;
+          p.prompt();
+          p.userChoice.then(function(result){
             if(result.outcome === 'accepted'){
               btnLabel.textContent = '✓ Instaluje se…';
               mainBtn.disabled = true;
               showBadge('🎉', 'Instalace zahájena!');
               installNote.textContent = 'Skvěle! Otevři MYEShim z plochy telefonu.';
             } else {
+              showBadge('ℹ️', 'Instalaci zrušil/a');
               installNote.textContent = 'Instalaci spustíš přes ⋮ menu → „Instalovat aplikaci".';
               installNote.style.color = '#c53580';
             }
           });
         } else {
+          // Prompt není k dispozici — zvýrazni manuální návod
           document.getElementById('step-android').style.background = 'rgba(229,69,142,.08)';
           document.getElementById('step-android').style.borderRadius = '10px';
           installNote.textContent = 'Použij postup níže 👆';
           installNote.style.color = '#c53580';
+          showBadge('ℹ️', 'Použij postup níže');
         }
       });
       return;
@@ -239,17 +264,21 @@ window.addEventListener('beforeinstallprompt', function(e){
       btnLabel.textContent = 'Nainstalovat na desktop';
       mainBtn.addEventListener('click', function(){
         if(deferredPrompt){
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(function(result){
-            deferredPrompt = null;
+          var p = deferredPrompt;
+          deferredPrompt = null;
+          p.prompt();
+          p.userChoice.then(function(result){
             if(result.outcome === 'accepted'){
               btnLabel.textContent = '✓ Instaluje se…';
               mainBtn.disabled = true;
+              showBadge('🎉', 'Instalace zahájena!');
             }
           });
         } else {
           document.getElementById('step-desktop').style.background = 'rgba(229,69,142,.08)';
           document.getElementById('step-desktop').style.borderRadius = '10px';
+          installNote.textContent = 'Použij postup v adresním řádku 👆';
+          installNote.style.color = '#c53580';
         }
       });
     }
@@ -266,11 +295,22 @@ window.addEventListener('beforeinstallprompt', function(e){
     });
 
     function showBadge(icon, text){
-      statusBadge.querySelector('span').textContent = icon;
-      statusText.textContent = text;
-      statusBadge.classList.add('show');
+      var badge = document.getElementById('status-badge');
+      if(!badge) return;
+      badge.querySelector('span').textContent = icon;
+      document.getElementById('status-text').textContent = text;
+      badge.classList.add('show');
     }
   });
+
+  function showBadge(icon, text){
+    var badge = document.getElementById('status-badge');
+    if(!badge) return;
+    badge.querySelector('span').textContent = icon;
+    var st = document.getElementById('status-text');
+    if(st) st.textContent = text;
+    badge.classList.add('show');
+  }
 })();
 </script>
 </body>
