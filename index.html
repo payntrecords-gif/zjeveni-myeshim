@@ -58,7 +58,7 @@ const _authGateTimeout = setTimeout(() => {
 }, 3000);
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check.js';
@@ -87,6 +87,7 @@ try {
 const auth = getAuth(app);
 const db = getFirestore(app);
 setPersistence(auth, browserLocalPersistence).catch(e => console.warn('setPersistence failed:', e));
+window.__myeshimAuth = auth;
 console.log('Firebase init ok');
 
 function redirectTo(path) {
@@ -132,6 +133,24 @@ function releaseAuthGate() {
   document.documentElement.classList.add('auth-released'); // ← PŘIDEJ TENTO ŘÁDEK
   const fb = document.getElementById('app-load-fallback');
   if (fb) fb.style.display = 'none';
+}
+
+function dispatchAuthReady(loggedIn) {
+  document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!loggedIn } }));
+}
+
+function applyApprovedUserUi(user) {
+  window.__myeshimUser = user;
+  try {
+    if (typeof hideAuthOverlay === 'function') hideAuthOverlay();
+    if (typeof updateAvatar === 'function') updateAvatar(user);
+    if (typeof localStorage !== 'undefined' && !localStorage.getItem('myeshim-joined')) {
+      localStorage.setItem('myeshim-joined', new Date().toISOString().slice(0, 10));
+    }
+  } catch (error) {
+    console.warn('[AuthGate] Failed to apply approved UI state', error);
+  }
+  dispatchAuthReady(true);
 }
 
 async function initFcmForApprovedUser(user) {
@@ -187,7 +206,7 @@ onAuthStateChanged(auth, async (user) => {
 
     if (cachedApproved) {
       setCachedUid(user.uid);
-      window.__myeshimUser = user;
+      applyApprovedUserUi(user);
       console.log('[AuthGate] cached approved -> release');
       releaseAuthGate();
       initFcmForApprovedUser(user); // FCM na pozadí, neblokuje UI
@@ -208,20 +227,17 @@ onAuthStateChanged(auth, async (user) => {
       setApprovedCache(user.uid);
       setCachedUid(user.uid);
       if (!cachedApproved) {
-        window.__myeshimUser = user;
+        applyApprovedUserUi(user);
         console.log('[AuthGate] approved -> release');
         releaseAuthGate();
         initFcmForApprovedUser(user);
       }
     } catch (error) {
-      console.error('[AuthGate] Firestore approval check failed -> signing out non-cached users', error);
+      console.error('[AuthGate] Firestore approval check failed', error);
       if (!cachedApproved) {
         clearApprovedCache();
-        setCachedUid(null);
-        await signOut(auth).catch((signOutError) => {
-          console.warn('[AuthGate] signOut failed after check failure', signOutError?.message || signOutError);
-        });
-        redirectTo('./login.html');
+        setCachedUid(user.uid);
+        redirectTo('./waiting.html');
       }
     }
   } catch (error) {
@@ -6606,8 +6622,13 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   function initAuth() {
-    if (!window.firebase || typeof firebase.auth !== 'function' || authInitialized) return;
+    if (authInitialized) return;
     authInitialized = true;
+    if (window.__myeshimAuth) {
+      auth = window.__myeshimAuth;
+      return;
+    }
+    if (!window.firebase || typeof firebase.auth !== 'function') return;
     // Re-use existing app if already initialized
     if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(FIREBASE_AUTH_CONFIG);
@@ -6618,7 +6639,6 @@ const FCM_SENDER_ID = '360259005980';
         reportNonCriticalError('Auth persistence selhala:', err);
       });
     }
-    auth.onAuthStateChanged(onAuthChange);
   }
 
   function onAuthChange(user) {
