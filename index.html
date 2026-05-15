@@ -43,8 +43,109 @@ html.browser-mode #app-load-fallback{display:none !important}
 html.browser-mode.auth-released #install-overlay{display:flex !important;visibility:visible !important}
 html.browser-mode:not(.auth-released) #install-overlay{display:none !important;visibility:hidden !important}
 html.browser-mode body{background:var(--bg,#f8f3f7)}
+/* ── LOADING SCREEN ── */
 @keyframes alf-spin{to{transform:rotate(360deg)}}
+@keyframes alf-fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes alf-shimmer{
+  0%{background-position:200% center}
+  100%{background-position:-200% center}
+}
+@keyframes alf-logo-in{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@keyframes alf-pulse-ring{
+  0%,100%{transform:scale(1);opacity:.55}
+  50%{transform:scale(1.12);opacity:.85}
+}
+#app-load-fallback{
+  position:fixed;inset:0;
+  z-index:99999;
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:0;
+  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+  /* light default tokens */
+  --alf-bg:
+    radial-gradient(ellipse 120% 60% at 50% -5%,rgba(229,69,142,.22) 0%,transparent 60%),
+    radial-gradient(ellipse 80% 50% at 95% 110%,rgba(123,62,244,.14) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 40% at 0% 80%,rgba(229,69,142,.08) 0%,transparent 55%),
+    #f8f3f7;
+  --alf-ring-bg:radial-gradient(circle,rgba(229,69,142,.22) 0%,transparent 65%);
+  --alf-logo-shadow:0 20px 48px rgba(229,69,142,.28),0 4px 16px rgba(123,62,244,.14);
+  --alf-spinner-ring:rgba(229,69,142,.2);
+  --alf-spinner-tip:#e5458e;
+  --alf-text-gradient:linear-gradient(135deg,#7b3ef4 0%,#e5458e 100%);
+  background:var(--alf-bg);
+}
+/* dark tokens — applied by media query and/or html.alf-dark class */
+@media (prefers-color-scheme: dark){
+  #app-load-fallback{
+    --alf-bg:
+      radial-gradient(ellipse 110% 55% at 50% -8%,rgba(180,90,220,.28) 0%,transparent 58%),
+      radial-gradient(ellipse 70% 45% at 95% 110%,rgba(100,50,200,.22) 0%,transparent 55%),
+      radial-gradient(ellipse 55% 38% at 0% 80%,rgba(229,69,142,.14) 0%,transparent 52%),
+      linear-gradient(170deg,#1a1425 0%,#130f1c 55%,#1c1128 100%);
+    --alf-ring-bg:radial-gradient(circle,rgba(220,100,200,.3) 0%,transparent 65%);
+    --alf-logo-shadow:0 20px 48px rgba(180,60,200,.35),0 4px 18px rgba(100,50,200,.2);
+    --alf-spinner-ring:rgba(229,69,142,.18);
+    --alf-spinner-tip:#d44caa;
+    --alf-text-gradient:linear-gradient(135deg,#c084fc 0%,#f472b6 100%);
+  }
+}
+html.alf-dark #app-load-fallback{
+  --alf-bg:
+    radial-gradient(ellipse 110% 55% at 50% -8%,rgba(180,90,220,.28) 0%,transparent 58%),
+    radial-gradient(ellipse 70% 45% at 95% 110%,rgba(100,50,200,.22) 0%,transparent 55%),
+    radial-gradient(ellipse 55% 38% at 0% 80%,rgba(229,69,142,.14) 0%,transparent 52%),
+    linear-gradient(170deg,#1a1425 0%,#130f1c 55%,#1c1128 100%);
+  --alf-ring-bg:radial-gradient(circle,rgba(220,100,200,.3) 0%,transparent 65%);
+  --alf-logo-shadow:0 20px 48px rgba(180,60,200,.35),0 4px 18px rgba(100,50,200,.2);
+  --alf-spinner-ring:rgba(229,69,142,.18);
+  --alf-spinner-tip:#d44caa;
+  --alf-text-gradient:linear-gradient(135deg,#c084fc 0%,#f472b6 100%);
+}
+.alf-logo-wrap{
+  position:relative;
+  margin-bottom:2rem;
+  animation:alf-logo-in .55s cubic-bezier(.22,1,.36,1) both;
+}
+.alf-logo-wrap::before{
+  content:'';
+  position:absolute;inset:-22px;
+  border-radius:50%;
+  background:var(--alf-ring-bg);
+  animation:alf-pulse-ring 2.8s ease-in-out infinite;
+}
+.alf-logo-wrap img{
+  position:relative;display:block;
+  width:96px;height:96px;
+  border-radius:22px;
+  box-shadow:var(--alf-logo-shadow);
+}
+.alf-spinner{
+  width:2.6rem;height:2.6rem;
+  border-radius:50%;
+  border:2.5px solid var(--alf-spinner-ring);
+  border-top-color:var(--alf-spinner-tip);
+  animation:alf-spin .85s linear infinite;
+  margin-bottom:1.1rem;
+}
+.alf-text{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:.9rem;font-weight:600;letter-spacing:.06em;
+  background:var(--alf-text-gradient);
+  background-size:200% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:alf-fade-in .5s .3s cubic-bezier(.22,1,.36,1) both,
+            alf-shimmer 3.5s linear infinite;
+}
 </style>
+<script>
+(function(){
+  try{
+    var t=localStorage.getItem('ux35-theme')||'system';
+    var isDark=t==='dark'||(t==='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches);
+    if(isDark) document.documentElement.classList.add('alf-dark');
+  }catch(e){}
+})();
+</script>
 <script type="module" id="auth-gate-script">
 console.log('MYEShim boot start');
 document.documentElement.classList.add('auth-gate-pending');
@@ -2827,10 +2928,12 @@ body.dark .mm-l4-wrong-token{
 </script>
 </head>
 <body>
-<div id="app-load-fallback" style="position:fixed;inset:0;background:#120f15;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:1.2rem;">
-  <img src="logo.png" alt="MYEShim" width="121" height="50" style="opacity:.9">
-  <div style="width:2.5rem;height:2.5rem;border-radius:50%;border:3px solid rgba(229,69,142,.25);border-top-color:#e5458e;animation:alf-spin .8s linear infinite;"></div>
-  <span style="font-family:sans-serif;font-size:.95rem;color:rgba(255,255,255,.7);letter-spacing:.04em;">Načítání…</span>
+<div id="app-load-fallback">
+  <div class="alf-logo-wrap">
+    <img src="logo.png" alt="MYEShim" width="96" height="96">
+  </div>
+  <div class="alf-spinner"></div>
+  <span class="alf-text">Načítání…</span>
 </div>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
 <div id="topbar">
