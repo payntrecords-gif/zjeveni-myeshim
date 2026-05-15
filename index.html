@@ -111,6 +111,20 @@ function clearApprovedCache() {
     localStorage.removeItem('myeshim-approved-cache');
   } catch (e) { /* ignore */ }
 }
+function setApprovedCache(uid) {
+  try {
+    localStorage.setItem('myeshim-approved-cache', uid);
+  } catch (e) { /* ignore */ }
+}
+function getApprovedCacheUid() {
+  try {
+    return localStorage.getItem('myeshim-approved-cache');
+  } catch (e) {
+    return null;
+  }
+}
+window.clearApprovedCache = clearApprovedCache;
+window.setApprovedCache = setApprovedCache;
 
 function releaseAuthGate() {
   clearTimeout(_authGateTimeout);
@@ -154,52 +168,60 @@ try {
 }
 
 onAuthStateChanged(auth, async (user) => {
-  console.log('MYEShim onAuthStateChanged:', user ? 'user=' + user.uid : 'no user');
-  if (!user) {
-    setCachedUid(null);
-    clearApprovedCache();
-    redirectTo('./login.html');
-    return;
-  }
-
- // Rychlý start: pokud máme cached approved pro tohoto uida, rovnou pusť UI
-  let cachedApproved = false;
+  const authUser = user || null;
   try {
-    cachedApproved = localStorage.getItem('myeshim-approved-cache') === user.uid;
-  } catch(e) {}
-
-  if (cachedApproved) {
-    setCachedUid(user.uid);
-    window.__myeshimUser = user;
-    console.log('MYEShim auth gate ok (cache) – releasing');
-    releaseAuthGate();
-    initFcmForApprovedUser(user); // FCM na pozadí, neblokuje UI
-  }
-
-  // Strict check: vždy ověř v Firestore (i když jsme pustili z cache)
-  try {
-    const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
-    const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
-    if (!isApproved) {
-      setCachedUid(user.uid);
-      try { localStorage.removeItem('myeshim-approved-cache'); } catch(e) {}
-      redirectTo('./waiting.html');
+    console.log('MYEShim onAuthStateChanged:', user ? 'user=' + user.uid : 'no user');
+    if (!user) {
+      setCachedUid(null);
+      clearApprovedCache();
+      redirectTo('./login.html');
       return;
     }
-    // Ulož cache pro příští spuštění
-    try { localStorage.setItem('myeshim-approved-cache', user.uid); } catch(e) {}
-    setCachedUid(user.uid);
-    if (!cachedApproved) {
+
+   // Rychlý start: pokud máme cached approved pro tohoto uida, rovnou pusť UI
+    let cachedApproved = false;
+    try {
+      cachedApproved = getApprovedCacheUid() === user.uid;
+    } catch(e) {}
+
+    if (cachedApproved) {
+      setCachedUid(user.uid);
       window.__myeshimUser = user;
-      console.log('MYEShim auth gate ok – releasing');
+      console.log('MYEShim auth gate ok (cache) – releasing');
       releaseAuthGate();
-      initFcmForApprovedUser(user);
+      initFcmForApprovedUser(user); // FCM na pozadí, neblokuje UI
+    }
+
+    // Strict check: vždy ověř v Firestore (i když jsme pustili z cache)
+    try {
+      const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
+      const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
+      if (!isApproved) {
+        setCachedUid(user.uid);
+        clearApprovedCache();
+        redirectTo('./waiting.html');
+        return;
+      }
+      // Ulož cache pro příští spuštění
+      setApprovedCache(user.uid);
+      setCachedUid(user.uid);
+      if (!cachedApproved) {
+        window.__myeshimUser = user;
+        console.log('MYEShim auth gate ok – releasing');
+        releaseAuthGate();
+        initFcmForApprovedUser(user);
+      }
+    } catch (error) {
+      console.error('MYEShim Firestore approved check failed:', error);
+      if (!cachedApproved) {
+        redirectTo('./waiting.html');
+      }
     }
   } catch (error) {
-    console.error('MYEShim Firestore approved check failed:', error);
-    if (!cachedApproved) {
-      redirectTo('./waiting.html');
-    }
+    console.error('MYEShim auth bootstrap failed:', error);
+    clearApprovedCache();
+    setCachedUid(authUser?.uid || null);
+    redirectTo(authUser?.uid ? './waiting.html' : './login.html');
   }
 });
 </script>
@@ -6476,6 +6498,9 @@ const FCM_SENDER_ID = '360259005980';
   function safeLSSet(key, val) {
     try { localStorage.setItem(key, val); } catch(e) {}
   }
+  const clearApprovedCache = window.clearApprovedCache || function() {
+    try { localStorage.removeItem('myeshim-approved-cache'); } catch(e) {}
+  };
 
   function reportNonCriticalError(label, err) {
     try { console.warn(label, err && err.message ? err.message : err); } catch(e) {}
