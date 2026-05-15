@@ -4075,7 +4075,7 @@ window.shareCurrentVerse=async function(){
     el.overlay.classList.add('open');
     updateMemorizedButtonState(vv, { animate: false });
     // Zkontroluj Firestore jestli je verš už memorovaný → potvrď per-verse status
-    if (!isVerseMemorized(vv)) loadMemorizedState(vv);
+    if (!isVerseMemorized(vv)) void loadMemorizedState(vv);
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
@@ -4099,7 +4099,7 @@ window.shareCurrentVerse=async function(){
     const memorizeBtn = document.getElementById('verse-memorize-btn');
     if (!memorizeBtn) return;
     const memorized = isVerseMemorized(verse);
-    if (memorized) setLocalMemorizedState(verse, true);
+    if (memorized && !getLocalMemorizedState(verse)) setLocalMemorizedState(verse, true);
     memorizeBtn.classList.toggle('mm-memorized', memorized);
     if (memorized){
       memorizeBtn.innerHTML = '<span class="mm-mem-title">🏆 Mistrovství dokončeno</span><span class="mm-mem-sub">Memorováno</span>';
@@ -4158,7 +4158,7 @@ window.shareCurrentVerse=async function(){
     const vv = verse || (window.VERSES && window.state ? window.VERSES[window.state.idx] : null);
     if (!vv) return;
     updateMemorizedButtonState(vv, { animate: false });
-    if (!isVerseMemorized(vv)) loadMemorizedState(vv);
+    if (!isVerseMemorized(vv)) void loadMemorizedState(vv);
   };
   window.openMemorizeMode = open;
   window.closeMemorizeMode = close;
