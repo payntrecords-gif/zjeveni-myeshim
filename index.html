@@ -3967,6 +3967,8 @@ window.shareCurrentVerse=async function(){
       return;
     }
     if (mm.level === 5){
+      if (!mm.completedThisView) completeLevel();
+      markVerseMemorizedUI();
       close();
       return;
     }
@@ -4028,14 +4030,6 @@ window.shareCurrentVerse=async function(){
         { merge: true }
       );
       console.log('[Memorize] Uloženo do Firestore:', key);
-      // Vizuální označení tlačítka Memorovat na kartě verše
-      const memorizeBtn = document.getElementById('verse-memorize-btn');
-      if (memorizeBtn) {
-        memorizeBtn.textContent = '✓ Memorováno';
-        memorizeBtn.style.background = '#1a7a4a';
-        memorizeBtn.style.color = '#fff';
-        memorizeBtn.style.borderColor = '#1a7a4a';
-      }
     } catch(e) {
       console.warn('[Memorize] Firestore save failed:', e && e.message ? e.message : e);
     }
@@ -4049,15 +4043,23 @@ window.shareCurrentVerse=async function(){
       const key = 'zj_' + verse.c + '_' + verse.v;
       const snap = await getDoc(doc(db, 'users', user.uid, 'memorized', key));
       if (snap.exists()) {
-        const memorizeBtn = document.getElementById('verse-memorize-btn');
-        if (memorizeBtn) {
-          memorizeBtn.textContent = '✓ Memorováno';
-          memorizeBtn.style.background = '#1a7a4a';
-          memorizeBtn.style.color = '#fff';
-          memorizeBtn.style.borderColor = '#1a7a4a';
-        }
+        markVerseMemorizedUI();
       }
     } catch(e) { /* tiše ignoruj */ }
+  }
+  function markVerseMemorizedUI() {
+    const memorizeBtn = document.getElementById('verse-memorize-btn');
+    if (!memorizeBtn) return;
+    memorizeBtn.textContent = '✓ Memorováno';
+    memorizeBtn.style.background = '#1a7a4a';
+    memorizeBtn.style.color = '#fff';
+    memorizeBtn.style.borderColor = '#1a7a4a';
+    memorizeBtn.style.borderRadius = '999px';
+    memorizeBtn.animate([
+      { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(26,122,74,0.5)' },
+      { transform: 'scale(1.08)', boxShadow: '0 0 0 10px rgba(26,122,74,0)' },
+      { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(26,122,74,0)' }
+    ], { duration: 600, easing: 'ease-out' });
   }
   window.openMemorizeMode = open;
   window.closeMemorizeMode = close;
