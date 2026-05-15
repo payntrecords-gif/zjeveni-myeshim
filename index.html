@@ -94,10 +94,6 @@ function redirectTo(path) {
   window.location.replace(path);
 }
 
-function uidPrefix(uid) {
-  return typeof uid === 'string' && uid ? uid.slice(0, 6) : 'none';
-}
-
 function setCachedUid(uid) {
   try {
     if (uid) {
@@ -174,7 +170,7 @@ try {
 onAuthStateChanged(auth, async (user) => {
   const authUser = user || null;
   try {
-    console.log('[AuthGate] onAuthStateChanged', user ? ('uid=' + uidPrefix(user.uid)) : 'no user');
+    console.log('[AuthGate] onAuthStateChanged', user ? 'user present' : 'no user');
     if (!user) {
       setCachedUid(null);
       clearApprovedCache();
@@ -192,7 +188,7 @@ onAuthStateChanged(auth, async (user) => {
     if (cachedApproved) {
       setCachedUid(user.uid);
       window.__myeshimUser = user;
-      console.log('[AuthGate] cached approved -> release (uid=' + uidPrefix(user.uid) + ')');
+      console.log('[AuthGate] cached approved -> release');
       releaseAuthGate();
       initFcmForApprovedUser(user); // FCM na pozadí, neblokuje UI
     }
@@ -204,7 +200,7 @@ onAuthStateChanged(auth, async (user) => {
       if (!isApproved) {
         setCachedUid(user.uid);
         clearApprovedCache();
-        console.log('[AuthGate] not approved -> waiting (uid=' + uidPrefix(user.uid) + ')');
+        console.log('[AuthGate] not approved -> waiting');
         redirectTo('./waiting.html');
         return;
       }
@@ -213,12 +209,12 @@ onAuthStateChanged(auth, async (user) => {
       setCachedUid(user.uid);
       if (!cachedApproved) {
         window.__myeshimUser = user;
-        console.log('[AuthGate] approved -> release (uid=' + uidPrefix(user.uid) + ')');
+        console.log('[AuthGate] approved -> release');
         releaseAuthGate();
         initFcmForApprovedUser(user);
       }
     } catch (error) {
-      console.error('[AuthGate] check failed -> keep current safe state (uid=' + uidPrefix(user.uid) + ')', error);
+      console.error('[AuthGate] check failed -> keep current safe state', error);
       if (!cachedApproved) {
         clearApprovedCache();
         setCachedUid(null);
@@ -6548,7 +6544,7 @@ const FCM_SENDER_ID = '360259005980';
       hideInstallOverlay(/* silent */true);
       clearAvatar();
       showAuthOverlay();
-      try { console.log('[AuthGate] legacy listener: no user (no redirect)'); } catch(e) {}
+      console.log('[AuthGate] legacy listener: no user (no redirect)');
     }
     document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
   }
