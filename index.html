@@ -3334,7 +3334,7 @@ window.shareCurrentVerse=async function(){
     el.retry.style.display = freeAdvance ? 'none' : '';
     if (done) {
       el.next.disabled = false;
-      el.next.textContent = finalLevel ? 'Hotovo 🎉' : 'Další úroveň';
+      el.next.textContent = finalLevel ? 'Dokončit ✓' : 'Další úroveň';
       el.next.classList.add('mm-next-ready');
     } else {
       el.next.disabled = !freeAdvance;
@@ -3939,7 +3939,7 @@ window.shareCurrentVerse=async function(){
           '<div class="mm-result-label">Originál</div>' +
           '<div class="mm-verse">' + esc(mm.verse.t) + '</div>';
         if (el.footer) el.footer.innerHTML = '<div style="display:flex;justify-content:flex-end;margin-bottom:6px">' + buildPeekButton() + '</div>';
-        if (el.next) { el.next.disabled = false; el.next.textContent = 'Další'; el.next.classList.add('mm-next-ready'); }
+        if (el.next) { el.next.disabled = false; el.next.textContent = mm.level === 5 ? 'Dokončit ✓' : 'Další'; el.next.classList.add('mm-next-ready'); }
       }
       if (q5.state !== 'checked') setMessage('Úroveň 5: Napiš verš z paměti a zkontroluj se.');
       if (el.next && q5.state !== 'checked' && (mm.progress.level || 0) < mm.level){ el.next.disabled = true; el.next.classList.remove('mm-next-ready'); }
