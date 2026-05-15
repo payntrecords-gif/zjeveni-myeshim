@@ -50,14 +50,6 @@ h1{
 #main-btn:disabled{opacity:.7;cursor:default}
 #main-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.2;flex-shrink:0}
 
-#skip-btn{
-  display:block;width:100%;padding:11px 20px;
-  background:none;border:1.5px solid rgba(229,69,142,.3);border-radius:14px;
-  font:inherit;font-size:.93rem;font-weight:700;color:#c53580;cursor:pointer;
-  transition:background .14s,border-color .14s;margin-bottom:14px;
-}
-#skip-btn:active{background:rgba(229,69,142,.06)}
-
 .steps{background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:14px}
 .step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:.87rem;color:#5e4f5b;line-height:1.45}
 .step:not(:last-child){border-bottom:1px solid rgba(229,69,142,.1)}
@@ -112,8 +104,6 @@ h1{
     <span id="btn-label">Nainstalovat aplikaci</span>
   </button>
 
-  <button id="skip-btn">Přejít do aplikace bez instalace</button>
-
   <div class="steps" id="install-steps">
     <div class="step" id="step-telegram" style="display:none">
       <span class="step-icon">✈️</span>
@@ -159,12 +149,9 @@ h1{
     return;
   }
 
-  // Zachyť beforeinstallprompt co nejdřív — BEZ automatického volání prompt()
-  // prompt() smí být volán POUZE z přímé user gesture (klik na tlačítko)
   window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault(); // zabraň výchozímu mini-info baru
+    e.preventDefault();
     deferredPrompt = e;
-    // Aktualizuj UI pokud je DOM připraven
     if(document.readyState !== 'loading'){
       onPromptReady();
     }
@@ -182,19 +169,8 @@ h1{
     var mainBtn = document.getElementById('main-btn');
     var btnLabel = document.getElementById('btn-label');
     var installNote = document.getElementById('install-note');
-    var statusBadge = document.getElementById('status-badge');
-    var statusText = document.getElementById('status-text');
     var iosArrow = document.getElementById('ios-arrow');
-    var skipBtn = document.getElementById('skip-btn');
 
-    // Přejít bez instalace
-    if(skipBtn){
-      skipBtn.addEventListener('click', function(){
-        window.location.href = './index.html';
-      });
-    }
-
-    // Pokud byl prompt zachycen ještě před DOMContentLoaded
     if(deferredPrompt) onPromptReady();
 
     // ── TELEGRAM ──
@@ -228,10 +204,8 @@ h1{
     // ── ANDROID CHROME ──
     if(isAndroid){
       document.getElementById('step-android').style.display = 'flex';
-
       mainBtn.addEventListener('click', function(){
         if(deferredPrompt){
-          // ✅ Tady se SMÍ volat prompt() — je to přímá reakce na klik
           var p = deferredPrompt;
           deferredPrompt = null;
           p.prompt();
@@ -248,7 +222,6 @@ h1{
             }
           });
         } else {
-          // Prompt není k dispozici — zvýrazni manuální návod
           document.getElementById('step-android').style.background = 'rgba(229,69,142,.08)';
           document.getElementById('step-android').style.borderRadius = '10px';
           installNote.textContent = 'Použij postup níže 👆';
