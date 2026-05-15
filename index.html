@@ -6544,7 +6544,7 @@ const FCM_SENDER_ID = '360259005980';
       hideInstallOverlay(/* silent */true);
       clearAvatar();
       showAuthOverlay();
-      console.log('[AuthGate] legacy listener: no user (no redirect)');
+      console.log('[AuthGate] legacy listener: no user state updated; primary gate handles redirect');
     }
     document.dispatchEvent(new CustomEvent('myeshim-auth-ready', { detail: { loggedIn: !!user } }));
   }
