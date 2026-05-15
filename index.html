@@ -349,7 +349,7 @@ body.dark #verse-memorize-btn.mm-memorized{
   background:linear-gradient(135deg,rgba(255,234,182,.96),rgba(245,176,41,.9)) !important;
   color:#2f1a00 !important;
   border-color:rgba(255,227,160,.96) !important;
-  box-shadow:0 6px 16px rgba(245,176,41,.2),0 0 0 1px rgba(255,255,255,.1) inset,0 0 14px rgba(245,176,41,.12) !important;
+  box-shadow:0 4px 12px rgba(245,176,41,.16),0 0 0 1px rgba(255,255,255,.12) inset,0 0 7px rgba(245,176,41,.08) !important;
 }
 #verse-memorize-btn .mm-complete-inner{
   position:relative;z-index:1;min-width:0;display:inline-flex;align-items:center;gap:7px;
@@ -2330,9 +2330,18 @@ body.dark .cv-right {
   padding: 30px 24px !important;
   margin-bottom: 20px !important;
 }
+body.dark .verse-card{
+  background:
+    linear-gradient(160deg,rgba(57,34,64,.9) 0%,rgba(43,27,52,.92) 42%,rgba(31,20,40,.96) 100%) !important;
+  border:1.5px solid rgba(255,162,213,.24) !important;
+  box-shadow:0 14px 28px rgba(7,5,12,.42),inset 0 1px 0 rgba(255,236,248,.07) !important;
+}
 .vc-text {
   line-height: 1.92 !important;
 }
+body.dark .vc-ref{color:#fff3fb !important}
+body.dark .vc-text{color:#f7edf6 !important}
+body.dark .vc-text b{color:rgba(247,237,246,.78) !important}
 /* Vzduch mezi kartou, tlačítky a tab barem */
 .verse-actions {
   margin-bottom: 28px !important;
@@ -2352,7 +2361,7 @@ body.dark .cv-right {
 body.dark .tabs button.active {
   background: var(--pink, #e5458e) !important;
   color: #fff !important;
-  box-shadow: 0 4px 16px rgba(229,69,142,.40) !important;
+  box-shadow: 0 4px 12px rgba(229,69,142,.28) !important;
 }
 
 /* ══════════════════════════════
@@ -2378,6 +2387,19 @@ body.dark .va-btn.ghost {
   color: #ff8cc2 !important;
   border-color: rgba(255,140,194,.55) !important;
 }
+body.dark #panel-guide .guide-card{
+  background:linear-gradient(180deg,#1f1820 0%,#1a141c 100%) !important;
+  border-color:rgba(255,160,211,.2) !important;
+  box-shadow:0 10px 22px rgba(8,6,12,.28) !important;
+}
+body.dark #panel-guide .guide-step-card{
+  background:linear-gradient(180deg,rgba(44,31,48,.92) 0%,rgba(35,25,40,.92) 100%) !important;
+  border-color:rgba(255,160,211,.2) !important;
+  box-shadow:0 5px 12px rgba(5,4,9,.22) !important;
+}
+body.dark #panel-guide .gs-body h4{color:#f6ecf5 !important}
+body.dark #panel-guide .gs-body p,
+body.dark #panel-guide .gs-body ul{color:rgba(247,237,246,.72) !important}
 
 /* ══════════════════════════════
    6. BOTTOM NAV – větší ikony, barevné Prev/Next, výraznější střed
@@ -2412,9 +2434,13 @@ body.dark #bn-next {
   font-weight: 900 !important;
 }
 body.dark #bn-nav {
-  background: linear-gradient(135deg, rgba(255,140,194,.20) 0%, rgba(255,140,194,.13) 100%) !important;
-  border-color: rgba(255,140,194,.52) !important;
-  box-shadow: 0 4px 16px rgba(255,140,194,.20) !important;
+  background: linear-gradient(135deg, rgba(255,140,194,.16) 0%, rgba(255,140,194,.1) 100%) !important;
+  border-color: rgba(255,166,213,.44) !important;
+  box-shadow: 0 2px 9px rgba(255,140,194,.12) !important;
+}
+body.dark #bottomnav{
+  box-shadow:0 -6px 18px rgba(3,2,6,.34) !important;
+  border-top-color:rgba(255,160,211,.2) !important;
 }
 </style>
 
@@ -2436,6 +2462,18 @@ body.dark #bn-nav {
 #memorize-overlay.open #memorize-sheet{transform:translateY(0)}
 #memorize-sheet.dragging{transition:none}
 body.dark #memorize-sheet{background:#1c161d;background-image:linear-gradient(180deg,#231b24 0%,#1a151d 100%);color:#f8eef5}
+body.dark #memorize-sheet{
+  background:
+    linear-gradient(180deg,rgba(54,32,51,.22) 0%,rgba(26,20,31,0) 30%),
+    linear-gradient(180deg,#261b29 0%,#1b1420 52%,#15101a 100%);
+  border:1px solid rgba(255,170,214,.16);
+  box-shadow:0 20px 40px rgba(7,5,11,.52),inset 0 1px 0 rgba(255,238,249,.07);
+  position:fixed;
+}
+body.dark #memorize-sheet::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(130% 72% at 50% -9%,rgba(255,192,224,.1) 0%,rgba(255,192,224,0) 55%);
+}
 .mm-handle{width:42px;height:5px;border-radius:999px;background:rgba(0,0,0,.14);margin:0 auto 10px}
 body.dark .mm-handle{background:rgba(255,255,255,.18)}
 .mm-close{
@@ -2459,10 +2497,25 @@ body.dark .mm-title{color:#ff8cc2}
   font:inherit;font-size:.78rem;font-weight:900;color:var(--sub);cursor:pointer
 }
 .mm-level-chip.active{border-color:var(--pink,#e5458e);color:var(--pink,#e5458e);background:#fff2f8}
-.mm-level-chip.locked{opacity:.45;cursor:not-allowed}
-.mm-level-chip:not(.active):not(.locked){opacity:.65}
-body.dark .mm-level-chip{background:#281f2a;border-color:#3d3040;color:#d8bfd0}
-body.dark .mm-level-chip.active{background:rgba(255,140,194,.14);border-color:#ff8cc2;color:#ff8cc2}
+.mm-level-chip.locked{opacity:.58;cursor:not-allowed}
+.mm-level-chip:not(.active):not(.locked){opacity:.78}
+body.dark .mm-level-chip{
+  background:linear-gradient(180deg,rgba(53,37,57,.86) 0%,rgba(41,29,45,.86) 100%);
+  border-color:rgba(255,158,209,.26);
+  color:rgba(247,237,246,.72);
+}
+body.dark .mm-level-chip.active{
+  background:linear-gradient(180deg,rgba(255,156,207,.2) 0%,rgba(255,140,194,.14) 100%);
+  border-color:rgba(255,170,216,.72);
+  color:#fef5fb;
+  box-shadow:0 3px 10px rgba(255,140,194,.16);
+}
+body.dark .mm-level-chip.locked{
+  background:linear-gradient(180deg,rgba(48,35,52,.82) 0%,rgba(38,28,43,.82) 100%);
+  border-color:rgba(199,146,181,.22);
+  color:rgba(247,237,246,.56);
+  opacity:.9;
+}
 .mm-message{
   min-height:24px;font-size:.88rem;font-weight:800;color:#7a6a76;margin-bottom:9px;
   transition:opacity .22s ease,transform .22s ease;opacity:1;flex-shrink:0
@@ -2475,9 +2528,27 @@ body.dark .mm-message{color:#d4becb}
 .mm-scroll-area{flex:1;overflow-y:auto;min-height:0;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
 body.dark .mm-content{background:rgba(34,26,35,.66);border-color:#3c2f3f}
 body.dark .mm-scroll-area .mm-content{background:rgba(34,26,35,.66);border-color:#3c2f3f}
+body.dark .mm-content,
+body.dark .mm-scroll-area .mm-content{
+  background:linear-gradient(180deg,rgba(42,30,48,.78) 0%,rgba(32,23,38,.8) 100%);
+  border-color:rgba(255,170,216,.2);
+  color:#f7edf6;
+  box-shadow:inset 0 1px 0 rgba(255,243,250,.06),0 10px 24px rgba(8,6,12,.2);
+}
 .mm-content.transitioning{opacity:.6;transform:translateY(8px)}
 .mm-verse{font-size:1.15rem;line-height:1.6;font-weight:700;color:var(--text)}
-body.dark .mm-verse{color:#f8eef5}
+body.dark .mm-verse{color:#f7edf6}
+body.dark .mm-verse b{color:rgba(247,237,246,.96)}
+body.dark .mm-sub,
+body.dark .mm-progress-label,
+body.dark .mm-quiz-prompt,
+body.dark .mm-result-label,
+body.dark .mm-score-row,
+body.dark .mm-feedback-row,
+body.dark .mm-diff-legend{color:rgba(247,237,246,.72)}
+body.dark .mm-peek-plain,
+body.dark .mm-l4-hidden-token,
+body.dark .mm-level4-progress{color:rgba(247,237,246,.56)}
 .mm-blank-btn{
   border:none;background:rgba(229,69,142,.1);border-radius:10px;padding:2px 14px;min-height:30px;min-width:58px;
   font:inherit;font-weight:900;color:transparent;cursor:default;vertical-align:middle;
@@ -2519,6 +2590,11 @@ body.dark .mm-input{background:#251d27;color:#f8eef5;border-color:#4b3b50}
 body.dark .mm-btn-ghost{background:#271f29;color:#ff9dcf;border-color:#624a66}
 body.dark .mm-btn-peek{color:#ff9dcf;border-color:rgba(255,140,194,.42)}
 body.dark .mm-btn-peek:disabled{color:#9a8190;border-color:rgba(154,129,144,.35)}
+body.dark .mm-btn{
+  background:linear-gradient(135deg,#f07cb2 0%,#de4f95 100%);
+  box-shadow:0 4px 14px rgba(222,79,149,.22),inset 0 1px 0 rgba(255,240,249,.16);
+}
+body.dark .mm-btn.mm-next-ready{animation:mm-next-pulse-dark 1.9s ease-in-out infinite}
 body.dark .mm-actions{background:linear-gradient(180deg,rgba(28,22,29,0) 0%,rgba(28,22,29,.94) 28%,rgba(28,22,29,.98) 100%)}
 .mm-correct-flash{animation:mm-flash .42s ease}
 .mm-wrong-flash{animation:mm-wrong .45s ease}
@@ -2553,12 +2629,23 @@ body.dark .mm-diff-extra{color:#ff6b6b}
 @keyframes mm-opt-pop{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 @keyframes mm-opt-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
 @keyframes mm-next-pulse{0%,100%{box-shadow:0 4px 14px rgba(229,69,142,.35);transform:scale(1)}50%{box-shadow:0 6px 24px rgba(229,69,142,.6);transform:scale(1.02)}}
+@keyframes mm-next-pulse-dark{
+  0%,100%{box-shadow:0 4px 12px rgba(222,79,149,.24);transform:scale(1)}
+  50%{box-shadow:0 6px 16px rgba(222,79,149,.3);transform:scale(1.01)}
+}
 @keyframes mm-sheen{from{transform:translateX(-200%)}to{transform:translateX(300%)}}
 /* === WORD TAP (LEVEL 1) === */
 .mm-word-btn{display:inline;border:none;background:transparent;font:inherit;font-size:inherit;cursor:pointer;border-radius:4px;padding:1px 2px;transition:background .15s,color .15s,transform .15s}
 .mm-word-btn.mm-word-next{background:rgba(229,69,142,.12);outline:2px solid rgba(229,69,142,.4);border-radius:4px}
 .mm-word-done{background:rgba(229,69,142,.18);color:#c53580;font-weight:900}
 body.dark .mm-word-done{color:#ff8cc2}
+body.dark .mm-word-btn,
+body.dark .mm-scan-word{color:#f7edf6}
+body.dark .mm-word-btn.mm-word-next{
+  background:rgba(255,140,194,.16);
+  outline:2px solid rgba(255,170,216,.76);
+  color:#fff4fb;
+}
 .mm-word-shake{animation:mm-word-shake .35s ease}
 @keyframes mm-word-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 #mm-quiz-footer{flex-shrink:0;padding:10px 0 2px;border-top:1px solid var(--line);margin-top:8px}
@@ -2572,6 +2659,11 @@ body.dark #mm-quiz-footer{border-color:#3c2f3f}
 .mm-scan-word.mm-scan-active{background:rgba(229,69,142,.22);color:var(--pink,#e5458e);outline:2px solid var(--pink,#e5458e);animation:mm-bounce .25s ease}
 .mm-scan-word.mm-scan-done{background:rgba(76,175,80,.16);color:#2a7d37}
 body.dark .mm-scan-word.mm-scan-done{color:#4aba6c}
+body.dark .mm-scan-word.mm-scan-active{
+  background:rgba(255,140,194,.18);
+  color:#fff4fb;
+  outline:2px solid rgba(255,170,216,.74);
+}
 /* active blank slot for level 3 */
 .mm-blank-static.mm-scan-active{background:rgba(229,69,142,.22);outline:2px solid var(--pink,#e5458e);color:var(--pink,#e5458e)}
 /* === LEVEL 2 – DÍRY VE VĚTÁCH (WORD BANK) === */
