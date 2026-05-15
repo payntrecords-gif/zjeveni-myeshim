@@ -171,8 +171,9 @@ onAuthStateChanged(auth, async (user) => {
       redirectTo('./waiting.html');
       return;
     }
-    setCachedUid(user.uid);
+ setCachedUid(user.uid);
     console.log('MYEShim auth gate ok – releasing');
+    window.__myeshimUser = user; // sdílený auth stav pro openProfile
     releaseAuthGate();
     initFcmForApprovedUser(user);
   } catch (error) {
@@ -6576,7 +6577,7 @@ const FCM_SENDER_ID = '360259005980';
   }
 
 window.openProfile = function() {
-  var user = auth ? auth.currentUser : null;
+  var user = window.__myeshimUser || (auth ? auth.currentUser : null);
   
   // Pokud user je null, ale možná se auth teprve inicializuje — počkej
   if (!user) {
