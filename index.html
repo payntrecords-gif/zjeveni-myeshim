@@ -4195,6 +4195,38 @@ window.shareCurrentVerse=async function(){
   function isVerseMemorized(verse){
     return getLocalMemorizedState(verse) || isVerseMasteredByProgress(verse);
   }
+  function renderMemorizedBadge(button){
+    if (!button) return;
+    button.textContent = '';
+    const wrap = document.createElement('span');
+    wrap.className = 'mm-complete-inner';
+
+    const icon = document.createElement('span');
+    icon.className = 'mm-complete-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    const pathA = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathA.setAttribute('d', 'M7 18.5V10l5-4 5 4v8.5');
+    const pathB = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathB.setAttribute('d', 'M5 11l7-5 7 5');
+    const pathC = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathC.setAttribute('d', 'M9 18.5h6');
+    svg.append(pathA, pathB, pathC);
+    icon.appendChild(svg);
+
+    const label = document.createElement('span');
+    label.className = 'mm-complete-label';
+    label.textContent = 'Memorováno';
+
+    const check = document.createElement('span');
+    check.className = 'mm-complete-check';
+    check.setAttribute('aria-hidden', 'true');
+    check.textContent = '✓';
+
+    wrap.append(icon, label, check);
+    button.appendChild(wrap);
+  }
   function updateMemorizedButtonState(verse, options){
     const opts = options || {};
     const memorizeBtn = document.getElementById('verse-memorize-btn');
@@ -4206,7 +4238,7 @@ window.shareCurrentVerse=async function(){
     memorizeBtn.setAttribute('aria-pressed', memorized ? 'true' : 'false');
     memorizeBtn.dataset.state = memorized ? 'memorized' : 'ready';
     if (memorized){
-      memorizeBtn.innerHTML = '<span class="mm-complete-inner"><span class="mm-complete-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18.5V10l5-4 5 4v8.5"/><path d="M5 11l7-5 7 5"/><path d="M9 18.5h6"/></svg></span><span class="mm-complete-label">Memorováno</span><span class="mm-complete-check" aria-hidden="true">✓</span></span>';
+      renderMemorizedBadge(memorizeBtn);
       memorizeBtn.setAttribute('aria-label', 'Verš je memorován');
       if (opts.animate){
         memorizeBtn.classList.remove('mm-complete-celebrate');
