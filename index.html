@@ -6575,9 +6575,30 @@ const FCM_SENDER_ID = '360259005980';
     };
   }
 
-  window.openProfile = function() {
-    var user = auth ? auth.currentUser : null;
-    if (!user) { showAuthOverlay(); return; }
+window.openProfile = function() {
+  var user = auth ? auth.currentUser : null;
+  
+  // Pokud user je null, ale možná se auth teprve inicializuje — počkej
+  if (!user) {
+    if (auth) {
+      // Počkej max 2 sekundy na auth state
+      var waited = 0;
+      var waitInterval = setInterval(function() {
+        waited += 100;
+        var u = auth.currentUser;
+        if (u) {
+          clearInterval(waitInterval);
+          window.openProfile(); // zkus znovu
+        } else if (waited >= 2000) {
+          clearInterval(waitInterval);
+          showAuthOverlay(); // teprve teď přesměruj
+        }
+      }, 100);
+    } else {
+      showAuthOverlay();
+    }
+    return;
+  }
 
     // Avatar
     var psImg = document.getElementById('ps-avatar-img');
