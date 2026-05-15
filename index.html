@@ -214,12 +214,12 @@ onAuthStateChanged(auth, async (user) => {
         initFcmForApprovedUser(user);
       }
     } catch (error) {
-      console.error('[AuthGate] check failed -> keep current safe state', error);
+      console.error('[AuthGate] check failed -> signing out non-cached users', error);
       if (!cachedApproved) {
         clearApprovedCache();
         setCachedUid(null);
         await signOut(auth).catch((signOutError) => {
-          console.warn('[AuthGate] signOut after check failure failed', signOutError && signOutError.message ? signOutError.message : signOutError);
+          console.warn('[AuthGate] signOut after check failure failed', signOutError?.message || signOutError);
         });
         redirectTo('./login.html');
       }
