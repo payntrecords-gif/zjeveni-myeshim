@@ -276,7 +276,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
 body.dark .va-btn.ghost{background:#241b27;color:#ff8cc2;border-color:rgba(255,140,194,.3)}
 #verse-memorize-btn{
   position:relative;overflow:hidden;isolation:isolate;
-  display:flex;text-align:left;justify-content:flex-start;align-items:center;gap:10px;
+  display:flex;text-align:left;justify-content:flex-start;align-items:center;gap:10px;min-width:0;
 }
 #verse-memorize-btn::before{
   content:'';position:absolute;inset:-35% -22%;pointer-events:none;opacity:0;
@@ -288,49 +288,54 @@ body.dark .va-btn.ghost{background:#241b27;color:#ff8cc2;border-color:rgba(255,1
   box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
 }
 #verse-memorize-btn.mm-memorized{
-  background:linear-gradient(135deg,rgba(255,247,217,.96),rgba(245,176,41,.92)) !important;
-  color:#3a2200 !important;
-  border:1px solid rgba(255,224,150,.92) !important;
-  box-shadow:0 10px 22px rgba(245,176,41,.24),0 0 0 1px rgba(255,255,255,.2) inset,0 0 22px rgba(245,176,41,.16) !important;
-  border-radius:18px !important;
+  flex:0 1 auto;
+  width:auto;
+  max-width:46%;
+  padding:7px 10px !important;
+  border-radius:999px !important;
+  background:linear-gradient(135deg,rgba(255,248,224,.95),rgba(248,193,86,.93)) !important;
+  color:#402400 !important;
+  border:1px solid rgba(255,226,150,.94) !important;
+  box-shadow:0 6px 16px rgba(245,176,41,.2),0 0 0 1px rgba(255,255,255,.22) inset,0 0 14px rgba(245,176,41,.12) !important;
 }
 #verse-memorize-btn.mm-memorized::before{
-  opacity:1;animation:mm-complete-sheen 3s linear infinite;
+  opacity:.32;
 }
 #verse-memorize-btn.mm-memorized::after{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.34), inset 0 0 0 1px rgba(255,255,255,.06);
 }
 #verse-memorize-btn.mm-complete-celebrate{
-  animation:mm-complete-pop .95s cubic-bezier(.22,1,.36,1);
+  animation:mm-complete-pop .85s cubic-bezier(.22,1,.36,1);
+}
+#verse-memorize-btn.mm-memorized.mm-complete-celebrate::before{
+  opacity:1;animation:mm-complete-sheen .92s ease-out 1;
 }
 body.dark #verse-memorize-btn.mm-memorized{
-  background:linear-gradient(135deg,rgba(255,229,162,.97),rgba(245,176,41,.9)) !important;
-  color:#2d1900 !important;
+  background:linear-gradient(135deg,rgba(255,234,182,.96),rgba(245,176,41,.9)) !important;
+  color:#2f1a00 !important;
   border-color:rgba(255,227,160,.96) !important;
-  box-shadow:0 10px 22px rgba(245,176,41,.22),0 0 0 1px rgba(255,255,255,.1) inset,0 0 24px rgba(245,176,41,.14) !important;
+  box-shadow:0 6px 16px rgba(245,176,41,.2),0 0 0 1px rgba(255,255,255,.1) inset,0 0 14px rgba(245,176,41,.12) !important;
 }
 #verse-memorize-btn .mm-complete-inner{
-  position:relative;z-index:1;min-width:0;width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
+  position:relative;z-index:1;min-width:0;display:inline-flex;align-items:center;gap:7px;
 }
 #verse-memorize-btn .mm-complete-icon{
-  width:32px;height:32px;border-radius:11px;display:grid;place-items:center;flex-shrink:0;
+  width:18px;height:18px;border-radius:999px;display:grid;place-items:center;flex-shrink:0;
   background:linear-gradient(135deg,rgba(255,255,255,.45),rgba(255,255,255,.12));
   color:#b97700;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 0 0 1px rgba(255,255,255,.14);
 }
 body.dark #verse-memorize-btn .mm-complete-icon{color:#8c5a00}
 #verse-memorize-btn .mm-complete-icon svg{
-  width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
+  width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round;
 }
-#verse-memorize-btn .mm-complete-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px}
-#verse-memorize-btn .mm-complete-kicker{
-  font-size:.67rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;line-height:1;color:inherit;opacity:.78;
-}
-#verse-memorize-btn .mm-complete-main{
-  font-size:.87rem;font-weight:900;line-height:1.04;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+#verse-memorize-btn .mm-complete-label{
+  min-width:0;
+  font-size:.75rem;font-weight:900;line-height:1;color:inherit;letter-spacing:.02em;
+  white-space:nowrap;
 }
 #verse-memorize-btn .mm-complete-check{
-  width:22px;height:22px;border-radius:999px;display:grid;place-items:center;flex-shrink:0;font-weight:900;font-size:.82rem;
-  color:#f7e3ad;background:rgba(58,34,0,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.15);
+  width:16px;height:16px;border-radius:999px;display:grid;place-items:center;flex-shrink:0;font-weight:900;font-size:.62rem;
+  color:#fdf3d6;background:rgba(58,34,0,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.15);
 }
 body.dark #verse-memorize-btn .mm-complete-check{background:rgba(45,25,0,.2)}
 #memorize-sheet.mm-complete-celebrate{
@@ -343,13 +348,13 @@ body.dark #verse-memorize-btn .mm-complete-check{background:rgba(45,25,0,.2)}
 }
 @keyframes mm-complete-pop{
   0%{transform:scale(1)}
-  34%{transform:scale(1.05)}
-  64%{transform:scale(.985)}
+  30%{transform:scale(1.06)}
+  62%{transform:scale(.99)}
   100%{transform:scale(1)}
 }
 @keyframes mm-complete-sheen{
-  0%{transform:translateX(-120%) skewX(-18deg)}
-  100%{transform:translateX(180%) skewX(-18deg)}
+  0%{transform:translateX(-130%) skewX(-16deg)}
+  100%{transform:translateX(170%) skewX(-16deg)}
 }
 @keyframes mm-complete-sheet{
   0%{box-shadow:0 20px 40px rgba(22,14,24,.22)}
@@ -363,10 +368,10 @@ body.dark #verse-memorize-btn .mm-complete-check{background:rgba(45,25,0,.2)}
 }
 @media(max-width:375px){
   .mm-level-chip{font-size:.73rem;padding:7px 10px}
-  #verse-memorize-btn .mm-complete-icon{width:28px;height:28px}
-  #verse-memorize-btn .mm-complete-main{font-size:.82rem}
-  #verse-memorize-btn .mm-complete-kicker{font-size:.63rem}
-  #verse-memorize-btn .mm-complete-check{width:19px;height:19px;font-size:.72rem}
+  #verse-memorize-btn.mm-memorized{max-width:42%;padding:6px 9px !important}
+  #verse-memorize-btn .mm-complete-label{font-size:.7rem}
+  #verse-memorize-btn .mm-complete-icon{width:16px;height:16px}
+  #verse-memorize-btn .mm-complete-check{width:14px;height:14px;font-size:.56rem}
 }
 @media (prefers-reduced-motion: reduce){
   #verse-memorize-btn.mm-complete-celebrate,
@@ -4201,8 +4206,8 @@ window.shareCurrentVerse=async function(){
     memorizeBtn.setAttribute('aria-pressed', memorized ? 'true' : 'false');
     memorizeBtn.dataset.state = memorized ? 'memorized' : 'ready';
     if (memorized){
-      memorizeBtn.innerHTML = '<span class="mm-complete-inner"><span class="mm-complete-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18.5V10l5-4 5 4v8.5"/><path d="M5 11l7-5 7 5"/><path d="M9 18.5h6"/></svg></span><span class="mm-complete-copy"><span class="mm-complete-kicker">🏆 Mistrovství</span><span class="mm-complete-main">Memorováno</span></span><span class="mm-complete-check" aria-hidden="true">✓</span></span>';
-      memorizeBtn.setAttribute('aria-label', 'Verš je memorován — mistrovství dokončeno');
+      memorizeBtn.innerHTML = '<span class="mm-complete-inner"><span class="mm-complete-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18.5V10l5-4 5 4v8.5"/><path d="M5 11l7-5 7 5"/><path d="M9 18.5h6"/></svg></span><span class="mm-complete-label">Memorováno</span><span class="mm-complete-check" aria-hidden="true">✓</span></span>';
+      memorizeBtn.setAttribute('aria-label', 'Verš je memorován');
       if (opts.animate){
         memorizeBtn.classList.remove('mm-complete-celebrate');
         void memorizeBtn.offsetWidth;
