@@ -274,6 +274,27 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
 .va-btn.ghost{background:#fff;color:var(--pink);border:1px solid rgba(229,69,142,.25)}
 .va-btn.ghost.active{background:rgba(229,69,142,.12);border-color:rgba(229,69,142,.45)}
 body.dark .va-btn.ghost{background:#241b27;color:#ff8cc2;border-color:rgba(255,140,194,.3)}
+#verse-memorize-btn.mm-memorized{
+  background:linear-gradient(135deg,#f0b429,#f59e0b) !important;
+  color:#2a1800 !important;
+  border:1.5px solid rgba(214,143,0,.9) !important;
+  box-shadow:0 8px 20px rgba(245,158,11,.35), inset 0 1px 0 rgba(255,255,255,.45) !important;
+  border-radius:16px !important;
+}
+#verse-memorize-btn .mm-mem-title{display:block;font-size:.74rem;font-weight:900;line-height:1.1}
+#verse-memorize-btn .mm-mem-sub{display:block;font-size:.7rem;font-weight:800;opacity:.9;margin-top:3px}
+#verse-memorize-btn.mm-memorized.mm-memorized-celebrate{animation:mm-memorized-pop .9s cubic-bezier(.22,1,.36,1)}
+body.dark #verse-memorize-btn.mm-memorized{
+  background:linear-gradient(135deg,#ffd37a,#f0b429) !important;
+  color:#2b1700 !important;
+  border-color:rgba(255,204,102,.95) !important;
+}
+@keyframes mm-memorized-pop{
+  0%{transform:scale(1);box-shadow:0 0 0 0 rgba(245,158,11,.0)}
+  30%{transform:scale(1.09);box-shadow:0 0 0 16px rgba(245,158,11,.20)}
+  60%{transform:scale(.98);box-shadow:0 0 0 26px rgba(245,158,11,.08)}
+  100%{transform:scale(1);box-shadow:0 0 0 0 rgba(245,158,11,0)}
+}
 
 .tabs{
   display:grid;grid-template-columns:repeat(3,1fr);gap:5px;
@@ -2809,6 +2830,9 @@ function render(){
   nextBtn.setAttribute('aria-disabled',state.idx===VERSES.length-1?'true':'false');
   setTab(state.tab||'qa');
   updateFavoriteButton();
+  if (typeof window.refreshMemorizeButtonForCurrentVerse === 'function') {
+    window.refreshMemorizeButtonForCurrentVerse(vv);
+  }
   save();
 }
 
@@ -3148,6 +3172,7 @@ window.shareCurrentVerse=async function(){
     attempts: 0,
     completedThisView: false
   };
+  const MEMORIZED_VERSES_KEY = 'myeshim-memorized-verses';
   const GENERIC_OPTIONS = ['Slovo','Amen','Duch','Život','Pravda','Světlo'];
   const MIN_HINT_UNDERSCORE_COUNT = 1;
   const MAX_HINT_UNDERSCORE_COUNT = 8;
@@ -3205,6 +3230,40 @@ window.shareCurrentVerse=async function(){
   function localDayStamp(dt){
     const d = dt || new Date();
     return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  }
+  function verseMemorizedKey(verse){
+    if (!verse) return '';
+    return 'zj_' + verse.c + '_' + verse.v;
+  }
+  function currentVerseMatches(verse){
+    if (!verse || !window.state || !Array.isArray(window.VERSES)) return false;
+    const current = window.VERSES[window.state.idx];
+    return !!current && current.c === verse.c && current.v === verse.v;
+  }
+  function loadMemorizedVersesMap(){
+    try{
+      const parsed = JSON.parse(localStorage.getItem(MEMORIZED_VERSES_KEY) || '{}') || {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    }catch(e){
+      return {};
+    }
+  }
+  function saveMemorizedVersesMap(map){
+    try{ localStorage.setItem(MEMORIZED_VERSES_KEY, JSON.stringify(map || {})); }catch(e){}
+  }
+  function getLocalMemorizedState(verse){
+    const key = verseMemorizedKey(verse);
+    if (!key) return false;
+    const map = loadMemorizedVersesMap();
+    return !!map[key];
+  }
+  function setLocalMemorizedState(verse, value){
+    const key = verseMemorizedKey(verse);
+    if (!key) return;
+    const map = loadMemorizedVersesMap();
+    if (value) map[key] = true;
+    else delete map[key];
+    saveMemorizedVersesMap(map);
   }
   function loadProgress(){
     try{
@@ -3343,7 +3402,16 @@ window.shareCurrentVerse=async function(){
     }
     el.retry.textContent = 'Zkusit znovu';
   }
-    function completeLevel(){
+  function finalizeVerseMasteryCompletion(verse, options){
+    const opts = options || {};
+    const wasMemorized = isVerseMemorized(verse);
+    setLocalMemorizedState(verse, true);
+    if (currentVerseMatches(verse)) updateMemorizedButtonState(verse, { animate: !!opts.animate && !wasMemorized });
+    if (!wasMemorized && opts.animate) launchMemorizeConfetti();
+    saveMemorizedToFirestore(verse);
+    return !wasMemorized;
+  }
+  function completeLevel(){
     const prevLevel = mm.progress.level || 0;
     mm.progress.level = Math.max(prevLevel, mm.level);
     updateStreakOnComplete();
@@ -3356,7 +3424,7 @@ window.shareCurrentVerse=async function(){
     renderLevelGrid();
     // Uložení dokončení na Firestore při mistrovství (level 5)
     if (isLast) {
-      saveMemorizedToFirestore(mm.verse);
+      finalizeVerseMasteryCompletion(mm.verse, { animate: true });
     }
   }
 
@@ -3968,7 +4036,7 @@ window.shareCurrentVerse=async function(){
     }
     if (mm.level === 5){
       if (!mm.completedThisView) completeLevel();
-      markVerseMemorizedUI();
+      finalizeVerseMasteryCompletion(mm.verse, { animate: false });
       close();
       return;
     }
@@ -4005,20 +4073,57 @@ window.shareCurrentVerse=async function(){
     scrollLevelIntoView(mm.level - 1);
     renderLevel();
     el.overlay.classList.add('open');
-    // Zkontroluj Firestore jestli je verš už memorovaný → obarvi tlačítko
-    loadMemorizedState(vv);
+    updateMemorizedButtonState(vv, { animate: false });
+    // Zkontroluj Firestore jestli je verš už memorovaný → potvrď per-verse status
+    if (!isVerseMemorized(vv)) loadMemorizedState(vv);
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('memorize-overlay');
   }
-   async function saveMemorizedToFirestore(verse) {
+  function isVerseMasteredByProgress(verse){
+    if (!verse) return false;
+    try{
+      const storageKey = 'memorize_' + verse.c + '_' + verse.v;
+      const raw = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+      return (Number(raw.level) || 0) >= 5;
+    }catch(e){
+      return false;
+    }
+  }
+  function isVerseMemorized(verse){
+    return getLocalMemorizedState(verse) || isVerseMasteredByProgress(verse);
+  }
+  function updateMemorizedButtonState(verse, options){
+    const opts = options || {};
+    const memorizeBtn = document.getElementById('verse-memorize-btn');
+    if (!memorizeBtn) return;
+    const memorized = isVerseMemorized(verse);
+    if (memorized) setLocalMemorizedState(verse, true);
+    memorizeBtn.classList.toggle('mm-memorized', memorized);
+    if (memorized){
+      memorizeBtn.innerHTML = '<span class="mm-mem-title">🏆 Mistrovství dokončeno</span><span class="mm-mem-sub">Memorováno</span>';
+      memorizeBtn.setAttribute('aria-label', 'Verš je memorován — mistrovství dokončeno');
+      if (opts.animate){
+        memorizeBtn.classList.remove('mm-memorized-celebrate');
+        void memorizeBtn.offsetWidth;
+        memorizeBtn.classList.add('mm-memorized-celebrate');
+        setTimeout(function(){ memorizeBtn.classList.remove('mm-memorized-celebrate'); }, 1000);
+      }
+      return;
+    }
+    memorizeBtn.textContent = 'Memorovat';
+    memorizeBtn.setAttribute('aria-label', 'Spustit memorovací režim');
+    memorizeBtn.classList.remove('mm-memorized-celebrate');
+  }
+  async function saveMemorizedToFirestore(verse) {
     try {
+      if (!verse) return;
       const user = window.__myeshimUser;
       if (!user) return;
       const { getFirestore, doc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
       const db = getFirestore();
-      const key = 'zj_' + verse.c + '_' + verse.v;
+      const key = verseMemorizedKey(verse);
       await setDoc(
         doc(db, 'users', user.uid, 'memorized', key),
         {
@@ -4036,31 +4141,25 @@ window.shareCurrentVerse=async function(){
   }
   async function loadMemorizedState(verse) {
     try {
+      if (!verse) return;
       const user = window.__myeshimUser;
       if (!user) return;
       const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
       const db = getFirestore();
-      const key = 'zj_' + verse.c + '_' + verse.v;
+      const key = verseMemorizedKey(verse);
       const snap = await getDoc(doc(db, 'users', user.uid, 'memorized', key));
       if (snap.exists()) {
-        markVerseMemorizedUI();
+        setLocalMemorizedState(verse, true);
       }
+      if (currentVerseMatches(verse)) updateMemorizedButtonState(verse, { animate: false });
     } catch(e) { /* tiše ignoruj */ }
   }
-  function markVerseMemorizedUI() {
-    const memorizeBtn = document.getElementById('verse-memorize-btn');
-    if (!memorizeBtn) return;
-    memorizeBtn.textContent = '✓ Memorováno';
-    memorizeBtn.style.background = '#1a7a4a';
-    memorizeBtn.style.color = '#fff';
-    memorizeBtn.style.borderColor = '#1a7a4a';
-    memorizeBtn.style.borderRadius = '999px';
-    memorizeBtn.animate([
-      { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(26,122,74,0.5)' },
-      { transform: 'scale(1.08)', boxShadow: '0 0 0 10px rgba(26,122,74,0)' },
-      { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(26,122,74,0)' }
-    ], { duration: 600, easing: 'ease-out' });
-  }
+  window.refreshMemorizeButtonForCurrentVerse = function(verse){
+    const vv = verse || (window.VERSES && window.state ? window.VERSES[window.state.idx] : null);
+    if (!vv) return;
+    updateMemorizedButtonState(vv, { animate: false });
+    if (!isVerseMemorized(vv)) loadMemorizedState(vv);
+  };
   window.openMemorizeMode = open;
   window.closeMemorizeMode = close;
   function showTypingDiff(typed){
