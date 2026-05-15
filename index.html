@@ -111,7 +111,20 @@ function clearApprovedCache() {
     localStorage.removeItem('myeshim-approved-cache');
   } catch (e) { /* ignore */ }
 }
+function setApprovedCache(uid) {
+  try {
+    localStorage.setItem('myeshim-approved-cache', uid);
+  } catch (e) { /* ignore */ }
+}
+function getApprovedCacheUid() {
+  try {
+    return localStorage.getItem('myeshim-approved-cache');
+  } catch (e) {
+    return null;
+  }
+}
 window.clearApprovedCache = clearApprovedCache;
+window.setApprovedCache = setApprovedCache;
 
 function releaseAuthGate() {
   clearTimeout(_authGateTimeout);
@@ -155,6 +168,7 @@ try {
 }
 
 onAuthStateChanged(auth, async (user) => {
+  const authUser = user || null;
   try {
     console.log('MYEShim onAuthStateChanged:', user ? 'user=' + user.uid : 'no user');
     if (!user) {
@@ -167,7 +181,7 @@ onAuthStateChanged(auth, async (user) => {
    // Rychlý start: pokud máme cached approved pro tohoto uida, rovnou pusť UI
     let cachedApproved = false;
     try {
-      cachedApproved = localStorage.getItem('myeshim-approved-cache') === user.uid;
+      cachedApproved = getApprovedCacheUid() === user.uid;
     } catch(e) {}
 
     if (cachedApproved) {
@@ -189,7 +203,7 @@ onAuthStateChanged(auth, async (user) => {
         return;
       }
       // Ulož cache pro příští spuštění
-      try { localStorage.setItem('myeshim-approved-cache', user.uid); } catch(e) {}
+      setApprovedCache(user.uid);
       setCachedUid(user.uid);
       if (!cachedApproved) {
         window.__myeshimUser = user;
@@ -206,8 +220,8 @@ onAuthStateChanged(auth, async (user) => {
   } catch (error) {
     console.error('MYEShim auth bootstrap failed:', error);
     clearApprovedCache();
-    setCachedUid(user?.uid || null);
-    redirectTo(user?.uid ? './waiting.html' : './login.html');
+    setCachedUid(authUser?.uid || null);
+    redirectTo(authUser?.uid ? './waiting.html' : './login.html');
   }
 });
 </script>
