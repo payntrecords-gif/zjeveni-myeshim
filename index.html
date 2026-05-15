@@ -195,6 +195,12 @@ onAuthStateChanged(auth, async (user) => {
       releaseAuthGate();
       initFcmForApprovedUser(user);
     }
+  } catch (error) {
+    console.error('MYEShim Firestore approved check failed:', error);
+    if (!cachedApproved) {
+      redirectTo('./waiting.html');
+    }
+  }
 });
 </script>
 <title>MYEShim – Zjevení</title>
