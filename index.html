@@ -206,8 +206,8 @@ onAuthStateChanged(auth, async (user) => {
   } catch (error) {
     console.error('MYEShim auth bootstrap failed:', error);
     clearApprovedCache();
-    setCachedUid(user ? user.uid : null);
-    redirectTo(user ? './waiting.html' : './login.html');
+    setCachedUid(user?.uid || null);
+    redirectTo(user?.uid ? './waiting.html' : './login.html');
   }
 });
 </script>
@@ -6484,7 +6484,7 @@ const FCM_SENDER_ID = '360259005980';
   function safeLSSet(key, val) {
     try { localStorage.setItem(key, val); } catch(e) {}
   }
-  var clearApprovedCache = window.clearApprovedCache || function() {
+  const clearApprovedCache = window.clearApprovedCache || function() {
     try { localStorage.removeItem('myeshim-approved-cache'); } catch(e) {}
   };
 
