@@ -55,7 +55,7 @@ const _authGateTimeout = setTimeout(() => {
   document.documentElement.classList.remove('auth-gate-pending');
   const fb = document.getElementById('app-load-fallback');
   if (fb) fb.style.display = 'flex';
-}, 5000);
+}, 3000);
 
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -162,24 +162,39 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Strict check: always verify approval in Firestore before releasing UI gate
+ // Rychlý start: pokud máme cached approved pro tohoto uida, rovnou pusť UI
+  let cachedApproved = false;
+  try {
+    cachedApproved = localStorage.getItem('myeshim-approved-cache') === user.uid;
+  } catch(e) {}
+
+  if (cachedApproved) {
+    setCachedUid(user.uid);
+    window.__myeshimUser = user;
+    console.log('MYEShim auth gate ok (cache) – releasing');
+    releaseAuthGate();
+    initFcmForApprovedUser(user); // FCM na pozadí, neblokuje UI
+  }
+
+  // Strict check: vždy ověř v Firestore (i když jsme pustili z cache)
   try {
     const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
     const isApproved = approvedSnap.exists() && approvedSnap.data()?.status === 'approved';
     if (!isApproved) {
       setCachedUid(user.uid);
+      try { localStorage.removeItem('myeshim-approved-cache'); } catch(e) {}
       redirectTo('./waiting.html');
       return;
     }
- setCachedUid(user.uid);
-    console.log('MYEShim auth gate ok – releasing');
-    window.__myeshimUser = user; // sdílený auth stav pro openProfile
-    releaseAuthGate();
-    initFcmForApprovedUser(user);
-  } catch (error) {
-    console.error('Auth gate check failed:', error);
-    redirectTo('./waiting.html');
-  }
+    // Ulož cache pro příští spuštění
+    try { localStorage.setItem('myeshim-approved-cache', user.uid); } catch(e) {}
+    setCachedUid(user.uid);
+    if (!cachedApproved) {
+      window.__myeshimUser = user;
+      console.log('MYEShim auth gate ok – releasing');
+      releaseAuthGate();
+      initFcmForApprovedUser(user);
+    }
 });
 </script>
 <title>MYEShim – Zjevení</title>
