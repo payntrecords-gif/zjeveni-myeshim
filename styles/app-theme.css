@@ -31,17 +31,17 @@ body{color-scheme:light}
 }
 #topbar{
   background:var(--glass-bg) !important;
-  backdrop-filter:blur(20px) saturate(1.08) !important;
-  -webkit-backdrop-filter:blur(20px) saturate(1.08) !important;
-  border-bottom:1px solid var(--glass-line) !important;
-  box-shadow:0 8px 20px rgba(129,99,56,.07);
+  backdrop-filter:blur(16px) saturate(1.05) !important;
+  -webkit-backdrop-filter:blur(16px) saturate(1.05) !important;
+  border-bottom:1px solid rgba(172,145,93,.13) !important;
+  box-shadow:0 6px 14px rgba(129,99,56,.05);
 }
-.tb-left{gap:14px !important}
-.tb-logo img{filter:drop-shadow(0 8px 18px rgba(129,99,56,.10))}
+.tb-left{gap:12px !important}
+.tb-logo img{filter:drop-shadow(0 5px 12px rgba(129,99,56,.06))}
 .tb-iginja{
-  font-size:clamp(1.08rem,4.4vw,1.24rem) !important;
-  font-weight:800 !important;
-  letter-spacing:-.03em !important;
+  font-size:clamp(1.03rem,4.2vw,1.17rem) !important;
+  font-weight:780 !important;
+  letter-spacing:-.02em !important;
   color:#9d7a32 !important;
 }
 #ux35-progress-wrap{
@@ -55,12 +55,12 @@ body{color-scheme:light}
 #ux35-progress-label{color:#8b734d !important;margin-top:8px !important;letter-spacing:.025em !important}
 #app{
   max-width:560px !important;
-  padding:26px 18px 28px !important;
+  padding:24px 18px 24px !important;
 }
 #app-tabs-outer,
 #app-panels{max-width:560px !important;margin:0 auto !important;padding-left:18px !important;padding-right:18px !important}
 #app-panels{padding-bottom:calc(122px + env(safe-area-inset-bottom)) !important}
-.cv-row{margin-bottom:22px !important;align-items:flex-end !important;gap:16px !important}
+.cv-row{margin-bottom:18px !important;align-items:flex-end !important;gap:14px !important}
 .cv-left .cv-chapter{
   font-size:clamp(1.08rem,4.9vw,1.34rem) !important;
   color:#46331d !important;
@@ -85,11 +85,11 @@ body{color-scheme:light}
 }
 .verse-card{
   background:linear-gradient(145deg,#d2ab55 0%,#c39a42 100%) !important;
-  border:1px solid rgba(255,255,255,.28) !important;
+  border:1px solid rgba(255,255,255,.24) !important;
   border-radius:var(--radius-ui) !important;
-  padding:28px 24px !important;
-  margin-bottom:22px !important;
-  box-shadow:0 20px 40px rgba(178,137,60,.20) !important;
+  padding:26px 22px !important;
+  margin-bottom:18px !important;
+  box-shadow:0 14px 28px rgba(178,137,60,.16) !important;
 }
 .vc-ref{
   font-size:clamp(2.26rem,10.4vw,2.9rem) !important;
@@ -111,7 +111,7 @@ body{color-scheme:light}
   display:grid !important;
   grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:10px !important;
-  margin:0 0 22px !important;
+  margin:0 0 18px !important;
 }
 .va-btn,
 .note-save,
@@ -119,13 +119,13 @@ body{color-scheme:light}
 .mm-btn:not(.mm-btn-ghost),
 .auth-btn-login,
 .iov-native-btn{
-  min-height:56px !important;
+  min-height:54px !important;
   border-radius:999px !important;
-  padding:0 18px !important;
-  font-size:1rem !important;
+  padding:0 20px !important;
+  font-size:.98rem !important;
   font-weight:800 !important;
   line-height:1.15 !important;
-  box-shadow:0 10px 22px rgba(129,99,56,.11) !important;
+  box-shadow:0 8px 18px rgba(129,99,56,.10) !important;
   border:1px solid transparent !important;
 }
 .va-btn,
@@ -148,8 +148,8 @@ body{color-scheme:light}
 .install-btn{
   background:rgba(255,250,242,.92) !important;
   color:var(--text) !important;
-  border:1px solid rgba(172,145,93,.22) !important;
-  box-shadow:0 8px 18px rgba(129,99,56,.07) !important;
+  border:1px solid rgba(172,145,93,.19) !important;
+  box-shadow:0 6px 14px rgba(129,99,56,.06) !important;
 }
 .va-btn.ghost.active,
 .tabs button.active,
@@ -211,12 +211,13 @@ body{color-scheme:light}
   border-radius:var(--radius-ui) !important;
   padding:6px !important;
   gap:8px !important;
-  box-shadow:0 12px 24px rgba(129,99,56,.07) !important;
+  box-shadow:0 9px 18px rgba(129,99,56,.06) !important;
 }
 .tabs button{
-  min-height:56px !important;
+  min-height:54px !important;
+  padding:0 16px !important;
   border-radius:var(--radius-ui-soft) !important;
-  font-size:1rem !important;
+  font-size:.97rem !important;
   color:#7f6a45 !important;
 }
 .guide-card,
@@ -237,7 +238,7 @@ body{color-scheme:light}
   color:var(--text) !important;
   border:1px solid rgba(172,145,93,.18) !important;
   border-radius:var(--radius-ui) !important;
-  box-shadow:0 16px 34px rgba(129,99,56,.11) !important;
+  box-shadow:0 12px 24px rgba(129,99,56,.09) !important;
 }
 .guide-card,
 .qa-card{padding:24px !important}
@@ -292,22 +293,23 @@ body{color-scheme:light}
 .note-save{width:100% !important;margin-top:16px !important}
 #bottomnav{
   background:var(--glass-bg) !important;
-  backdrop-filter:blur(18px) saturate(1.08) !important;
-  -webkit-backdrop-filter:blur(18px) saturate(1.08) !important;
-  border-top:1px solid var(--glass-line) !important;
-  box-shadow:0 -8px 18px rgba(129,99,56,.07) !important;
-  padding:12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
-  gap:6px !important;
+  backdrop-filter:blur(14px) saturate(1.04) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.04) !important;
+  border-top:1px solid rgba(172,145,93,.13) !important;
+  box-shadow:0 -4px 12px rgba(129,99,56,.05) !important;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom)) !important;
+  gap:5px !important;
 }
 #bottomnav button{
-  min-height:58px !important;
+  min-height:54px !important;
+  padding:8px 10px !important;
   border-radius:var(--radius-ui-soft) !important;
   color:#6d5630 !important;
   background:transparent !important;
   border:1px solid transparent !important;
   box-shadow:none !important;
 }
-#bottomnav button span{font-size:.95rem !important;font-weight:780 !important}
+#bottomnav button span{font-size:.93rem !important;font-weight:760 !important;line-height:1.2 !important}
 #bn-prev:hover,
 #bn-next:hover,
 #tb-avatar-btn:hover,
@@ -315,8 +317,8 @@ body{color-scheme:light}
 #bottomnav button:active{background:rgba(255,250,242,.82) !important}
 .bn-avatar-wrap{
   border-radius:16px !important;
-  border:1px solid rgba(191,153,80,.22) !important;
-  background:rgba(255,250,242,.86) !important;
+  border:1px solid rgba(191,153,80,.19) !important;
+  background:rgba(255,250,242,.82) !important;
 }
 .bn-avatar-label{color:#6d5630 !important}
 #nav-sheet{background:rgba(248,241,230,.98) !important;border-radius:var(--radius-ui) var(--radius-ui) 0 0 !important}
@@ -338,7 +340,8 @@ body{color-scheme:light}
 .ns-v-grid button{
   color:#6d5630 !important;
   border-radius:20px !important;
-  min-height:52px !important;
+  min-height:54px !important;
+  padding:0 16px !important;
 }
 .ns-ch-grid button .ch-title{color:#9a8460 !important}
 .ns-v-grid button.has-note{background:rgba(247,236,212,.95) !important}
@@ -420,15 +423,16 @@ body{color-scheme:light}
   .va-btn,
   .tabs button,
   #bottomnav button,
-  .ux35-btn{min-height:56px !important}
+  .ux35-btn{min-height:54px !important}
   .tabs{top:calc(72px + env(safe-area-inset-top)) !important}
   #bottomnav{padding-left:12px !important;padding-right:12px !important}
   .bn-avatar-label{font-size:.9rem !important}
 }
 @media (max-width:420px){
   .verse-actions{grid-template-columns:1fr !important}
-  #bottomnav{gap:6px !important}
-  #bottomnav button span{font-size:.88rem !important}
+  #bottomnav{gap:4px !important}
+  #bottomnav button{padding:7px 8px !important}
+  #bottomnav button span{font-size:.85rem !important;line-height:1.15 !important}
   .cv-left .cv-name{font-size:clamp(1.78rem,7.7vw,2.05rem) !important;max-width:13ch !important}
   .vc-text{font-size:clamp(1.05rem,4.4vw,1.16rem) !important;line-height:1.74 !important}
 }
