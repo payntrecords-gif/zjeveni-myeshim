@@ -14,10 +14,10 @@
   --accent-soft:#dec17e;
   --ok:#6f8850;
   --error:#a45f4c;
-  --shadow-sm:0 12px 28px rgba(132,102,58,.08);
-  --shadow-md:0 22px 52px rgba(132,102,58,.12);
-  --shadow-lg:0 32px 70px rgba(132,102,58,.16);
-  --radius-xl:32px;
+  --shadow-sm:0 10px 22px rgba(132,102,58,.08);
+  --shadow-md:0 18px 40px rgba(132,102,58,.11);
+  --shadow-lg:0 26px 58px rgba(132,102,58,.14);
+  --radius-xl:30px;
   --radius-lg:24px;
   --radius-md:18px;
   --radius-sm:14px;
@@ -34,8 +34,8 @@ body{
   display:grid;
   align-content:center;
   justify-items:center;
-  gap:18px;
-  padding:24px 18px calc(32px + env(safe-area-inset-bottom));
+  gap:20px;
+  padding:26px 18px calc(34px + env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at top,rgba(224,193,115,.28) 0%,transparent 34%),
     radial-gradient(circle at 100% 100%,rgba(193,154,70,.10) 0%,transparent 28%),
@@ -45,7 +45,7 @@ body{
 }
 body.page-scroll{
   display:block;
-  padding:28px 18px calc(42px + env(safe-area-inset-bottom));
+  padding:30px 18px calc(46px + env(safe-area-inset-bottom));
 }
 a,.link{
   color:var(--accent-strong);
@@ -63,7 +63,7 @@ a:hover,.link:hover{text-decoration:underline}
   width:min(100%,var(--page-max-wide));
   margin:0 auto;
   display:grid;
-  gap:18px;
+  gap:20px;
 }
 .card{
   width:min(100%,var(--page-max));
@@ -72,7 +72,7 @@ a:hover,.link:hover{text-decoration:underline}
   border-radius:var(--radius-xl);
   box-shadow:var(--shadow-md);
   backdrop-filter:blur(12px);
-  padding:28px 24px;
+  padding:30px 24px;
 }
 .page-scroll .card,
 .wrap .card{width:auto}
@@ -82,21 +82,24 @@ form.card,
 .card > :last-child{margin-bottom:0}
 h1,h2,h3{margin:0;color:var(--text);letter-spacing:-.03em}
 h1{
-  font-size:clamp(1.85rem,6.4vw,2.45rem);
-  line-height:1.06;
+  font-size:clamp(1.9rem,6.3vw,2.5rem);
+  line-height:1.08;
   font-weight:800;
-  margin-bottom:12px;
+  margin-bottom:14px;
+  text-wrap:balance;
 }
 h2{
-  font-size:clamp(1.22rem,4.8vw,1.55rem);
-  line-height:1.12;
+  font-size:clamp(1.24rem,4.6vw,1.58rem);
+  line-height:1.18;
   font-weight:800;
-  margin-bottom:10px;
+  margin-bottom:12px;
+  text-wrap:balance;
 }
 p{
-  margin:0 0 14px;
+  margin:0 0 16px;
   color:var(--muted);
-  line-height:1.62;
+  line-height:1.68;
+  text-wrap:pretty;
 }
 strong{color:var(--text)}
 label{
@@ -127,7 +130,7 @@ button,.btn{
   align-items:center;
   justify-content:center;
   gap:8px;
-  min-height:54px;
+  min-height:56px;
   padding:14px 20px;
   border-radius:var(--pill);
   border:1px solid transparent;
@@ -141,8 +144,13 @@ button,.btn{
   text-decoration:none;
   transition:transform .16s ease,box-shadow .16s ease,filter .16s ease,background .16s ease,border-color .16s ease,color .16s ease;
 }
-button:hover,.btn:hover{transform:translateY(-1px);filter:saturate(1.02);text-decoration:none}
-button:active,.btn:active{transform:translateY(0);filter:saturate(.98)}
+button:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(132,102,58,.10);filter:saturate(1.015);text-decoration:none}
+button:active,.btn:active{transform:translateY(0);box-shadow:0 8px 16px rgba(132,102,58,.09);filter:saturate(.985)}
+button:focus-visible,.btn:focus-visible{
+  outline:none;
+  border-color:rgba(193,154,70,.44);
+  box-shadow:0 0 0 4px rgba(193,154,70,.12),0 8px 16px rgba(132,102,58,.08);
+}
 button:disabled,.btn:disabled{opacity:.58;cursor:not-allowed;transform:none;filter:none}
 .card > button,
 .card > .btn,
@@ -174,14 +182,14 @@ form.card > .btn{width:100%}
 .btn-red,.btn-secondary{
   background:var(--surface-soft);
   color:var(--text);
-  border-color:var(--line-strong);
-  box-shadow:none;
+  border-color:rgba(175,146,87,.28);
+  box-shadow:0 6px 14px rgba(132,102,58,.06);
 }
 .btn-red:hover,.btn-secondary:hover{background:#fffdf8}
 .btn-gold{background:linear-gradient(135deg,var(--accent-soft),var(--accent));color:#fffdf7}
 .text-center{text-align:center}
 @media (max-width:480px){
   body,body.page-scroll{padding-left:14px;padding-right:14px}
-  .card{padding:24px 18px;border-radius:28px}
-  button,.btn{min-height:52px;font-size:.98rem}
+  .card{padding:24px 18px;border-radius:26px}
+  button,.btn{min-height:54px;font-size:.98rem}
 }
