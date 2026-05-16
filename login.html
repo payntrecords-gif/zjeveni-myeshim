@@ -52,23 +52,7 @@
     const btn = document.getElementById("submit-btn");
 
     function redirect() {
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-      if (!isMobile) {
-        window.location.replace("./index.html");
-        return;
-      }
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone;
-      const installAlreadyMarked = (() => {
-        try {
-          return localStorage.getItem('myeshim-install-completed') === '1';
-        } catch (error) {
-          return false;
-        }
-      })();
-
-      window.location.replace((isStandalone || installAlreadyMarked) ? "./index.html" : "./install.html");
+      window.location.replace("./index.html");
     }
 
     function errorMessage(code) {
