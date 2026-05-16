@@ -80,7 +80,7 @@
 
     function redirect() {
       const target = isMobileDevice() && !hasCompletedInstallOnboarding()
-        ? "./install.html"
+        ? "./index.html#install"
         : "./index.html";
       window.location.replace(target);
     }
