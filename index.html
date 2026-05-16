@@ -7,6 +7,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <script id="standalone-gate-script">
 (function(){
+  var INSTALL_ONBOARDING_KEY = 'myeshim-install-onboarding-complete';
+  function hasCompletedInstallOnboarding() {
+    try {
+      if (localStorage.getItem(INSTALL_ONBOARDING_KEY) === '1') return true;
+      var legacyCompleted =
+        localStorage.getItem('myeshim-install-seen') === '1' ||
+        localStorage.getItem('myeshim-install-completed') === '1';
+      if (legacyCompleted) localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+      return legacyCompleted;
+    } catch (e) {
+      return false;
+    }
+  }
   try{
     var isStandalone = (
       (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
@@ -16,8 +29,7 @@
     document.documentElement.classList.add(isStandalone ? 'standalone-mode' : 'browser-mode');
     var isMobileUA = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
     document.documentElement.classList.add(isMobileUA ? 'mobile-device' : 'desktop-device');
-    // If install overlay was already dismissed or app is standalone, mark it dismissed so CSS won't force it
-    if (isStandalone || localStorage.getItem('myeshim-install-seen') === '1') {
+    if (isStandalone || hasCompletedInstallOnboarding()) {
       document.documentElement.classList.add('install-dismissed');
     }
   }catch(e){
@@ -1873,12 +1885,29 @@ body{display:flex;flex-direction:column}
 }
 .iov-native-btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(199,155,59,.42)}
 .iov-native-btn:active{transform:scale(.98)}
+.iov-native-btn:disabled{opacity:.58;cursor:not-allowed;transform:none;box-shadow:0 8px 22px rgba(199,155,59,.2)}
 .iov-native-btn.visible{display:block}
+.iov-wait-state{
+  display:none;align-items:center;justify-content:center;gap:10px;
+  padding:14px 0;margin-bottom:14px;color:#7a6a76;font-size:.92rem
+}
+.iov-wait-spinner{
+  width:18px;height:18px;border:2px solid rgba(175,146,87,.26);
+  border-top-color:#c79b3b;border-radius:50%;animation:alf-spin 1s linear infinite;flex-shrink:0
+}
 .iov-steps{background:#faf5fb;border-radius:14px;padding:14px 16px;margin-bottom:12px}
 .iov-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:.87rem;color:#5e4f5b;line-height:1.4}
 .iov-step:not(:last-child){border-bottom:1px solid rgba(199,155,59,.1)}
 .iov-step-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
 .iov-note{font-size:.78rem;color:#9a7fa0;text-align:center;line-height:1.4;margin-top:4px}
+.iov-continue-btn{
+  display:block;width:100%;padding:14px 20px;margin-top:14px;
+  background:#fff;color:#8d6d2b;border:1px solid rgba(199,155,59,.24);border-radius:14px;
+  font:inherit;font-size:.97rem;font-weight:800;cursor:pointer;
+  box-shadow:0 8px 18px rgba(132,102,58,.08);transition:transform .14s,box-shadow .14s
+}
+.iov-continue-btn:hover{transform:translateY(-2px);box-shadow:0 12px 22px rgba(132,102,58,.12)}
+.iov-continue-btn:active{transform:scale(.98)}
 #iov-ios-steps{display:none}
 </style>
 <style id="guide-card-refresh">
@@ -2466,22 +2495,6 @@ body{display:flex;flex-direction:column}
   .mm-level4-submit{min-width:118px}
 }
 </style>
-<script id="iov-continue-fix">
-(function() {
-  document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('iov-continue-btn');
-    if (!btn) return;
-    btn.addEventListener('click', function() {
-      try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
-      document.documentElement.classList.add('install-dismissed');
-      var ov = document.getElementById('install-overlay');
-      if (ov) { ov.classList.remove('visible'); ov.style.display = 'none'; }
-      document.body.style.overflow = '';
-    });
-  });
-})();
-</script>
-
 <link rel="stylesheet" href="./styles/app-theme.css">
 </head>
 <body>
@@ -4636,11 +4649,12 @@ render();
 <script id="ux40-pwa-script">
 (function(){
   const LAST_ROUTE_KEY='myeshim-last-route';
+  const INSTALL_ONBOARDING_KEY='myeshim-install-onboarding-complete';
   const SUPPORTS_BEFOREINSTALLPROMPT='onbeforeinstallprompt' in window;
   const standaloneMedia=window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
   const UA=navigator.userAgent || '';
   let deferredPrompt=null;
-  let installDismissed=false;
+  let installDismissed=hasCompletedInstallOnboarding();
   function $(id){return document.getElementById(id)}
   function isAndroid(){ return /Android/i.test(UA); }
   function isIOS(){ return /iPhone|iPad|iPod/i.test(UA); }
@@ -4653,6 +4667,28 @@ render();
   }
   function isStandalone(){
     return (standaloneMedia && standaloneMedia.matches) || window.navigator.standalone === true || document.referrer.startsWith('android-app://');
+  }
+  function hasCompletedInstallOnboarding(){
+    if(isStandalone()) return true;
+    try{
+      if(localStorage.getItem(INSTALL_ONBOARDING_KEY)==='1') return true;
+      const legacyCompleted=
+        localStorage.getItem('myeshim-install-seen')==='1' ||
+        localStorage.getItem('myeshim-install-completed')==='1';
+      if(legacyCompleted) localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+      return legacyCompleted;
+    }catch(e){
+      return false;
+    }
+  }
+  function markInstallOnboardingComplete(){
+    installDismissed=true;
+    try{
+      localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+      localStorage.removeItem('myeshim-install-seen');
+      localStorage.removeItem('myeshim-install-completed');
+    }catch(e){}
+    document.documentElement.classList.add('install-dismissed');
   }
   function setTip(text){
     const tip=$('pwaTip');
@@ -4783,6 +4819,7 @@ render();
         let choice=null;
         try{ choice=await promptEvent.userChoice; }catch(e){}
         installDismissed=!choice || choice.outcome !== 'accepted';
+        if(choice && choice.outcome === 'accepted') markInstallOnboardingComplete();
         syncInstallUI();
       });
     }
@@ -4805,20 +4842,19 @@ render();
     });
     window.addEventListener('appinstalled', function(){
       deferredPrompt=null;
-      installDismissed=true;
+      markInstallOnboardingComplete();
       syncInstallUI();
-      if(isStandalone()){
-        if(typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
-      }else if(typeof window.showInstallOverlay==='function'){
-        window.showInstallOverlay();
-      }
+      if(typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
     });
     window.addEventListener('resize', syncInstallUI);
     window.addEventListener('pageshow', syncInstallUI);
     if(standaloneMedia && standaloneMedia.addEventListener){
       standaloneMedia.addEventListener('change', function(){
         syncInstallUI();
-        if(isStandalone() && typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
+        if(isStandalone()){
+          markInstallOnboardingComplete();
+          if(typeof window.hideInstallOverlay==='function') window.hideInstallOverlay();
+        }
       });
     }
     syncInstallUI();
@@ -6105,11 +6141,13 @@ const FCM_SENDER_ID = '360259005980';
   </div>
   <div class="iov-tagline">Jeden krok k označování</div>
   <div class="iov-card">
-    <div class="iov-title">Přidej aplikaci na plochu 📲</div>
-    <div class="iov-sub">MyeShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
-    <!-- Android: native install button (visible when beforeinstallprompt is available) -->
+    <div class="iov-title" id="iov-title">Přidej aplikaci na plochu 📲</div>
+    <div class="iov-sub" id="iov-sub">MyeShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
     <button id="iov-native-btn" class="iov-native-btn" type="button">Instalovat</button>
-    <!-- iOS: Safari share instructions -->
+    <div class="iov-wait-state" id="iov-wait-state" aria-live="polite">
+      <div class="iov-wait-spinner" aria-hidden="true"></div>
+      <span>Připravujeme instalaci…</span>
+    </div>
     <div class="iov-steps" id="iov-ios-steps">
       <div class="iov-step">
         <span class="iov-step-icon">1️⃣</span>
@@ -6124,8 +6162,8 @@ const FCM_SENDER_ID = '360259005980';
         <span>Klepni na <strong>Přidat</strong> vpravo nahoře</span>
       </div>
     </div>
-    <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
-    <button id="iov-continue-btn" class="iov-native-btn visible" type="button">Pokračovat do aplikace</button>
+    <p class="iov-note" id="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
+    <button id="iov-continue-btn" class="iov-continue-btn" type="button">Pokračovat do aplikace</button>
   </div>
 </div>
 
@@ -6304,9 +6342,41 @@ const FCM_SENDER_ID = '360259005980';
   }
 
   // ── Install overlay (step 2 of onboarding) ──
+  var INSTALL_ONBOARDING_KEY = 'myeshim-install-onboarding-complete';
+  function hasCompletedInstallOnboarding() {
+    if (typeof window.isStandalone === 'function' && window.isStandalone()) return true;
+    try {
+      if (localStorage.getItem(INSTALL_ONBOARDING_KEY) === '1') return true;
+      var legacyCompleted =
+        localStorage.getItem('myeshim-install-seen') === '1' ||
+        localStorage.getItem('myeshim-install-completed') === '1';
+      if (legacyCompleted) localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+      return legacyCompleted;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markInstallOnboardingComplete() {
+    try {
+      localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+      localStorage.removeItem('myeshim-install-seen');
+      localStorage.removeItem('myeshim-install-completed');
+    } catch (e) {}
+    document.documentElement.classList.add('install-dismissed');
+  }
+
+  function setInstallOverlayCopy(title, sub, note) {
+    var titleEl = document.getElementById('iov-title');
+    var subEl = document.getElementById('iov-sub');
+    var noteEl = document.getElementById('iov-note');
+    if (titleEl) titleEl.textContent = title;
+    if (subEl) subEl.textContent = sub;
+    if (noteEl) noteEl.textContent = note;
+  }
+
   function showInstallOverlay() {
-    // Install overlay is mobile-only
-    if (document.documentElement.classList.contains('desktop-device')) return;
+    if (document.documentElement.classList.contains('desktop-device') || hasCompletedInstallOnboarding()) return;
     var ov = document.getElementById('install-overlay');
     if (ov) { ov.classList.add('visible'); document.body.style.overflow = 'hidden'; }
     updateInstallOverlayBtn();
@@ -6319,7 +6389,7 @@ const FCM_SENDER_ID = '360259005980';
     ov.style.display = 'none';
     document.documentElement.classList.add('install-dismissed');
     if (!silent) {
-      try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
+      markInstallOnboardingComplete();
     }
     document.body.style.overflow = '';
   }
@@ -6327,44 +6397,90 @@ const FCM_SENDER_ID = '360259005980';
   function maybeShowInstallOverlayFromHash() {
     if (!showInstallOverlayFromHash) return;
     if (typeof window.isStandalone === 'function' && window.isStandalone()) return;
+    if (hasCompletedInstallOnboarding()) return;
     showInstallOverlay();
     history.replaceState(null, document.title, window.location.pathname);
     showInstallOverlayFromHash = false;
   }
 
-  // Show the native install button when the browser has a deferred prompt or Telegram context ready
   window.updateInstallOverlayBtn = function() {
     var btn = document.getElementById('iov-native-btn');
+    var waitState = document.getElementById('iov-wait-state');
+    var iosSteps = document.getElementById('iov-ios-steps');
     if (!btn) return;
+    if (document.documentElement.classList.contains('desktop-device')) {
+      btn.classList.remove('visible');
+      if (waitState) waitState.style.display = 'none';
+      if (iosSteps) iosSteps.style.display = 'none';
+      return;
+    }
     var ua = navigator.userAgent || '';
     var isIOSDevice = /iPhone|iPad|iPod/i.test(ua);
-    // iOS never fires beforeinstallprompt – native btn stays hidden; iOS steps guide the user
-    if (isIOSDevice) { btn.classList.remove('visible'); return; }
+    var isAndroidDevice = /Android/i.test(ua);
+    var isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|OPiOS/i.test(ua);
     var hasPrompt = typeof window.hasDeferredPrompt === 'function' && window.hasDeferredPrompt();
     var externalContext = typeof window.getExternalInstallContext === 'function' ? window.getExternalInstallContext() : null;
-    btn.classList.toggle('visible', hasPrompt || !!externalContext);
-    btn.textContent = externalContext ? externalContext.button : 'Instalovat';
+
+    if (isIOSDevice) {
+      if (waitState) waitState.style.display = 'none';
+      if (iosSteps) iosSteps.style.display = isSafari ? 'block' : 'none';
+      if (isSafari) {
+        btn.classList.remove('visible');
+        setInstallOverlayCopy(
+          'Přidej na plochu 📲',
+          'MyeShim funguje na iPhonu nejlépe jako aplikace z plochy. Přidání zabere jen pár sekund.',
+          'Po přidání můžeš pokračovat rovnou do aplikace.'
+        );
+      } else {
+        btn.classList.add('visible');
+        btn.textContent = 'Otevřít v Safari';
+        setInstallOverlayCopy(
+          'Otevři MyeShim v Safari',
+          'Přidání na plochu funguje na iPhonu pouze v Safari. Otevři tam tuto stránku a dokonči instalaci.',
+          'V Safari pak zvol Sdílet → Přidat na plochu.'
+        );
+      }
+      return;
+    }
+
+    if (!isAndroidDevice) {
+      btn.classList.remove('visible');
+      if (waitState) waitState.style.display = 'none';
+      if (iosSteps) iosSteps.style.display = 'none';
+      return;
+    }
+
+    if (iosSteps) iosSteps.style.display = 'none';
+    if (externalContext) {
+      btn.classList.add('visible');
+      btn.textContent = externalContext.button;
+      if (waitState) waitState.style.display = 'none';
+      setInstallOverlayCopy(externalContext.title, externalContext.sub, externalContext.tip);
+      return;
+    }
+
+    if (hasPrompt) {
+      btn.classList.add('visible');
+      btn.textContent = 'Instalovat';
+      if (waitState) waitState.style.display = 'none';
+      setInstallOverlayCopy(
+        'Přidej na plochu 📲',
+        'Klepni na tlačítko níže a potvrď instalaci. MyeShim bude připravený na ploše telefonu.',
+        'Po potvrzení můžeš pokračovat rovnou do aplikace.'
+      );
+      return;
+    }
+
+    btn.classList.remove('visible');
+    if (waitState) waitState.style.display = 'flex';
+    setInstallOverlayCopy(
+      'Připravujeme instalaci',
+      'Aplikace se připravuje k instalaci. Jakmile bude vše připravené, zobrazí se tlačítko Instalovat.',
+      'Nechceš čekat? Můžeš pokračovat i bez instalace.'
+    );
   };
 
-  // Set up install overlay: platform-specific layout and native button wiring
-  function setupInstallOverlayPlatform() {
-    var ua = navigator.userAgent || '';
-    var isIOSDevice = /iPhone|iPad|iPod/i.test(ua);
-    var iosSteps = document.getElementById('iov-ios-steps');
-    var nativeBtn = document.getElementById('iov-native-btn');
-    if (isIOSDevice) {
-      // iOS: show share instructions; native button is not applicable
-      if (iosSteps) iosSteps.style.display = 'block';
-      if (nativeBtn) nativeBtn.classList.remove('visible');
-    } else {
-      // Android / non-iOS: hide steps, show button via updateInstallOverlayBtn
-      if (iosSteps) iosSteps.style.display = 'none';
-    }
-  }
-
-  // Wire up native install button inside the install overlay
   document.addEventListener('DOMContentLoaded', function() {
-    setupInstallOverlayPlatform();
     var nativeBtn = document.getElementById('iov-native-btn');
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
@@ -6373,7 +6489,13 @@ const FCM_SENDER_ID = '360259005980';
           return;
         }
         if (typeof window.triggerInstallPrompt === 'function') {
-          await window.triggerInstallPrompt();
+          var accepted = await window.triggerInstallPrompt();
+          if (accepted) {
+            markInstallOnboardingComplete();
+            hideInstallOverlay(false);
+            history.replaceState(null, '', window.location.pathname);
+            return;
+          }
           updateInstallOverlayBtn();
         }
       });
@@ -6382,7 +6504,7 @@ const FCM_SENDER_ID = '360259005980';
     var continueBtn = document.getElementById('iov-continue-btn');
     if (continueBtn) {
       continueBtn.addEventListener('click', function() {
-        try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
+        markInstallOnboardingComplete();
         hideInstallOverlay(false);
         history.replaceState(null, '', window.location.pathname);
       });
@@ -6390,9 +6512,7 @@ const FCM_SENDER_ID = '360259005980';
     updateInstallOverlayBtn();
   });
 
-  // Expose so ux40-pwa-script can close the overlay after standalone is detected
   window.hideInstallOverlay = function() {
-    try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
     hideInstallOverlay(false);
   };
   window.showInstallOverlay = function() { showInstallOverlay(); };

@@ -39,6 +39,7 @@
     .step strong{color:var(--text)}
     .note{font-size:.82rem;color:var(--muted);text-align:center;margin-top:12px;line-height:1.45}
     #wait-state{display:none;align-items:center;justify-content:center;gap:10px;padding:14px 0;margin-bottom:16px;color:var(--muted);font-size:.93rem}
+    #continue-btn{margin-top:12px}
     @keyframes spin{to{transform:rotate(360deg)}}
     .wait-spinner{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;flex-shrink:0}
     #ios-steps{display:none;margin-bottom:16px}
@@ -88,6 +89,7 @@
   </div>
 
   <p class="note" id="install-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš dál.</p>
+  <button id="continue-btn" class="btn-secondary" type="button">Pokračovat do aplikace</button>
 </div>
 
 <div id="ios-arrow">
@@ -95,19 +97,31 @@
   Klepni na Sdílet → „Přidat na plochu"
 </div>
 
-<script>
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 (function(){
+  const firebaseConfig = {
+    apiKey: "AIzaSyDNxmsMfxs0RZJLOViRn85P1t3SxuDOoRc",
+    authDomain: "myeshim-app.firebaseapp.com",
+    projectId: "myeshim-app",
+    storageBucket: "myeshim-app.firebasestorage.app",
+    messagingSenderId: "360259005980",
+    appId: "1:360259005980:web:610695f8b44de04dc079d9"
+  };
+  const INSTALL_ONBOARDING_KEY = 'myeshim-install-onboarding-complete';
   var ua = navigator.userAgent || '';
   var isIOS = /iphone|ipad|ipod/i.test(ua);
   var isAndroid = /android/i.test(ua);
   var isTelegram = /telegram|tgwebview/i.test(ua);
   var isMobile = isIOS || isAndroid;
-
-  // Desktop: redirect immediately – install page is mobile-only
-  if (!isMobile) {
-    window.location.replace('./index.html');
-    return;
-  }
+  var app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  var auth = getAuth(app);
+  var db = getFirestore(app);
+  var continueBtn = document.getElementById('continue-btn');
+  var installBooted = false;
 
   function isStandaloneMode() {
     return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
@@ -115,42 +129,96 @@
            (document.referrer || '').startsWith('android-app://');
   }
 
-  function isInstalled() {
+  function hasCompletedInstallOnboarding() {
     if (isStandaloneMode()) return true;
-    try { return localStorage.getItem('myeshim-install-completed') === '1'; } catch(e) { return false; }
+    try {
+      if (localStorage.getItem(INSTALL_ONBOARDING_KEY) === '1') return true;
+      var legacyCompleted =
+        localStorage.getItem('myeshim-install-seen') === '1' ||
+        localStorage.getItem('myeshim-install-completed') === '1';
+      if (legacyCompleted) localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+      return legacyCompleted;
+    } catch(e) {
+      return false;
+    }
   }
 
-  function markInstalled() {
-    try { localStorage.setItem('myeshim-install-completed', '1'); } catch(e) {}
+  function completeInstallOnboarding() {
+    try {
+      localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+      localStorage.removeItem('myeshim-install-seen');
+      localStorage.removeItem('myeshim-install-completed');
+    } catch(e) {}
+  }
+
+  function redirectToApp() {
+    window.location.replace('./index.html');
+  }
+
+  function redirectToLogin() {
+    window.location.replace('./login.html');
+  }
+
+  function redirectToWaiting() {
+    window.location.replace('./waiting.html');
+  }
+
+  function setContent(title, sub, note) {
+    document.getElementById('card-title').textContent = title;
+    document.getElementById('card-sub').textContent = sub;
+    document.getElementById('install-note').textContent = note;
+  }
+
+  function showContinueButton() {
+    if (continueBtn) continueBtn.style.display = '';
+  }
+
+  function hideWaitingState() {
+    var waitState = document.getElementById('wait-state');
+    if (waitState) waitState.style.display = 'none';
+  }
+
+  function hideIOSArrow() {
+    var iosArrow = document.getElementById('ios-arrow');
+    if (iosArrow) iosArrow.style.display = 'none';
   }
 
   // ── iOS: clean Safari-only share flow ──────────────────────────────────────
   function renderIOS() {
     var isSafari = /safari/i.test(ua) && !/chrome|chromium|crios|fxios|opios/i.test(ua);
+    var mainBtn = document.getElementById('main-btn');
+    var btnLabel = document.getElementById('btn-label');
+    var iosSteps = document.getElementById('ios-steps');
+    var iosArrow = document.getElementById('ios-arrow');
+
+    hideWaitingState();
+    showContinueButton();
 
     if (isTelegram) {
-      document.getElementById('card-title').textContent = 'Otevři MyeShim v Safari';
-      document.getElementById('card-sub').textContent = 'Telegram neumí přidat aplikaci na plochu. Klepni níže a otevři MyeShim v Safari.';
-      var btnLabel = document.getElementById('btn-label');
+      setContent(
+        'Otevři MyeShim v Safari',
+        'Telegram neumí přidat aplikaci na plochu. Otevři MyeShim v Safari a tam ho přidej na plochu.',
+        'Instalace na iPhonu funguje pouze přes Safari.'
+      );
       if (btnLabel) btnLabel.textContent = '🧭 Otevřít v Safari';
-      var mainBtn = document.getElementById('main-btn');
       if (mainBtn) {
         mainBtn.style.display = '';
         mainBtn.addEventListener('click', function() {
           window.open(location.href, '_blank', 'noopener');
-        });
+        }, { once: true });
       }
-      document.getElementById('install-note').textContent = 'V Safari pak přidej MyeShim na plochu přes nabídku Sdílet.';
+      if (iosSteps) iosSteps.style.display = 'none';
+      hideIOSArrow();
       return;
     }
 
     if (!isSafari) {
-      // Chrome/other browser on iOS
-      document.getElementById('card-title').textContent = 'Otevři MyeShim v Safari';
-      document.getElementById('card-sub').textContent = 'Přidání na plochu funguje pouze přes Safari. Zkopíruj odkaz a otevři ho v Safari.';
-      var btnLabel = document.getElementById('btn-label');
+      setContent(
+        'Otevři MyeShim v Safari',
+        'Přidání na plochu funguje na iPhonu pouze v Safari. Otevři tam tuto stránku a dokonči instalaci.',
+        'V Safari pak zvol Sdílet → Přidat na plochu.'
+      );
       if (btnLabel) btnLabel.textContent = '🧭 Otevřít v Safari';
-      var mainBtn = document.getElementById('main-btn');
       if (mainBtn) {
         mainBtn.style.display = '';
         mainBtn.addEventListener('click', function() {
@@ -158,25 +226,20 @@
             navigator.clipboard.writeText(location.href).catch(function(){});
           }
           window.open(location.href, '_blank', 'noopener');
-        });
+        }, { once: true });
       }
-      document.getElementById('install-note').textContent = 'V Safari pak přidej MyeShim na plochu přes nabídku Sdílet.';
+      if (iosSteps) iosSteps.style.display = 'none';
+      hideIOSArrow();
       return;
     }
 
-    // Safari on iOS: show share instructions
-    document.getElementById('card-title').textContent = 'Přidej na plochu 📲';
-    document.getElementById('card-sub').textContent = 'MyeShim funguje nejlépe jako aplikace z plochy. Přidání zabere pár sekund.';
-    document.getElementById('install-note').textContent = 'Po přidání spusť aplikaci ikonou z plochy.';
-
-    // Hide install button, show steps and arrow
-    var mainBtn = document.getElementById('main-btn');
+    setContent(
+      'Přidej na plochu 📲',
+      'MyeShim funguje na iPhonu nejlépe jako aplikace z plochy. Přidání zabere jen pár sekund.',
+      'Po přidání můžeš pokračovat do aplikace nebo ji rovnou spustit z nové ikony.'
+    );
     if (mainBtn) mainBtn.style.display = 'none';
-
-    var iosSteps = document.getElementById('ios-steps');
     if (iosSteps) iosSteps.style.display = 'block';
-
-    var iosArrow = document.getElementById('ios-arrow');
     if (iosArrow) iosArrow.style.display = 'block';
   }
 
@@ -196,15 +259,19 @@
     var hasPrompt = !!window.__bipEvent;
     var mainBtn = document.getElementById('main-btn');
     var btnLabel = document.getElementById('btn-label');
-    var cardTitle = document.getElementById('card-title');
-    var cardSub = document.getElementById('card-sub');
-    var installNote = document.getElementById('install-note');
     var waitState = document.getElementById('wait-state');
+    var iosSteps = document.getElementById('ios-steps');
+
+    hideIOSArrow();
+    if (iosSteps) iosSteps.style.display = 'none';
+    showContinueButton();
 
     if (hasPrompt) {
-      if (cardTitle) cardTitle.textContent = 'Přidej na plochu 📲';
-      if (cardSub) cardSub.textContent = 'Klepni na tlačítko níže a potvrď instalaci. MyeShim bude připravený na ploše telefonu.';
-      if (installNote) installNote.textContent = 'Po potvrzení se aplikace nainstaluje.';
+      setContent(
+        'Přidej na plochu 📲',
+        'Klepni na tlačítko níže a potvrď instalaci. MyeShim bude připravený na ploše telefonu.',
+        'Po potvrzení můžeš pokračovat rovnou do aplikace.'
+      );
       if (btnLabel) btnLabel.textContent = 'Instalovat';
       if (mainBtn) { mainBtn.style.display = ''; mainBtn.disabled = false; }
       if (waitState) waitState.style.display = 'none';
@@ -219,36 +286,44 @@
           try {
             event.prompt();
             var choice = await event.userChoice;
-            console.info('[install-flow] userChoice', choice && choice.outcome);
             if (choice && choice.outcome === 'accepted') {
-              markInstalled();
-              if (btnLabel) btnLabel.textContent = '✓ Instaluje se…';
-              if (installNote) installNote.textContent = 'Potvrzeno. Otevři MyeShim z plochy telefonu.';
+              completeInstallOnboarding();
+              if (btnLabel) btnLabel.textContent = '✓ Hotovo';
+              redirectToApp();
             } else {
-              // Dismissed – allow retry if prompt fires again
               mainBtn.disabled = false;
             }
           } catch(err) {
-            console.warn('[install-flow] prompt failed', err);
             mainBtn.disabled = false;
           }
         });
       }
     } else {
-      if (cardTitle) cardTitle.textContent = 'Připravujeme instalaci';
-      if (cardSub) cardSub.textContent = 'Aplikace se připravuje k instalaci. Vyčkej chvíli.';
-      if (installNote) installNote.textContent = '';
+      setContent(
+        'Připravujeme instalaci',
+        'Aplikace se připravuje k instalaci. Jakmile bude vše připravené, zobrazí se tlačítko Instalovat.',
+        'Nechceš čekat? Můžeš pokračovat i bez instalace.'
+      );
       if (mainBtn) mainBtn.style.display = 'none';
       if (waitState) waitState.style.display = 'flex';
     }
   }
 
   function renderTelegramAndroid() {
-    document.getElementById('card-title').textContent = 'Otevři MyeShim v Chrome';
-    document.getElementById('card-sub').textContent = 'Telegram neumí přidat aplikaci na plochu. Klepni níže a otevři MyeShim v Chrome.';
+    setContent(
+      'Otevři MyeShim v Chrome',
+      'Telegram neumí přidat aplikaci na plochu. Otevři MyeShim v Chrome a tam pokračuj instalací.',
+      'V Chrome pak klepni na Instalovat.'
+    );
     var btnLabel = document.getElementById('btn-label');
     if (btnLabel) btnLabel.textContent = '📲 Otevřít v Chrome';
     var mainBtn = document.getElementById('main-btn');
+    var waitState = document.getElementById('wait-state');
+    var iosSteps = document.getElementById('ios-steps');
+    showContinueButton();
+    hideIOSArrow();
+    if (waitState) waitState.style.display = 'none';
+    if (iosSteps) iosSteps.style.display = 'none';
     if (mainBtn) {
       mainBtn.style.display = '';
       mainBtn.addEventListener('click', function() {
@@ -261,47 +336,73 @@
         } catch(e) {
           window.open(location.href, '_blank', 'noopener');
         }
-      });
+      }, { once: true });
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    if (isInstalled()) {
-      window.location.replace('./index.html');
-      return;
+  function bootInstallExperience() {
+    if (installBooted) return;
+    installBooted = true;
+    if (continueBtn) {
+      continueBtn.addEventListener('click', function() {
+        completeInstallOnboarding();
+        redirectToApp();
+      });
     }
-
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-        .then(function(reg){ console.info('[install-flow] SW registered', reg.scope); })
-        .catch(function(err){ console.warn('[install-flow] SW register failed', err); });
+        .catch(function(){});
     }
 
     var standaloneMedia = window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
     if (standaloneMedia && standaloneMedia.addEventListener) {
       standaloneMedia.addEventListener('change', function() {
-        if (isStandaloneMode()) window.location.replace('./index.html');
+        if (isStandaloneMode()) {
+          completeInstallOnboarding();
+          redirectToApp();
+        }
       });
     }
 
     window.addEventListener('appinstalled', function() {
-      markInstalled();
-      console.info('[install-flow] appinstalled event');
+      completeInstallOnboarding();
       var btnLabel = document.getElementById('btn-label');
       var mainBtn = document.getElementById('main-btn');
-      if (btnLabel) btnLabel.textContent = '✓ Instaluje se…';
+      if (btnLabel) btnLabel.textContent = '✓ Hotovo';
       if (mainBtn) mainBtn.disabled = true;
-      setTimeout(function() { window.location.replace('./index.html'); }, 900);
+      setTimeout(redirectToApp, 250);
     });
 
     if (isIOS) {
       renderIOS();
     } else if (isAndroid) {
       renderAndroid();
+    } else {
+      redirectToApp();
+    }
+  }
+
+  onAuthStateChanged(auth, async function(user) {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+    try {
+      var snap = await getDoc(doc(db, 'approvedUsers', user.uid));
+      var approved = snap.exists() && snap.data().status === 'approved';
+      if (!approved) {
+        redirectToWaiting();
+        return;
+      }
+      if (!isMobile || hasCompletedInstallOnboarding()) {
+        redirectToApp();
+        return;
+      }
+      bootInstallExperience();
+    } catch (error) {
+      redirectToWaiting();
     }
   });
-
-  console.info('[install-flow] platform', { isIOS: isIOS, isAndroid: isAndroid, isTelegram: isTelegram });
 })();
 </script>
 </body>
