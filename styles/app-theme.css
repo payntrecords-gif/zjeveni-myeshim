@@ -14,7 +14,7 @@
   --radius-ui:28px;
   --radius-ui-soft:22px;
   --ux-topbar-height:74px;
-  --ux-chrome-compact-height:126px;
+  --ux-chrome-compact-height:118px;
   --ux-fixed-scale:.98;
   --ux-sticky-bg:#f4e9d6;
   --ux-sticky-bg-strong:#f2e4cc;
@@ -58,7 +58,7 @@ body{color-scheme:light}
   box-shadow:none !important;
   display:flex !important;
   flex-direction:column !important;
-  gap:8px !important;
+  gap:6px !important;
 }
 #app-shell{
   background:#f4e9d6 !important;
@@ -79,7 +79,7 @@ body{color-scheme:light}
 }
 #app-compact-row{
   display:flex !important;
-  align-items:center !important;
+  align-items:flex-start !important;
   padding:0 16px !important;
   max-height:0 !important;
   opacity:0 !important;
@@ -90,14 +90,16 @@ body{color-scheme:light}
 #app-compact-line{
   display:block !important;
   width:100% !important;
-  font-size:.8rem !important;
-  line-height:1.35 !important;
+  font-size:.79rem !important;
+  line-height:1.28 !important;
   font-weight:760 !important;
   color:#6f5630 !important;
   letter-spacing:.01em !important;
+  text-wrap:pretty !important;
+  overflow-wrap:anywhere !important;
 }
 #app-progress-area{
-  padding:8px 16px 10px !important;
+  padding:9px 16px 10px !important;
   display:flex !important;
   flex-direction:column !important;
   gap:8px !important;
@@ -116,7 +118,7 @@ body{color-scheme:light}
   align-items:center !important;
   min-height:24px !important;
   border-radius:999px !important;
-  font-size:.74rem !important;
+  font-size:.73rem !important;
   font-weight:780 !important;
   color:#7a6234 !important;
   background:#f7efdf !important;
@@ -146,7 +148,7 @@ body{color-scheme:light}
   gap:8px !important;
 }
 #ux35-progress-track{height:7px !important;background:rgba(172,145,93,.2) !important;border-radius:999px !important;max-width:none !important;margin-left:0 !important;margin-right:0 !important}
-#ux35-progress{background:linear-gradient(90deg,#dabc74,#bf9950) !important}
+#ux35-progress{background:linear-gradient(90deg,#dabc74,#bf9950) !important;transition:width .24s ease !important}
 #ux35-progress-label{
   color:#7a6236 !important;
   margin-top:0 !important;
@@ -161,6 +163,7 @@ body{color-scheme:light}
   white-space:normal !important;
   overflow:visible !important;
   text-overflow:clip !important;
+  min-height:1em !important;
   transition:all .2s ease !important;
 }
 #app{
@@ -196,6 +199,16 @@ body{color-scheme:light}
   box-shadow:0 8px 16px rgba(129,99,56,.06) !important;
   max-width:none !important;
   margin:0 !important;
+}
+#app-tabs-outer .tabs button{
+  border:1px solid transparent !important;
+  transition:background .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease !important;
+}
+#app-tabs-outer .tabs button.active{
+  background:rgba(234,214,176,.88) !important;
+  color:#6a521f !important;
+  border-color:rgba(191,153,80,.34) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 4px 10px rgba(129,99,56,.08) !important;
 }
 #app-panels{padding-top:14px !important;padding-bottom:calc(118px + env(safe-area-inset-bottom)) !important}
 /* ── cv-row: premium full-state heading block ── */
@@ -252,14 +265,14 @@ html.header-compact #app-shell{
   box-shadow:0 8px 18px rgba(129,99,56,.10) !important;
 }
 html.header-compact #app-compact-row{
-  max-height:42px !important;
+  max-height:52px !important;
   opacity:1 !important;
   transform:translateY(0) !important;
-  padding-top:10px !important;
+  padding-top:9px !important;
   padding-bottom:2px !important;
 }
 html.header-compact #app-progress-area{
-  padding-top:8px !important;
+  padding-top:7px !important;
 }
 html.header-compact #ux35-progress-label{
   margin-top:0 !important;
@@ -273,7 +286,7 @@ html.header-compact #ux35-progress-label{
 }
 html.header-compact #app-tabs-row{padding:0 16px 12px !important}
 html.header-compact #app-tabs-outer .tabs{padding:4px !important}
-html.header-compact #app-tabs-outer .tabs button{min-height:42px !important}
+html.header-compact #app-tabs-outer .tabs button{min-height:40px !important}
 .verse-card{
   background:linear-gradient(145deg,#d2ab55 0%,#c39a42 100%) !important;
   border:1px solid rgba(255,255,255,.24) !important;
@@ -630,7 +643,8 @@ html.header-compact #app-tabs-outer .tabs button{min-height:42px !important}
   #bottomnav{gap:4px !important}
   #bottomnav button{padding:7px 8px !important}
   #bottomnav button span{font-size:.85rem !important;line-height:1.15 !important}
-  .cv-left .cv-name{font-size:clamp(1.44rem,7vw,1.72rem) !important;max-width:15ch !important}
+  .cv-left .cv-name{font-size:clamp(1.24rem,6.1vw,1.5rem) !important;max-width:16ch !important}
+  #app-compact-line{font-size:.76rem !important}
   .vc-text{font-size:clamp(1.05rem,4.4vw,1.16rem) !important;line-height:1.74 !important}
 }
 
