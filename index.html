@@ -2533,15 +2533,25 @@ body{display:flex;flex-direction:column}
     <div class="cv-right" id="cv-right"></div>
   </div>
   </div>
-  <div id="ux35-progress-wrap">
-    <div id="ux35-progress-track"><div id="ux35-progress"></div></div>
-    <div id="ux35-progress-label"></div>
-  </div>
-  <div id="app-tabs-outer">
-    <div class="tabs">
-      <button id="tab-guide" onclick="setTab('guide')">Návod</button>
-      <button id="tab-qa" onclick="setTab('qa')">Q&amp;A</button>
-      <button id="tab-note" onclick="setTab('note')">Poznámky</button>
+  <div id="app-shell">
+    <div id="app-identity-row">
+      <div id="app-identity-meta" aria-live="polite">
+        <span id="app-identity-ref"></span>
+        <span id="app-identity-name"></span>
+      </div>
+      <div id="ux35-progress-wrap">
+        <div id="ux35-progress-track"><div id="ux35-progress"></div></div>
+        <div id="ux35-progress-label"></div>
+      </div>
+    </div>
+    <div id="app-tabs-row">
+      <div id="app-tabs-outer">
+        <div class="tabs">
+          <button id="tab-guide" onclick="setTab('guide')">Návod</button>
+          <button id="tab-qa" onclick="setTab('qa')">Q&amp;A</button>
+          <button id="tab-note" onclick="setTab('note')">Poznámky</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2702,9 +2712,14 @@ function render(){
   const vv=VERSES[state.idx];
   const cvs=chVS(vv.c);
   const pos=cvs.findIndex(x=>x.v===vv.v)+1;
+  const chapterName = chName(vv.c);
   document.getElementById('cv-ch').textContent='Zjevení '+vv.c;
-  document.getElementById('cv-name').textContent=chName(vv.c);
+  document.getElementById('cv-name').textContent=chapterName;
   document.getElementById('cv-right').textContent='Verš '+pos+' z '+cvs.length;
+  const compactRefEl = document.getElementById('app-identity-ref');
+  const compactNameEl = document.getElementById('app-identity-name');
+  if(compactRefEl) compactRefEl.textContent='Zj '+vv.c+' · '+pos+'/'+cvs.length;
+  if(compactNameEl) compactNameEl.textContent=chapterName;
   document.getElementById('vc-ref').textContent='Zj '+vv.c+':'+vv.v;
   document.getElementById('vc-text').textContent=vv.t;
   document.getElementById('nav-label').textContent='Zj '+vv.c+':'+vv.v;
@@ -7400,6 +7415,7 @@ window.openProfile = function() {
 /* ── COMPACT HEADER: sentinel-based switch for expanded/compact sticky chrome ── */
 (function(){
   var root = document.documentElement;
+  var chrome = document.getElementById('app-chrome');
   var sentinel = document.getElementById('header-compact-sentinel');
   if(!root || !sentinel) return;
 
@@ -7420,7 +7436,9 @@ window.openProfile = function() {
   refreshProgressLabel();
 
   function setCompactState(isCompact){
-    root.classList.toggle('header-compact', !!isCompact);
+    var compact = !!isCompact;
+    root.classList.toggle('header-compact', compact);
+    if(chrome) chrome.setAttribute('data-state', compact ? 'compact' : 'expanded');
     refreshProgressLabel();
   }
 
