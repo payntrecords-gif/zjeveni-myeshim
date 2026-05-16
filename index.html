@@ -6958,16 +6958,25 @@ window.openProfile = function() {
     if (psUpdateBtn.disabled) return;
     psUpdateBtn.disabled = true;
     psUpdateBtn.textContent = 'Aktualizuji…';
+    var refreshUrl = null;
     try {
       if ('serviceWorker' in navigator) {
         const reg = await navigator.serviceWorker.getRegistration();
         if (reg) await reg.update();
       }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(function(key){ return caches.delete(key); }));
+      }
+      var u = new URL(window.location.href);
+      u.searchParams.set('update', Date.now().toString());
+      refreshUrl = u.toString();
     } catch(e) {}
     // Bezpečný reload: počkáme až Firebase persistuje session
     // do localStorage, PAK reloadujeme
     setTimeout(() => {
-      window.location.reload();
+      if (refreshUrl) window.location.replace(refreshUrl);
+      else window.location.reload();
     }, 800);
   };
 
