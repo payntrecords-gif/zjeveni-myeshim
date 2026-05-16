@@ -205,7 +205,7 @@ import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10
         mainBtn.style.display = '';
         mainBtn.addEventListener('click', function() {
           window.open(location.href, '_blank', 'noopener');
-        }, { once: true });
+        });
       }
       if (iosSteps) iosSteps.style.display = 'none';
       hideIOSArrow();
@@ -226,7 +226,7 @@ import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10
             navigator.clipboard.writeText(location.href).catch(function(){});
           }
           window.open(location.href, '_blank', 'noopener');
-        }, { once: true });
+        });
       }
       if (iosSteps) iosSteps.style.display = 'none';
       hideIOSArrow();
@@ -336,7 +336,7 @@ import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10
         } catch(e) {
           window.open(location.href, '_blank', 'noopener');
         }
-      }, { once: true });
+      });
     }
   }
 
