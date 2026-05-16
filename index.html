@@ -16,6 +16,10 @@
     document.documentElement.classList.add(isStandalone ? 'standalone-mode' : 'browser-mode');
     var isMobileUA = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
     document.documentElement.classList.add(isMobileUA ? 'mobile-device' : 'desktop-device');
+    // If install overlay was already dismissed or app is standalone, mark it dismissed so CSS won't force it
+    if (isStandalone || localStorage.getItem('myeshim-install-seen') === '1') {
+      document.documentElement.classList.add('install-dismissed');
+    }
   }catch(e){
     document.documentElement.classList.add('browser-mode');
   }
@@ -54,7 +58,7 @@ html.browser-mode #pwaTip{visibility:hidden !important}
 html.browser-mode #auth-overlay,
 html.browser-mode #auth-overlay-error{display:none !important;visibility:hidden !important}
 html.browser-mode #app-load-fallback{display:none !important}
-html.browser-mode.auth-released.mobile-device #install-overlay{display:flex !important;visibility:visible !important}
+html.browser-mode.auth-released.mobile-device:not(.install-dismissed) #install-overlay{display:flex !important;visibility:visible !important}
 html.browser-mode:not(.auth-released) #install-overlay,
 html.browser-mode.desktop-device #install-overlay{display:none !important;visibility:hidden !important}
 html.browser-mode body{background:var(--bg,#f8f3f7)}
@@ -2468,7 +2472,11 @@ body{display:flex;flex-direction:column}
     var btn = document.getElementById('iov-continue-btn');
     if (!btn) return;
     btn.addEventListener('click', function() {
-      window.location.href = './login.html';
+      try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
+      document.documentElement.classList.add('install-dismissed');
+      var ov = document.getElementById('install-overlay');
+      if (ov) { ov.classList.remove('visible'); ov.style.display = 'none'; }
+      document.body.style.overflow = '';
     });
   });
 })();
@@ -6306,8 +6314,13 @@ const FCM_SENDER_ID = '360259005980';
 
   function hideInstallOverlay(silent) {
     var ov = document.getElementById('install-overlay');
-    if (!ov || !ov.classList.contains('visible')) return;
+    if (!ov) return;
     ov.classList.remove('visible');
+    ov.style.display = 'none';
+    document.documentElement.classList.add('install-dismissed');
+    if (!silent) {
+      try { localStorage.setItem('myeshim-install-seen', '1'); } catch(e) {}
+    }
     document.body.style.overflow = '';
   }
 
