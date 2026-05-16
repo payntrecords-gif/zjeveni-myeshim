@@ -49,8 +49,8 @@ select{
   -webkit-backdrop-filter:blur(16px) saturate(1.05) !important;
   border-bottom:1px solid rgba(172,145,93,.13) !important;
   box-shadow:0 6px 14px rgba(129,99,56,.05);
-  min-height:var(--ux-topbar-height) !important;
-  height:var(--ux-topbar-height) !important;
+  min-height:calc(var(--ux-topbar-height) + env(safe-area-inset-top)) !important;
+  height:calc(var(--ux-topbar-height) + env(safe-area-inset-top)) !important;
   align-items:center !important;
   overflow:visible !important;
   z-index:32 !important;
@@ -166,7 +166,7 @@ select{
   padding:8px 18px 20px !important;
   margin:0 auto !important;
 }
-#app-tabs-area{display:none !important}
+#app-tabs-area{display:block !important}
 /* Panels stay centred at a comfortable reading width */
 #app-panels{max-width:560px !important;margin:0 auto !important;padding-left:18px !important;padding-right:18px !important}
 #app-tabs-outer{
