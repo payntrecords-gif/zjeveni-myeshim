@@ -2817,16 +2817,31 @@ window.shareCurrentVerse=async function(){
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
-  ctx.fillStyle='#f5f0ff';
-  ctx.fillRect(0,0,W,H);
-  const bgGrad=ctx.createLinearGradient(0,0,W,H);
-  bgGrad.addColorStop(0,'rgba(180,210,255,0.5)');
-  bgGrad.addColorStop(0.5,'rgba(255,255,255,0.1)');
-  bgGrad.addColorStop(1,'rgba(255,180,210,0.4)');
-  ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
-  const PINK='#c79b3b',DPINK='#c93476';
-  const pad=72;
-  function rr(x,y,w,h,r,fill){
+
+  /* ── App palette ───────────────────────────────────────────────────────── */
+  const C_TEXT='#4a351e', C_MUTED='#826a43', C_ACCENT='#c19a46';
+  const C_LINE='rgba(175,146,87,0.20)', C_LINE_S='rgba(175,146,87,0.30)';
+
+  /* ── Background: warm cream gradient matching app ──────────────────────── */
+  const bgGrd=ctx.createLinearGradient(0,0,0,H);
+  bgGrd.addColorStop(0,'#fbf7ef');
+  bgGrd.addColorStop(0.45,'#f5ecdc');
+  bgGrd.addColorStop(1,'#ecdec1');
+  ctx.fillStyle=bgGrd; ctx.fillRect(0,0,W,H);
+  /* warm radial glow — top */
+  const rTop=ctx.createRadialGradient(W/2,0,0,W/2,0,900);
+  rTop.addColorStop(0,'rgba(224,193,115,0.32)');
+  rTop.addColorStop(1,'rgba(224,193,115,0)');
+  ctx.fillStyle=rTop; ctx.fillRect(0,0,W,H);
+  /* warm radial glow — bottom-right */
+  const rBR=ctx.createRadialGradient(W,H,0,W,H,W*0.7);
+  rBR.addColorStop(0,'rgba(193,154,70,0.13)');
+  rBR.addColorStop(1,'rgba(193,154,70,0)');
+  ctx.fillStyle=rBR; ctx.fillRect(0,0,W,H);
+
+  /* ── Helpers ───────────────────────────────────────────────────────────── */
+  const pad=76, cW=W-2*pad;
+  function rr(x,y,w,h,r){
     ctx.beginPath();
     ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
     ctx.arcTo(x+w,y,x+w,y+r,r);
@@ -2837,90 +2852,104 @@ window.shareCurrentVerse=async function(){
     ctx.lineTo(x,y+r);
     ctx.arcTo(x,y,x+r,y,r);
     ctx.closePath();
-    ctx.fillStyle=fill; ctx.fill();
   }
   function wrap(text,maxW,font){
     ctx.font=font;
-    const words=text.split(' '),ls=[];
+    const words=text.split(' '),lines=[];
     let line='';
-    words.forEach(w=>{
+    for(const w of words){
       const t=line?line+' '+w:w;
-      if(ctx.measureText(t).width>maxW){ls.push(line);line=w;}
+      if(ctx.measureText(t).width>maxW){lines.push(line);line=w;}
       else line=t;
-    });
-    if(line) ls.push(line);
-    return ls;
-  }
-  function pill(text,cx,y,font,bg,fg){
-    ctx.font=font;
-    const tw=ctx.measureText(text).width;
-    const ph=72,pr=36,pw=tw+80;
-    const px=cx-pw/2;
-    rr(px,y,pw,ph,pr,bg);
-    ctx.fillStyle=fg; ctx.font=font;
-    ctx.fillText(text,px+40,y+50);
-    return ph;
-  }
-  let curY=80;
-  ctx.fillStyle=PINK;
-  ctx.font='400 42px sans-serif';
-  ctx.fillText('iginja',pad,curY+50);
-  ctx.font='900 42px sans-serif';
-  ctx.fillText('SLOVO',pad+ctx.measureText('iginja').width+2,curY+50);
-  ctx.font='700 46px sans-serif';
-  const msW=ctx.measureText('MYE Shim').width;
-  ctx.fillText('MYE Shim',W-pad-msW,curY+50);
-  curY+=116;
-  ctx.fillStyle=PINK;
-  ctx.font='900 108px sans-serif';
-  ctx.fillText('Zjevení '+chNum,pad,curY+90);
-  curY+=148;
-  curY+=pill('Název',W/2,curY,'700 40px sans-serif',PINK,'#fff')+24;
-  const cW=W-2*pad;
-  const chLines=wrap(chName,cW-60,'700 48px sans-serif');
-  const cCardH=chLines.length*66+56;
-  rr(pad,curY,cW,cCardH,32,'rgba(255,255,255,0.95)');
-  ctx.fillStyle='#1a0a20'; ctx.font='700 48px sans-serif';
-  chLines.forEach((l,i)=>{
-    const lw=ctx.measureText(l).width;
-    ctx.fillText(l,pad+(cW-lw)/2,curY+54+i*66);
-  });
-  curY+=cCardH+44;
-  const vFont='500 44px sans-serif',vMaxW=cW-80;
-  const vLines=wrap(':'+vv.v+' '+verseText,vMaxW,vFont);
-  const vCardH=86+vLines.length*64+60;
-  rr(pad,curY,cW,vCardH,32,DPINK);
-  ctx.fillStyle='#fff'; ctx.font='800 58px sans-serif';
-  ctx.fillText('Zj '+vv.c+':'+vv.v,pad+36,curY+70);
-  ctx.font=vFont;
-  vLines.forEach((l,i)=>ctx.fillText(l,pad+36,curY+70+80+i*64));
-  curY+=vCardH+52;
-  curY+=pill('Návod na MYE Shim',W/2,curY,'700 42px sans-serif',PINK,'#fff')+48;
-  const STEPS=[
-    ['1','Podle slibu Ježíše jaké\npostavy a jaké události\nse objeví?'],
-    ['2','Odpovědět na 5W1H\na převypravět'],
-    ['3','Vymyslet otázky\n• otázky na porozumění verše\na fyzické naplnění\n• otázky na srdce Boží\na srdce postav'],
-    ['4','Odpovědět si na otázky'],
-    ['5','Speech'],
-    ['6','Sdílet uvědomění'],
-  ];
-  const colW=(cW-60)/2;
-  for(let i=0;i<STEPS.length;i+=2){
-    const lLines=STEPS[i][1].split('\n');
-    const rLines=i+1<STEPS.length?STEPS[i+1][1].split('\n'):[];
-    const rowH=Math.max(86+lLines.length*46,rLines.length?86+rLines.length*46:0)+20;
-    ctx.fillStyle=PINK; ctx.font='900 84px sans-serif';
-    ctx.fillText(STEPS[i][0],pad,curY+72);
-    ctx.fillStyle='#1a0a20'; ctx.font='400 36px sans-serif';
-    lLines.forEach((l,j)=>ctx.fillText(l,pad,curY+72+52+j*46));
-    if(i+1<STEPS.length){
-      ctx.fillStyle=PINK; ctx.font='900 84px sans-serif';
-      ctx.fillText(STEPS[i+1][0],pad+colW+60,curY+72);
-      ctx.fillStyle='#1a0a20'; ctx.font='400 36px sans-serif';
-      rLines.forEach((l,j)=>ctx.fillText(l,pad+colW+60,curY+72+52+j*46));
     }
-    curY+=rowH;
+    if(line) lines.push(line);
+    return lines;
   }
+  function textC(text,y,font,color){
+    ctx.font=font; ctx.fillStyle=color;
+    ctx.fillText(text,(W-ctx.measureText(text).width)/2,y);
+  }
+  function setShadow(b,c){ctx.shadowBlur=b;ctx.shadowColor=c;ctx.shadowOffsetX=0;ctx.shadowOffsetY=Math.round(b*0.3);}
+  function noShadow(){ctx.shadowBlur=0;ctx.shadowColor='transparent';ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;}
+
+  let y=0;
+
+  /* ── 1. Header ─────────────────────────────────────────────────────────── */
+  y=108;
+  textC('MYEShim',y+46,'800 50px sans-serif',C_ACCENT);
+  textC('sdílení verše',y+100,'400 34px sans-serif',C_MUTED);
+  y+=142;
+  ctx.strokeStyle=C_LINE_S; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(pad+110,y); ctx.lineTo(W-pad-110,y); ctx.stroke();
+
+  /* ── 2. Book & reference ───────────────────────────────────────────────── */
+  y+=70;
+  textC('ZJEVENÍ JANOVO',y,'700 30px sans-serif',C_MUTED);
+  y+=18;
+  textC(chNum+':'+vv.v,y+158,'800 174px sans-serif',C_TEXT);
+  y+=198;
+  /* chapter name */
+  const chLns=wrap(chName,cW*0.70,'400 42px sans-serif');
+  chLns.forEach((l,i)=>textC(l,y+i*56,'400 42px sans-serif',C_MUTED));
+  y+=chLns.length*56+60;
+
+  /* ── 3. Main verse card (gold, matching app verse-card) ────────────────── */
+  const vF='400 52px sans-serif';
+  const vLns=wrap(verseText,cW-120,vF);
+  const cPad=68, refH=84, sepGap=28;
+  const vCardH=cPad+refH+sepGap+vLns.length*70+cPad;
+  setShadow(70,'rgba(132,102,58,0.22)');
+  const vGrd=ctx.createLinearGradient(0,y,0,y+vCardH);
+  vGrd.addColorStop(0,'#d6b56f'); vGrd.addColorStop(1,'#c39a42');
+  rr(pad,y,cW,vCardH,60); ctx.fillStyle=vGrd; ctx.fill();
+  noShadow();
+  rr(pad,y,cW,vCardH,60);
+  ctx.strokeStyle='rgba(255,255,255,0.20)'; ctx.lineWidth=2; ctx.stroke();
+  /* verse ref */
+  ctx.fillStyle='rgba(255,253,247,0.92)'; ctx.font='800 68px sans-serif';
+  ctx.fillText('Zjevení '+vv.c+':'+vv.v,pad+cPad,y+cPad+62);
+  /* inner separator */
+  ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(pad+cPad,y+cPad+86); ctx.lineTo(pad+cW-cPad,y+cPad+86); ctx.stroke();
+  /* verse text */
+  ctx.fillStyle='#fffdf7'; ctx.font=vF;
+  vLns.forEach((l,i)=>ctx.fillText(l,pad+cPad,y+cPad+86+56+i*70));
+  y+=vCardH+72;
+
+  /* ── 4. Method steps — compact 2×3 grid of cream badges ───────────────── */
+  textC('METODA MYE SHIM',y,'700 30px sans-serif',C_MUTED);
+  y+=54;
+  const sLbls=['Postavy','Převyprávění','Otázky','Odpovědi','Speech','Sdílení'];
+  const bW=(cW-40)/3, bH=96, bGap=20;
+  for(let i=0;i<6;i++){
+    const col=i%3, row=Math.floor(i/3);
+    const bx=pad+col*(bW+bGap), by=y+row*(bH+16);
+    setShadow(14,'rgba(132,102,58,0.08)');
+    rr(bx,by,bW,bH,22); ctx.fillStyle='rgba(255,250,242,0.92)'; ctx.fill();
+    noShadow();
+    rr(bx,by,bW,bH,22);
+    ctx.strokeStyle=C_LINE_S; ctx.lineWidth=1.5; ctx.stroke();
+    /* number + label centred on same baseline */
+    ctx.font='800 32px sans-serif';
+    const numW=ctx.measureText(String(i+1)).width;
+    ctx.font='600 28px sans-serif';
+    const lblW=ctx.measureText(sLbls[i]).width;
+    const totalW=numW+10+lblW;
+    const tx=bx+(bW-totalW)/2, ty=by+bH/2+11;
+    ctx.fillStyle=C_ACCENT; ctx.font='800 32px sans-serif'; ctx.fillText(String(i+1),tx,ty);
+    ctx.fillStyle=C_TEXT; ctx.font='600 28px sans-serif'; ctx.fillText(sLbls[i],tx+numW+10,ty);
+  }
+  y+=2*(bH+16)+64;
+
+  /* ── 5. Footer ─────────────────────────────────────────────────────────── */
+  ctx.strokeStyle=C_LINE; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(pad+80,y); ctx.lineTo(W-pad-80,y); ctx.stroke();
+  y+=52;
+  textC('MYEShim',y+42,'700 44px sans-serif',C_ACCENT);
+  textC('myeshim.app',y+90,'400 32px sans-serif',C_MUTED);
+
+  /* ── Export ────────────────────────────────────────────────────────────── */
   canvas.toBlob(async blob=>{
     const file=new File([blob],'myeshim-vers.png',{type:'image/png'});
     try{
