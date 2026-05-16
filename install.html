@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>iginjaSlovo – Instalace</title>
+<title>MyeShim – Instalace</title>
   <meta name="theme-color" content="#f4ead8">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./styles/brand.css">
   <style>
     body.install-page{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:40px 20px calc(54px + env(safe-area-inset-bottom));text-align:center}
     .logo-wrap{position:relative;margin-bottom:22px;flex-shrink:0}
-    .logo-wrap::before{content:'';position:absolute;inset:-18px;background:radial-gradient(circle,rgba(193,154,70,.18) 0%,transparent 70%);border-radius:50%;animation:pulse 3s ease-in-out infinite}
+    .logo-wrap::before{content:'';position:absolute;inset:-14px -26px;background:radial-gradient(circle,rgba(193,154,70,.18) 0%,transparent 72%);border-radius:999px;animation:pulse 3s ease-in-out infinite}
     @keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
-    .logo-wrap img{width:84px;height:84px;border-radius:26px;box-shadow:var(--shadow-lg);display:block;position:relative}
+    .logo-wrap img{width:min(84vw,320px);height:auto;display:block;position:relative;box-shadow:none}
     h1{margin-bottom:8px;font-size:clamp(2rem,8vw,2.45rem);background:linear-gradient(135deg,var(--accent-strong),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent}
     .tagline{max-width:280px;margin:0 0 22px;color:var(--muted)}
     .card{max-width:380px;text-align:left}
@@ -36,9 +36,9 @@
 <body class="install-page">
 
 <div class="logo-wrap">
-  <img src="./iginjaslovo-mark.png" alt="iginjaSlovo">
+  <img src="./logomyeshim.png" alt="MyeShim logo" width="600" height="230">
 </div>
-<h1>iginjaSlovo</h1>
+<h1>MyeShim</h1>
 <p class="tagline">Jeden krok k označování</p>
 
 <div id="status-badge">
@@ -47,7 +47,7 @@
 
 <div class="card">
   <div class="card-title" id="card-title">Přidej aplikaci na plochu 📲</div>
-  <div class="card-sub" id="card-sub">iginjaSlovo funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
+  <div class="card-sub" id="card-sub">MyeShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
 
   <button id="main-btn">
     <svg viewBox="0 0 24 24"><path d="M12 3v13M5 10l7 7 7-7"/><path d="M3 19h18" stroke-linecap="round"/></svg>
@@ -57,7 +57,7 @@
   <div class="steps" id="install-steps">
     <div class="step" id="step-telegram" style="display:none">
       <span class="step-icon">✈️</span>
-      <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři iginjaSlovo v Chrome nebo Safari.</span>
+      <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři MyeShim v Chrome nebo Safari.</span>
     </div>
     <div class="step" id="step-android" style="display:none">
       <span class="step-icon">🤖</span>
@@ -69,7 +69,7 @@
     </div>
     <div class="step" id="step-desktop" style="display:none">
       <span class="step-icon">💻</span>
-      <span><strong>Desktop:</strong> v adresním řádku Chrome/Edge klepni na ikonu <strong>⊕</strong> vpravo → „Instalovat iginjaSlovo".</span>
+      <span><strong>Desktop:</strong> v adresním řádku Chrome/Edge klepni na ikonu <strong>⊕</strong> vpravo → „Instalovat MyeShim".</span>
     </div>
   </div>
 
@@ -164,7 +164,7 @@
               btnLabel.textContent = '✓ Instaluje se…';
               mainBtn.disabled = true;
               showBadge('🎉', 'Instalace zahájena!');
-              installNote.textContent = 'Skvěle! Otevři iginjaSlovo z plochy telefonu.';
+              installNote.textContent = 'Skvěle! Otevři MyeShim z plochy telefonu.';
             } else {
               showBadge('ℹ️', 'Instalaci zrušil/a');
               installNote.textContent = 'Instalaci spustíš přes ⋮ menu → „Instalovat aplikaci".';

@@ -31,7 +31,7 @@ function showReminderNotification(payload) {
   const targetUrl = resolveNotificationTarget(data);
   const title = notification.title || data.title || 'Nezapomeň na dnešní verš 📖';
   const options = {
-    body: notification.body || data.body || 'Otevři appku a přečti si dnešní čtení v iginjaSlovo.',
+    body: notification.body || data.body || 'Otevři appku a přečti si dnešní čtení v MyeShim.',
     icon: './icon-192.png',
     badge: './icon-96.png',
     tag: data.tag || 'daily-reminder',

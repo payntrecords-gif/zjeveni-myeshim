@@ -81,15 +81,14 @@ html.browser-mode body{background:var(--bg,#f8f3f7)}
 }
 .alf-logo-wrap::before{
   content:'';
-  position:absolute;inset:-22px;
-  border-radius:50%;
+  position:absolute;inset:-16px -34px;
+  border-radius:999px;
   background:var(--alf-ring-bg);
   animation:alf-pulse-ring 2.8s ease-in-out infinite;
 }
 .alf-logo-wrap img{
   position:relative;display:block;
-  width:96px;height:96px;
-  border-radius:22px;
+  width:min(72vw,280px);height:auto;
   box-shadow:var(--alf-logo-shadow);
 }
 .alf-spinner{
@@ -111,12 +110,12 @@ html.browser-mode body{background:var(--bg,#f8f3f7)}
 }
 </style>
 <script type="module" id="auth-gate-script">
-console.log('iginjaSlovo boot start');
+console.log('MyeShim boot start');
 document.documentElement.classList.add('auth-gate-pending');
 
 // Safety timeout: if Firebase or auth never resolves, show fallback UI
 const _authGateTimeout = setTimeout(() => {
-  console.warn('iginjaSlovo: auth gate timeout – releasing gate and showing fallback UI');
+  console.warn('MyeShim: auth gate timeout – releasing gate and showing fallback UI');
   document.documentElement.classList.remove('auth-gate-pending');
   const fb = document.getElementById('app-load-fallback');
   if (fb) fb.style.display = 'flex';
@@ -313,17 +312,17 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 </script>
-<title>iginjaSlovo – Zjevení</title>
-<meta name="description" content="iginjaSlovo – mobilní studijní aplikace pro knihu Zjevení">
-<meta property="og:title" content="iginjaSlovo – Zjevení">
-<meta property="og:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s iginjaSlovo.">
+<title>MyeShim – Zjevení</title>
+<meta name="description" content="MyeShim – mobilní studijní aplikace pro knihu Zjevení">
+<meta property="og:title" content="MyeShim – Zjevení">
+<meta property="og:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s MyeShim.">
 <meta property="og:image" content="https://payntrecords-gif.github.io/zjeveni-myeshim/icon-512.png">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="cs_CZ">
 <meta property="og:url" content="https://payntrecords-gif.github.io/zjeveni-myeshim/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="iginjaSlovo – Zjevení">
-<meta name="twitter:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s iginjaSlovo.">
+<meta name="twitter:title" content="MyeShim – Zjevení">
+<meta name="twitter:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s MyeShim.">
 <meta name="twitter:image" content="https://payntrecords-gif.github.io/zjeveni-myeshim/icon-512.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -1101,7 +1100,7 @@ html{scroll-padding-top:132px}
 <meta name="theme-color" content="#f4ead8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="iginjaSlovo">
+<meta name="apple-mobile-web-app-title" content="MyeShim">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 
@@ -1369,7 +1368,7 @@ body{display:flex;flex-direction:column}
 /* Show logo again alongside brand text */
 .tb-brand{display:none !important}
 .tb-logo{display:flex !important;align-items:center;flex-shrink:0}
-.tb-logo img{width:52px;height:52px;display:block;border-radius:16px;object-fit:cover}
+.tb-logo img{width:auto;height:44px;display:block;object-fit:contain}
 /* Center: verse reference pill (no hamburger inside) */
 #nav-pill{flex:none;display:flex;justify-content:center;min-width:0}
 #nav-pill button{
@@ -1485,17 +1484,17 @@ body{display:flex;flex-direction:column}
   position:relative;margin-bottom:28px;flex-shrink:0;
 }
 .auth-logo-wrap::before{
-  content:'';position:absolute;inset:-20px;
-  background:radial-gradient(circle,rgba(199,155,59,.18) 0%,transparent 70%);
-  border-radius:50%;animation:auth-pulse 3s ease-in-out infinite;
+  content:'';position:absolute;inset:-16px -30px;
+  background:radial-gradient(circle,rgba(199,155,59,.18) 0%,transparent 72%);
+  border-radius:999px;animation:auth-pulse 3s ease-in-out infinite;
 }
 @keyframes auth-pulse{
   0%,100%{transform:scale(1);opacity:.8}
   50%{transform:scale(1.1);opacity:1}
 }
 .auth-logo-wrap img{
-  width:88px;height:88px;border-radius:24px;
-  box-shadow:0 18px 44px rgba(199,155,59,.28);
+  width:min(78vw,320px);height:auto;
+  box-shadow:none;
   position:relative;display:block;
 }
 .auth-app-name{
@@ -1763,11 +1762,11 @@ body{display:flex;flex-direction:column}
 #install-overlay.visible{display:flex}
 .iov-logo-wrap{position:relative;margin-bottom:24px;flex-shrink:0}
 .iov-logo-wrap::before{
-  content:'';position:absolute;inset:-20px;
-  background:radial-gradient(circle,rgba(199,155,59,.18) 0%,transparent 70%);
-  border-radius:50%;animation:auth-pulse 3s ease-in-out infinite;
+  content:'';position:absolute;inset:-16px -30px;
+  background:radial-gradient(circle,rgba(199,155,59,.18) 0%,transparent 72%);
+  border-radius:999px;animation:auth-pulse 3s ease-in-out infinite;
 }
-.iov-logo-wrap img{width:80px;height:80px;border-radius:24px;box-shadow:0 18px 44px rgba(199,155,59,.28);position:relative;display:block}
+.iov-logo-wrap img{width:min(76vw,300px);height:auto;position:relative;display:block;box-shadow:none}
 .iov-app-name{
   font-size:2.2rem;font-weight:900;letter-spacing:-.02em;
   background:linear-gradient(135deg,#b89441 0%,#c79b3b 100%);
@@ -1856,7 +1855,7 @@ body{display:flex;flex-direction:column}
 }
 </style>
 <style id="ux50-bottomnav-redesign">
-/* === TOPBAR: only logo + iginjaSlovo === */
+/* === TOPBAR: only logo + MyeShim === */
 #topbar{
   display:flex !important;
   align-items:center !important;
@@ -2051,10 +2050,9 @@ body{display:flex;flex-direction:column}
   box-shadow: 0 4px 20px rgba(199,155,59,.10) !important;
 }
 .tb-logo img {
-  width: 52px !important;
-  height: 52px !important;
-  border-radius: 16px !important;
-  object-fit: cover !important;
+  width: auto !important;
+  height: 44px !important;
+  object-fit: contain !important;
 }
 
 /* ══════════════════════════════
@@ -2402,7 +2400,7 @@ body{display:flex;flex-direction:column}
 <body>
 <div id="app-load-fallback">
   <div class="alf-logo-wrap">
-    <img src="./iginjaslovo-mark.png" alt="iginjaSlovo" width="96" height="96">
+    <img src="./logomyeshim.png" alt="MyeShim logo" width="600" height="230">
   </div>
   <div class="alf-spinner"></div>
   <span class="alf-text">Načítání…</span>
@@ -2411,7 +2409,7 @@ body{display:flex;flex-direction:column}
 <div id="topbar">
   <!-- Compact brand mark -->
   <div class="tb-left">
-    <div class="tb-logo"><img src="./iginjaslovo-mark.png" alt="iginjaSlovo" width="52" height="52" loading="lazy"></div>
+    <div class="tb-logo"><img src="./logomyeshim.png" alt="MyeShim logo" width="600" height="230" loading="lazy"></div>
   </div>
   <!-- streak-badge kept hidden in DOM so JS streak script still works -->
   <div id="streak-badge" style="display:none !important" title="Tvůj studijní streak" aria-label="Streak" tabindex="-1">
@@ -2631,7 +2629,7 @@ function setTab(t){
   const vv=VERSES[state.idx];
   if(t==='guide'){
     document.getElementById('panel-guide').innerHTML=
-      '<div class="guide-card"><div class="guide-title">Návod na iginjaSlovo</div><div class="guide-steps">'+
+      '<div class="guide-card"><div class="guide-title">Návod na MyeShim</div><div class="guide-steps">'+
       GUIDE.map(([n,h,p,bullets])=>`<div class="guide-step"><div class="guide-step-card${Array.isArray(bullets)&&bullets.length?' has-bullets':''}"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4>${p?`<p>${p}</p>`:''}${Array.isArray(bullets)&&bullets.length?`<ul><li>${bullets.join('</li><li>')}</li></ul>`:''}</div></div></div>`).join('')+
       '</div></div>';
   } else if(t==='qa'){
@@ -2798,7 +2796,7 @@ window.openSearch=function(){
   openNav();
 };
 
-const BRAND_LOGO_FULL_SRC='./iginjaslovo-logo-full.png';
+const BRAND_LOGO_FULL_SRC='./logomyeshim.png';
 let _brandLogoPromise=null;
 function loadBrandLogo(){
   if(_brandLogoPromise) return _brandLogoPromise;
@@ -2893,7 +2891,7 @@ window.shareCurrentVerse=async function(){
     textC('sdílení verše',y+214,'400 34px sans-serif',C_MUTED);
     y+=254;
   }else{
-    textC('iginjaSlovo',y+46,'800 50px sans-serif',C_ACCENT);
+    textC('MyeShim',y+46,'800 50px sans-serif',C_ACCENT);
     textC('sdílení verše',y+100,'400 34px sans-serif',C_MUTED);
     y+=142;
   }
@@ -2967,16 +2965,16 @@ window.shareCurrentVerse=async function(){
   if(drawLogoCentered(brandLogo,y+56,264,120)){
     textC('zjeveni-myeshim',y+132,'400 30px sans-serif',C_MUTED);
   }else{
-    textC('iginjaSlovo',y+42,'700 44px sans-serif',C_ACCENT);
+    textC('MyeShim',y+42,'700 44px sans-serif',C_ACCENT);
     textC('zjeveni-myeshim',y+90,'400 32px sans-serif',C_MUTED);
   }
 
   /* ── Export ────────────────────────────────────────────────────────────── */
   canvas.toBlob(async blob=>{
-    const file=new File([blob],'iginjaslovo-vers.png',{type:'image/png'});
+    const file=new File([blob],'myeshim-vers.png',{type:'image/png'});
     try{
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({title:'iginjaSlovo verš',text:'Zj '+vv.c+':'+vv.v,files:[file]});
+        await navigator.share({title:'MyeShim verš',text:'Zj '+vv.c+':'+vv.v,files:[file]});
       } else {
         await navigator.clipboard.writeText('„'+verseText+'" — Zjevení '+vv.c+':'+vv.v);
         if(typeof window.toast==='function') window.toast('Verš zkopírován!');
@@ -4544,14 +4542,14 @@ render();
 <div id="installCard" class="install-card" aria-live="polite" aria-label="Instalace aplikace">
   <div class="install-copy">
     <p id="installTitle" class="install-title">Nainstalovat aplikaci</p>
-    <p id="installSub" class="install-sub">Přidej si iginjaSlovo na plochu pro rychlé otevření a pohodlnější každodenní používání.</p>
+    <p id="installSub" class="install-sub">Přidej si MyeShim na plochu pro rychlé otevření a pohodlnější každodenní používání.</p>
   </div>
   <div class="install-actions">
     <button id="installDismiss" class="install-dismiss" type="button">Později</button>
     <button id="installBtn" class="install-btn" type="button">Instalovat</button>
   </div>
 </div>
-<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabízí instalační nabídku, otevři iginjaSlovo v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
+<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabízí instalační nabídku, otevři MyeShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
 
 <script id="ux40-pwa-script">
 (function(){
@@ -4585,7 +4583,7 @@ render();
     if(isAndroid()){
       return {
         title:'Dokonči instalaci v Chrome',
-        sub:'Telegram neumí instalaci PWA přímo. Otevři iginjaSlovo jedním klepnutím v Chrome a tam zvol „Instalovat aplikaci“.',
+        sub:'Telegram neumí instalaci PWA přímo. Otevři MyeShim jedním klepnutím v Chrome a tam zvol „Instalovat aplikaci“.',
         button:'📲 Otevřít v Chrome',
         tip:'V Telegramu instalace nefunguje přímo — otevři stránku v Chrome a tam aplikaci nainstaluj.'
       };
@@ -4593,14 +4591,14 @@ render();
     if(isIOS()){
       return {
         title:'Dokonči instalaci v Safari',
-        sub:'Telegram neumí instalaci PWA přímo. Otevři iginjaSlovo v Safari a tam zvol „Přidat na plochu“.',
+        sub:'Telegram neumí instalaci PWA přímo. Otevři MyeShim v Safari a tam zvol „Přidat na plochu“.',
         button:'📋 Zkopírovat odkaz pro Safari',
         tip:'Odkaz si zkopíruj do Safari a pak použij Sdílet → „Přidat na plochu“.'
       };
     }
     return {
       title:'Dokonči instalaci v prohlížeči',
-      sub:'Tento interní prohlížeč instalaci aplikace nepodporuje. Otevři iginjaSlovo v plném prohlížeči a tam aplikaci nainstaluj.',
+      sub:'Tento interní prohlížeč instalaci aplikace nepodporuje. Otevři MyeShim v plném prohlížeči a tam aplikaci nainstaluj.',
       button:'📲 Otevřít v prohlížeči',
       tip:'Interní prohlížeč Telegramu instalaci nepodporuje — otevři stránku v běžném prohlížeči.'
     };
@@ -4658,15 +4656,15 @@ render();
         title.textContent=externalInstallContext.title;
         sub.textContent=externalInstallContext.sub;
       } else if(noPromptSupport){
-        title.textContent='Přidat iginjaSlovo na plochu';
+        title.textContent='Přidat MyeShim na plochu';
         sub.textContent=isDesktop()
           ? 'V Chrome nebo Edge otevři menu (⋮) a zvol „Instalovat aplikaci“ nebo „Přidat na plochu“.'
           : 'V Safari otevři sdílení (□↑) a zvol „Přidat na plochu“. V Chrome otevři menu (⋮) a zvol „Přidat na plochu“.';
       } else {
         title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
         sub.textContent=isDesktop()
-          ? 'Přidej si iginjaSlovo do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
-          : 'Přidej si iginjaSlovo na plochu pro rychlé otevření a pohodlnější každodenní používání.';
+          ? 'Přidej si MyeShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
+          : 'Přidej si MyeShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
       }
     }
     if(btn){
@@ -4768,8 +4766,8 @@ render();
     });
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-        .then(function(reg){ console.log('iginjaSlovo SW registered, scope:', reg.scope); })
-        .catch(function(err){ console.error('iginjaSlovo SW registration failed:', err); });
+        .then(function(reg){ console.log('MyeShim SW registered, scope:', reg.scope); })
+        .catch(function(err){ console.error('MyeShim SW registration failed:', err); });
     });
   }
   // TWA / standalone mode detection
@@ -4792,7 +4790,7 @@ render();
     <div class="sd-title">Tvůj streak 🔥</div>
     <div class="sd-count" id="sd-count">0 dní v řadě</div>
     <div class="sd-best" id="sd-best">Nejvíce: 0 dní</div>
-    <div class="sd-motto">Dělej iginjaSlovo každý den!</div>
+    <div class="sd-motto">Dělej MyeShim každý den!</div>
     <button class="sd-share" onclick="shareStreakCard()">Sdílet svůj streak</button>
     <button class="sd-close" onclick="closeStreakDetail()">Hotovo</button>
   </div>
@@ -4830,7 +4828,7 @@ const FCM_SENDER_ID = '360259005980';
     'Věrnost v malých věcech otevírá velké dveře.',
     'Dnešní verš je tvůj průvodce na dnešní den.',
     'Vytrvalost v studiu Písma přináší ovoce.',
-    'Jsi na správné cestě – iginjaSlovo tě podporuje! 🙏',
+    'Jsi na správné cestě – MyeShim tě podporuje! 🙏',
     'Malé kroky denně vedou k velkým proměnám.',
     'Boží slovo svítí na každý krok tvé cesty.',
   ];
@@ -5294,7 +5292,7 @@ const FCM_SENDER_ID = '360259005980';
 
   window.shareStreakCard = async function() {
     const user = window.firebase && firebase.auth && firebase.auth().currentUser;
-    const name = user && (user.displayName || user.email) ? (user.displayName || user.email) : 'iginjaSlovo uživatel';
+    const name = user && (user.displayName || user.email) ? (user.displayName || user.email) : 'MyeShim uživatel';
     const streak = parseInt(safeLS('streak_count', '0'), 10) || 0;
     const canvas = document.createElement('canvas');
     canvas.width = 1080; canvas.height = 1440;
@@ -5312,7 +5310,7 @@ const FCM_SENDER_ID = '360259005980';
     } else {
       ctx.fillStyle = '#fff';
       ctx.font = '700 58px sans-serif';
-      ctx.fillText('iginjaSlovo', 90, 120);
+      ctx.fillText('MyeShim', 90, 120);
     }
     ctx.fillStyle = '#fff';
     ctx.font = '900 240px sans-serif';
@@ -5323,16 +5321,16 @@ const FCM_SENDER_ID = '360259005980';
     ctx.fillText('Studuji už ' + streak + ' dní v řadě!', 90, 760);
     ctx.fillText('„Vytrvej každý den.“', 90, 840);
     canvas.toBlob(async function(blob) {
-      const file = new File([blob], 'iginjaslovo-streak.png', { type: 'image/png' });
+      const file = new File([blob], 'myeshim-streak.png', { type: 'image/png' });
       try {
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ title: 'Můj iginjaSlovo streak', text: '🔥 ' + streak + ' dní v řadě', files: [file] });
+          await navigator.share({ title: 'Můj MyeShim streak', text: '🔥 ' + streak + ' dní v řadě', files: [file] });
           return;
         }
       } catch(e) {}
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'iginjaslovo-streak.png';
+      a.download = 'myeshim-streak.png';
       a.click();
       setTimeout(function() { URL.revokeObjectURL(a.href); }, 1200);
     }, 'image/png');
@@ -5422,8 +5420,8 @@ const FCM_SENDER_ID = '360259005980';
     // Show welcome notification after ~3 minutes (within the 5-minute first-launch requirement)
     setTimeout(() => {
       navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification('Vítej v iginjaSlovo! 🎉', {
-          body: 'Dělej iginjaSlovo každý den! Jsme rádi, že jsi tady 🙏',
+        reg.showNotification('Vítej v MyeShim! 🎉', {
+          body: 'Dělej MyeShim každý den! Jsme rádi, že jsi tady 🙏',
           icon: './icon-192.png',
           badge: './icon-96.png',
           tag: 'myeshim-welcome',
@@ -5624,11 +5622,11 @@ const FCM_SENDER_ID = '360259005980';
       }
     } catch(e2) {}
     var _body = _verse
-      ? '\u201e' + _verse.t.slice(0, 140) + (_verse.t.length > 140 ? '\u2026' : '') + '\u201c \u2014 Zj\u00a0' + _verse.c + ':' + _verse.v + '\n\nUdělej dnes iginjaSlovo! 🙏'
-      : 'Dnešní verš tě čeká — udělej iginjaSlovo! 🙏';
+      ? '\u201e' + _verse.t.slice(0, 140) + (_verse.t.length > 140 ? '\u2026' : '') + '\u201c \u2014 Zj\u00a0' + _verse.c + ':' + _verse.v + '\n\nUdělej dnes MyeShim! 🙏'
+      : 'Dnešní verš tě čeká — udělej MyeShim! 🙏';
     var _ref = _verse ? _verse.c + ':' + _verse.v : '';
     navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification('iginjaSlovo 📖', {
+        reg.showNotification('MyeShim 📖', {
         body: _body,
         icon: './icon-192.png',
         badge: './icon-96.png',
@@ -6032,12 +6030,11 @@ const FCM_SENDER_ID = '360259005980';
 <!-- ── LOGIN OVERLAY ── -->
 <div id="auth-overlay" role="dialog" aria-modal="true" aria-label="Přihlásit se">
   <div class="auth-logo-wrap">
-    <img src="./iginjaslovo-logo-full.png" alt="iginjaSlovo logo" width="258" height="218" loading="lazy">
+    <img src="./logomyeshim.png" alt="MyeShim logo" width="600" height="230" loading="lazy">
   </div>
-  <div class="auth-app-name">iginjaSlovo</div>
   <div class="auth-tagline">„Studuj Zjevení každý den."</div>
   <div class="auth-card">
-    <div class="auth-card-title">Vítej v iginjaSlovo 👋</div>
+    <div class="auth-card-title">Vítej v MyeShim 👋</div>
     <div class="auth-card-sub">Přihlas se svým e-mailem a heslem a okamžitě začni studovat.</div>
     <button class="auth-btn-login" id="auth-login-btn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -6054,19 +6051,18 @@ const FCM_SENDER_ID = '360259005980';
 <!-- ── INSTALL OVERLAY (step 2 of onboarding) ── -->
 <div id="install-overlay" role="dialog" aria-modal="true" aria-label="Nainstalovat aplikaci">
   <div class="iov-logo-wrap">
-    <img src="./iginjaslovo-logo-full.png" alt="iginjaSlovo logo" width="258" height="218" loading="lazy">
+    <img src="./logomyeshim.png" alt="MyeShim logo" width="600" height="230" loading="lazy">
   </div>
-  <div class="iov-app-name">iginjaSlovo</div>
   <div class="iov-tagline">Jeden krok k označování</div>
   <div class="iov-card">
     <div class="iov-title">Přidej aplikaci na plochu 📲</div>
-    <div class="iov-sub">iginjaSlovo funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
+    <div class="iov-sub">MyeShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
     <!-- Install action button – native prompt or Telegram browser handoff -->
     <button id="iov-native-btn" class="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
     <div class="iov-steps">
       <div class="iov-step">
         <span class="iov-step-icon">✈️</span>
-        <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři iginjaSlovo v Chrome nebo Safari.</span>
+        <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři MyeShim v Chrome nebo Safari.</span>
       </div>
       <div class="iov-step">
         <span class="iov-step-icon">🤖</span>
@@ -6169,7 +6165,7 @@ const FCM_SENDER_ID = '360259005980';
 
     <!-- Sign out -->
     <button class="ps-btn-signout" id="ps-signout-btn" onclick="authSignOut()">Odhlásit se</button>
-    <div class="ps-app-version" id="ps-app-version">iginjaSlovo v1.0</div>
+    <div class="ps-app-version" id="ps-app-version">MyeShim v1.0</div>
   </div>
 </div>
 
