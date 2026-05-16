@@ -14,7 +14,7 @@
   --radius-ui:28px;
   --radius-ui-soft:22px;
   --ux-topbar-height:74px;
-  --ux-progress-height:38px;
+  --ux-progress-height:48px;
   --ux-fixed-scale:.98;
 }
 html,body{
@@ -39,7 +39,9 @@ body{color-scheme:light}
   border-bottom:1px solid rgba(172,145,93,.13) !important;
   box-shadow:0 6px 14px rgba(129,99,56,.05);
   min-height:var(--ux-topbar-height) !important;
+  height:var(--ux-topbar-height) !important;
   align-items:center !important;
+  overflow:visible !important;
 }
 .tb-left{gap:12px !important}
 .tb-logo img{filter:drop-shadow(0 5px 12px rgba(129,99,56,.06));height:38px !important;width:auto !important;max-width:100% !important}
@@ -47,15 +49,17 @@ body{color-scheme:light}
   top:calc(var(--ux-topbar-height) + env(safe-area-inset-top)) !important;
   max-width:560px !important;
   min-height:var(--ux-progress-height) !important;
+  height:var(--ux-progress-height) !important;
   margin-top:0 !important;
   padding:0 18px !important;
-  padding-top:8px !important;
-  padding-bottom:6px !important;
-  background:linear-gradient(180deg,rgba(245,236,220,.96),rgba(245,236,220,.86)) !important;
+  padding-top:10px !important;
+  padding-bottom:10px !important;
+  background:linear-gradient(180deg,rgba(245,236,220,.99),rgba(245,236,220,.98)) !important;
   border-bottom:1px solid rgba(172,145,93,.12) !important;
   backdrop-filter:blur(10px) !important;
   -webkit-backdrop-filter:blur(10px) !important;
   z-index:24 !important;
+  overflow:hidden !important;
 }
 #ux35-progress-track{height:6px !important;background:rgba(191,153,80,.14) !important;border-radius:999px !important}
 #ux35-progress{background:linear-gradient(90deg,#dabc74,#bf9950) !important}
@@ -72,8 +76,13 @@ body{color-scheme:light}
   z-index:23 !important;
   padding-top:8px !important;
   padding-bottom:10px !important;
-  background:linear-gradient(180deg,rgba(245,236,220,.96),rgba(245,236,220,.88)) !important;
+  background:linear-gradient(180deg,rgba(245,236,220,.99),rgba(245,236,220,.98)) !important;
   border-bottom:1px solid rgba(172,145,93,.1) !important;
+}
+#app-tabs-outer .tabs{
+  background:rgba(244,233,214,.92) !important;
+  border:1px solid var(--glass-line) !important;
+  box-shadow:0 4px 12px rgba(129,99,56,.06) !important;
 }
 #app-panels{padding-top:10px !important;padding-bottom:calc(118px + env(safe-area-inset-bottom)) !important}
 .cv-row{margin-bottom:18px !important;align-items:flex-end !important;gap:14px !important}
