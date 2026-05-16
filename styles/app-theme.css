@@ -14,10 +14,10 @@
   --radius-ui:28px;
   --radius-ui-soft:22px;
   --ux-topbar-height:74px;
-  --ux-progress-height:54px;
-  --ux-tabs-height:84px;
+  --ux-chrome-compact-height:112px;
   --ux-fixed-scale:.98;
   --ux-sticky-bg:#f4e9d6;
+  --ux-sticky-bg-strong:#f2e4cc;
 }
 html,body{
   background:
@@ -35,7 +35,7 @@ body{color-scheme:light}
     linear-gradient(180deg,#fbf7ef 0%,#f6eedf 40%,#efe2ca 100%) !important;
 }
 #topbar{
-  background:var(--glass-bg) !important;
+  background:var(--ux-sticky-bg-strong) !important;
   backdrop-filter:blur(16px) saturate(1.05) !important;
   -webkit-backdrop-filter:blur(16px) saturate(1.05) !important;
   border-bottom:1px solid rgba(172,145,93,.13) !important;
@@ -44,78 +44,105 @@ body{color-scheme:light}
   height:var(--ux-topbar-height) !important;
   align-items:center !important;
   overflow:visible !important;
+  z-index:32 !important;
 }
 .tb-left{gap:12px !important}
 .tb-logo img{filter:drop-shadow(0 5px 12px rgba(129,99,56,.06));height:38px !important;width:auto !important;max-width:100% !important}
-#ux35-progress-wrap{
+#app-chrome{
+  position:sticky !important;
   top:calc(var(--ux-topbar-height) + env(safe-area-inset-top)) !important;
-  /* Full-width so scrolling content never bleeds through on wide screens */
+  z-index:29 !important;
+  padding:12px 18px 12px !important;
+  background:var(--ux-sticky-bg) !important;
+  border-bottom:1px solid rgba(172,145,93,.22) !important;
+  box-shadow:0 8px 18px rgba(129,99,56,.09) !important;
+  display:grid !important;
+  gap:12px !important;
+}
+#app-heading-wrap{
+  background:rgba(255,249,238,.96) !important;
+  border:1px solid rgba(172,145,93,.20) !important;
+  border-radius:24px !important;
+  box-shadow:0 7px 16px rgba(129,99,56,.07) !important;
+  padding:14px 16px 12px !important;
+  max-height:220px !important;
+  opacity:1 !important;
+  transform:translateY(0) scale(1) !important;
+  overflow:hidden !important;
+  transition:max-height .24s ease,opacity .18s ease,transform .24s ease,padding .24s ease,margin .24s ease,border-color .2s ease,box-shadow .2s ease !important;
+}
+#header-compact-sentinel{height:1px !important;margin-top:-1px !important}
+#ux35-progress-wrap{
+  position:relative !important;
+  top:auto !important;
   max-width:none !important;
   width:100% !important;
+  min-height:auto !important;
+  height:auto !important;
+  margin-top:0 !important;
   margin-left:0 !important;
   margin-right:0 !important;
-  /* Fixed height prevents any layout reflow during scroll */
-  min-height:var(--ux-progress-height) !important;
-  height:var(--ux-progress-height) !important;
-  margin-top:0 !important;
-  padding:0 18px !important;
-  padding-top:10px !important;
-  padding-bottom:10px !important;
-  /* Solid background — no alpha leakage */
-  background:var(--ux-sticky-bg) !important;
-  border-bottom:1px solid rgba(172,145,93,.20) !important;
-  box-shadow:0 2px 8px rgba(129,99,56,.06) !important;
-  z-index:24 !important;
-  /* No overflow:hidden — was clipping the progress label text */
+  padding:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  z-index:auto !important;
   overflow:visible !important;
-  display:flex !important;
-  flex-direction:column !important;
-  justify-content:center !important;
+  display:block !important;
 }
-#ux35-progress-track{height:5px !important;background:rgba(172,145,93,.18) !important;border-radius:999px !important;max-width:524px !important;margin-left:auto !important;margin-right:auto !important}
+#ux35-progress-track{height:6px !important;background:rgba(172,145,93,.18) !important;border-radius:999px !important;max-width:none !important;margin-left:0 !important;margin-right:0 !important}
 #ux35-progress{background:linear-gradient(90deg,#dabc74,#bf9950) !important}
-#ux35-progress-label{color:#7a6236 !important;margin-top:7px !important;letter-spacing:.02em !important;font-size:.78rem !important;font-weight:700 !important;text-align:center !important;line-height:1.2 !important;max-width:524px !important;margin-left:auto !important;margin-right:auto !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important}
+#ux35-progress-label{
+  color:#7a6236 !important;
+  margin-top:8px !important;
+  letter-spacing:.02em !important;
+  font-size:.81rem !important;
+  font-weight:800 !important;
+  text-align:center !important;
+  line-height:1.2 !important;
+  max-width:none !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  transition:all .2s ease !important;
+}
 #app{
   max-width:560px !important;
-  padding:20px 18px 20px !important;
+  padding:18px 18px 20px !important;
   margin:0 auto !important;
 }
 /* Panels stay centred at a comfortable reading width */
 #app-panels{max-width:560px !important;margin:0 auto !important;padding-left:18px !important;padding-right:18px !important}
-/* Tab bar is full-width so its background covers the full viewport during scroll */
 #app-tabs-outer{
+  position:relative !important;
+  top:auto !important;
+  z-index:auto !important;
   max-width:none !important;
   width:100% !important;
   margin-left:0 !important;
   margin-right:0 !important;
-  padding-left:18px !important;
-  padding-right:18px !important;
-  position:sticky !important;
-  top:calc(var(--ux-topbar-height) + var(--ux-progress-height) + env(safe-area-inset-top)) !important;
-  z-index:23 !important;
-  padding-top:8px !important;
-  padding-bottom:10px !important;
-  /* Solid background prevents verse-card bleeding through on sides */
-  background:var(--ux-sticky-bg) !important;
-  border-bottom:1px solid rgba(172,145,93,.16) !important;
-  box-shadow:0 3px 10px rgba(129,99,56,.05) !important;
+  padding:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
 }
 #app-tabs-outer .tabs{
-  background:rgba(244,233,214,.92) !important;
+  background:rgba(248,239,224,.98) !important;
   border:1px solid var(--glass-line) !important;
   box-shadow:0 4px 12px rgba(129,99,56,.06) !important;
-  /* Centre tabs within the full-width outer on wide screens */
-  max-width:524px !important;
-  margin-left:auto !important;
-  margin-right:auto !important;
+  max-width:none !important;
+  margin:0 !important;
 }
 #app-panels{padding-top:14px !important;padding-bottom:calc(118px + env(safe-area-inset-bottom)) !important}
 /* ── cv-row: premium full-state heading block ── */
 .cv-row{
-  margin-bottom:20px !important;
+  margin-bottom:0 !important;
   align-items:flex-end !important;
   gap:14px !important;
-  padding-top:4px !important;
+  padding-top:0 !important;
+  transition:opacity .18s ease,transform .22s ease !important;
 }
 .cv-left .cv-chapter{
   font-size:clamp(.82rem,3.4vw,.94rem) !important;
@@ -143,6 +170,44 @@ body{color-scheme:light}
   text-align:right !important;
   padding-bottom:2px !important;
 }
+html.header-compact #app-chrome{
+  padding-top:8px !important;
+  padding-bottom:10px !important;
+  gap:8px !important;
+}
+html.header-compact #app-heading-wrap{
+  max-height:0 !important;
+  opacity:0 !important;
+  transform:translateY(-8px) scale(.985) !important;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+  margin:0 !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+}
+html.header-compact .cv-row{opacity:0 !important;pointer-events:none !important}
+html.header-compact #ux35-progress-track{display:none !important}
+html.header-compact #ux35-progress-wrap{
+  min-height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+}
+html.header-compact #ux35-progress-label{
+  margin:0 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height:34px !important;
+  padding:0 14px !important;
+  border-radius:999px !important;
+  background:rgba(236,219,186,.92) !important;
+  border:1px solid rgba(191,153,80,.30) !important;
+  box-shadow:0 4px 10px rgba(129,99,56,.08) !important;
+  text-align:left !important;
+}
+html.header-compact #app-tabs-outer .tabs{padding:4px !important}
+html.header-compact #app-tabs-outer .tabs button{min-height:44px !important}
 .verse-card{
   background:linear-gradient(145deg,#d2ab55 0%,#c39a42 100%) !important;
   border:1px solid rgba(255,255,255,.24) !important;
@@ -482,9 +547,8 @@ body{color-scheme:light}
 }
 @media (max-width:720px){
   #topbar{padding-left:18px !important;padding-right:18px !important}
-  #ux35-progress-wrap,
+  #app-chrome,
   #app,
-  #app-tabs-outer,
   #app-panels{padding-left:16px !important;padding-right:16px !important}
   .verse-card{padding:24px 22px !important;border-radius:26px !important}
   .verse-actions{gap:10px !important}
@@ -492,8 +556,6 @@ body{color-scheme:light}
   .tabs button,
   #bottomnav button,
   .ux35-btn{min-height:54px !important}
-  #ux35-progress-wrap{top:calc(var(--ux-topbar-height) + env(safe-area-inset-top)) !important}
-  #app-tabs-outer{top:calc(var(--ux-topbar-height) + var(--ux-progress-height) + env(safe-area-inset-top)) !important}
   #bottomnav{padding-left:12px !important;padding-right:12px !important}
   .bn-avatar-label{font-size:.9rem !important}
 }
@@ -506,29 +568,12 @@ body{color-scheme:light}
   .vc-text{font-size:clamp(1.05rem,4.4vw,1.16rem) !important;line-height:1.74 !important}
 }
 
-/* ── SCROLL-PADDING-TOP: account for all three sticky layers ── */
+/* ── SCROLL-PADDING-TOP: account for topbar + compact chrome ── */
 html{
   scroll-padding-top:calc(
     var(--ux-topbar-height) +
-    var(--ux-progress-height) +
-    var(--ux-tabs-height) +
+    var(--ux-chrome-compact-height) +
     16px +
     env(safe-area-inset-top)
   ) !important;
 }
-
-/* ── COMPACT HEADER STATE ── */
-/* Triggered by JS IntersectionObserver when cv-row scrolls out of view.
-   The progress strip becomes the primary identity bar in this state. */
-html.header-compact #ux35-progress-wrap{
-  background:var(--ux-sticky-bg) !important;
-  border-bottom-color:rgba(172,145,93,.24) !important;
-  box-shadow:0 3px 12px rgba(129,99,56,.09) !important;
-}
-html.header-compact #ux35-progress-label{
-  font-weight:800 !important;
-  color:#6a5028 !important;
-}
-/* Smooth fade for cv-row as it approaches sticky threshold */
-.cv-row{transition:opacity .15s ease}
-html.header-compact .cv-row{opacity:0;pointer-events:none}
