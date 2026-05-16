@@ -2523,12 +2523,8 @@ body{display:flex;flex-direction:column}
 </div>
 
 
-<div id="ux35-progress-wrap">
-  <div id="ux35-progress-track"><div id="ux35-progress"></div></div>
-  <div id="ux35-progress-label"></div>
-</div>
-
-<div id="app">
+<div id="app-chrome">
+  <div id="app-heading-wrap">
   <div class="cv-row">
     <div class="cv-left">
       <div class="cv-chapter" id="cv-ch"></div>
@@ -2536,6 +2532,22 @@ body{display:flex;flex-direction:column}
     </div>
     <div class="cv-right" id="cv-right"></div>
   </div>
+  </div>
+  <div id="ux35-progress-wrap">
+    <div id="ux35-progress-track"><div id="ux35-progress"></div></div>
+    <div id="ux35-progress-label"></div>
+  </div>
+  <div id="app-tabs-outer">
+    <div class="tabs">
+      <button id="tab-guide" onclick="setTab('guide')">Návod</button>
+      <button id="tab-qa" onclick="setTab('qa')">Q&amp;A</button>
+      <button id="tab-note" onclick="setTab('note')">Poznámky</button>
+    </div>
+  </div>
+</div>
+<div id="header-compact-sentinel" aria-hidden="true"></div>
+
+<div id="app">
   <div class="verse-card">
     <div class="vc-ref" id="vc-ref"></div>
     <div class="vc-text" id="vc-text"></div>
@@ -2544,13 +2556,6 @@ body{display:flex;flex-direction:column}
     <button class="va-btn" id="verse-share-btn" onclick="shareCurrentVerse()">Sdílet verš</button>
     <button class="va-btn ghost" id="verse-fav-btn" onclick="toggleFavoriteVerse()">♡ Oblíbené</button>
     <button class="va-btn ghost" id="verse-memorize-btn" aria-label="Spustit memorovací režim">Memorovat</button>
-  </div>
-</div>
-<div id="app-tabs-outer">
-  <div class="tabs">
-    <button id="tab-guide" onclick="setTab('guide')">Návod</button>
-    <button id="tab-qa" onclick="setTab('qa')">Q&amp;A</button>
-    <button id="tab-note" onclick="setTab('note')">Poznámky</button>
   </div>
 </div>
 <div id="app-panels">
@@ -4472,7 +4477,15 @@ render();
     if(bar) bar.style.width = pct.toFixed(2) + '%';
     if(label){
       const ch = currentChapter();
-      label.textContent = idx >= 0 ? `Zjevení ${ch ?? '–'} · verš ${idx+1} z ${total}` : '';
+      const expandedLabel = idx >= 0 ? `Zjevení ${ch ?? '–'} · verš ${idx+1} z ${total}` : '';
+      const compactLabel = idx >= 0 ? `Zj ${ch ?? '–'} · ${idx+1}/${total}` : '';
+      label.dataset.full = expandedLabel;
+      label.dataset.compact = compactLabel;
+      if(typeof window.__ux35RefreshProgressLabel === 'function'){
+        window.__ux35RefreshProgressLabel();
+      }else{
+        label.textContent = expandedLabel;
+      }
     }
   }
   function openSearch(){
@@ -7384,15 +7397,53 @@ window.openProfile = function() {
 })();
 </script>
 <script>
-/* ── COMPACT HEADER: toggle html.header-compact when cv-row scrolls behind sticky header ── */
+/* ── COMPACT HEADER: sentinel-based switch for expanded/compact sticky chrome ── */
 (function(){
-  var cvRow = document.querySelector('.cv-row');
-  if(!cvRow || !('IntersectionObserver' in window)) return;
-  /* rootMargin negative top = topbar(74) + progress(54) = 128px sticky area */
-  var obs = new IntersectionObserver(function(entries){
-    document.documentElement.classList.toggle('header-compact', !entries[0].isIntersecting);
-  }, { threshold: 0, rootMargin: '-128px 0px 0px 0px' });
-  obs.observe(cvRow);
+  var root = document.documentElement;
+  var sentinel = document.getElementById('header-compact-sentinel');
+  if(!root || !sentinel) return;
+
+  function cssPxVar(name, fallback){
+    var raw = getComputedStyle(root).getPropertyValue(name).trim();
+    var n = parseFloat(raw);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function refreshProgressLabel(){
+    var label = document.getElementById('ux35-progress-label');
+    if(!label) return;
+    var expanded = label.dataset.full || label.textContent || '';
+    var compact = label.dataset.compact || expanded;
+    label.textContent = root.classList.contains('header-compact') ? compact : expanded;
+  }
+  window.__ux35RefreshProgressLabel = refreshProgressLabel;
+  refreshProgressLabel();
+
+  function setCompactState(isCompact){
+    root.classList.toggle('header-compact', !!isCompact);
+    refreshProgressLabel();
+  }
+
+  var topbarHeight = cssPxVar('--ux-topbar-height', 74);
+  var compactChromeHeight = cssPxVar('--ux-chrome-compact-height', 118);
+  var triggerOffset = Math.round(topbarHeight + compactChromeHeight);
+
+  if('IntersectionObserver' in window){
+    var obs = new IntersectionObserver(function(entries){
+      var entry = entries && entries[0];
+      if(!entry) return;
+      setCompactState(!entry.isIntersecting);
+    }, { threshold: 0, rootMargin: '-' + triggerOffset + 'px 0px 0px 0px' });
+    obs.observe(sentinel);
+  }else{
+    var onScroll = function(){
+      var top = sentinel.getBoundingClientRect().top;
+      setCompactState(top <= triggerOffset);
+    };
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
+  }
 })();
 </script>
 </body>
