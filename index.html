@@ -693,7 +693,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
 </style>
 
 <style id="ux35-style">
-:root{--fontScale:1;--shadow-soft:0 10px 26px rgba(18,20,38,.08);--chip:#ffffffcc}
+:root{--fontScale:.98;--shadow-soft:0 10px 26px rgba(18,20,38,.08);--chip:#ffffffcc}
 html{font-size:calc(16px * var(--fontScale));scroll-behavior:smooth}
 body{padding-bottom:max(0px,env(safe-area-inset-bottom));}
 
@@ -2539,14 +2539,8 @@ body{display:flex;flex-direction:column}
   <div id="display-settings-sheet">
     <div class="dss-handle" onclick="closeDisplaySettings()"></div>
     <div class="dss-title">Nastavení zobrazení</div>
-    <div class="dss-section-label">Velikost písma</div>
-    <div class="dss-slider-row">
-      <span class="dss-font-a dss-font-a--small">A</span>
-      <!-- min/max are font-scale × 100 (92 = 0.92, 118 = 1.18); step=2 for smooth snapping -->
-      <input type="range" id="dss-font-slider" min="92" max="118" step="2" value="105" class="dss-slider" aria-label="Velikost písma">
-      <span class="dss-font-a dss-font-a--large">A</span>
-      <span id="dss-font-status">105%</span>
-    </div>
+    <div class="dss-section-label">Typografie</div>
+    <div class="dss-slider-row" role="status" aria-live="polite">Typografie je sjednocená pro čisté a konzistentní čtení.</div>
     <button class="dss-close-btn" type="button" onclick="closeDisplaySettings()">Hotovo</button>
   </div>
 </div>
@@ -4421,8 +4415,8 @@ render();
     if(themeColorMeta) themeColorMeta.setAttribute('content', '#f4ead8');
   }
   function clamp(n,min,max){ return Math.min(max,Math.max(min,n)); }
-  function applyFont(scale){
-    const s = clamp(Number(scale||1), 0.92, 1.18);
+  function applyFont(){
+    const s = 0.98;
     document.documentElement.style.setProperty('--fontScale', s.toFixed(2));
     store.set('ux35-font', s.toFixed(2));
     return s;
@@ -4476,9 +4470,6 @@ render();
       const tag = (e.target?.tagName || '').toLowerCase();
       const typing = ['input','textarea','select'].includes(tag) || e.target?.isContentEditable;
       if(e.key === '/' && !typing){ e.preventDefault(); openSearch(); }
-      if(typing) return;
-      if(e.key === '+' || e.key === '='){ applyFont((parseFloat(store.get('ux35-font','1.05')) || 1.05) + 0.04); updateProgress(); }
-      if(e.key === '-'){ applyFont((parseFloat(store.get('ux35-font','1.05')) || 1.05) - 0.04); updateProgress(); }
     });
   }
 
@@ -4525,7 +4516,7 @@ render();
   }
   function init(){
     applyTheme();
-    applyFont(parseFloat(store.get('ux35-font','1.05')) || 1.05);
+    applyFont();
     bind();
     updateProgress();
     wireNotes();
@@ -6037,26 +6028,10 @@ const FCM_SENDER_ID = '360259005980';
 
 <script id="display-settings-script">
 (function(){
-  /* Font scale range: 0.92 (min readable) – 1.18 (max comfortable); slider values are scale×100 */
-  var FONT_MIN = 0.92, FONT_MAX = 1.18;
-
-  function sliderPct(s){ return ((s - FONT_MIN) / (FONT_MAX - FONT_MIN) * 100).toFixed(1) + '%'; }
-
-  function syncFontUI(){
-    var s = parseFloat(localStorage.getItem('ux35-font') || '1.05');
-    var slider = document.getElementById('dss-font-slider');
-    var status = document.getElementById('dss-font-status');
-    if(slider) {
-      slider.value = Math.round(s * 100);
-      slider.style.setProperty('--pct', sliderPct(s));
-    }
-    if(status) status.textContent = Math.round(s * 100) + '%';
-  }
-
   window.openDisplaySettings = function(){
     var ov = document.getElementById('display-settings-overlay');
     if(!ov) return;
-    syncFontUI();
+    if (typeof window.applyFont === 'function') window.applyFont();
     ov.classList.add('open');
     document.body.style.overflow = 'hidden';
     if (typeof window.pushOverlayHistory === 'function') window.pushOverlayHistory('display-settings-overlay');
@@ -6066,23 +6041,6 @@ const FCM_SENDER_ID = '360259005980';
     if(ov) ov.classList.remove('open');
     document.body.style.overflow = '';
   };
-
-  // Wire slider
-  function wireSlider(){
-    var slider = document.getElementById('dss-font-slider');
-    if(!slider || slider.dataset.wired) return;
-    slider.dataset.wired = '1';
-    function onSlider(){
-      var scale = parseInt(slider.value, 10) / 100;
-      if(typeof window.applyFont === 'function'){
-        var s = window.applyFont(scale);
-        var status = document.getElementById('dss-font-status');
-        if(status) status.textContent = Math.round(s * 100) + '%';
-        slider.style.setProperty('--pct', sliderPct(s));
-      }
-    }
-    slider.addEventListener('input', onSlider);
-  }
 
   // Close on Escape
   document.addEventListener('keydown', function(e){
@@ -6094,8 +6052,7 @@ const FCM_SENDER_ID = '360259005980';
 
   // Initialize on load
   function init(){
-    syncFontUI();
-    wireSlider();
+    if (typeof window.applyFont === 'function') window.applyFont();
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
@@ -6200,12 +6157,10 @@ const FCM_SENDER_ID = '360259005980';
       <div class="ps-section-title">Nastavení</div>
       <div class="ps-row">
         <div class="ps-row-left">
-          <div class="ps-row-label">Velikost písma</div>
+          <div class="ps-row-label">Typografie</div>
         </div>
-        <div class="ps-font-row">
-          <span class="ps-font-label-sm">A</span>
-          <input type="range" id="ps-font-slider" class="ps-font-slider" min="92" max="118" step="2" value="100" aria-label="Velikost písma">
-          <span class="ps-font-label-lg">A</span>
+        <div class="ps-row-sub">
+          Sjednocená velikost písma je aktivní v celé aplikaci.
         </div>
       </div>
       <div class="ps-row" style="border-bottom:none">
@@ -6744,15 +6699,6 @@ window.openProfile = function() {
       quoteEl.textContent = '„' + verse.t + '" — Zj ' + verse.c + ':' + verse.v;
     }
 
-    // Font slider
-    var fontSlider = document.getElementById('ps-font-slider');
-    if (fontSlider) {
-      var scale = parseFloat(safeLS('ux35-font', '1.05'));
-      fontSlider.value = Math.round(scale * 100);
-      var pct = ((scale - 0.92) / (1.18 - 0.92) * 100).toFixed(1) + '%';
-      fontSlider.style.setProperty('--pct', pct);
-    }
-
     // Notifications
     updateProfileNotifStatus();
 
@@ -6819,17 +6765,9 @@ window.openProfile = function() {
 
   // ── Font slider wiring in profile ──
   function wireProfileFontSlider() {
-    var slider = document.getElementById('ps-font-slider');
-    if (!slider || slider.dataset.wired) return;
-    slider.dataset.wired = '1';
-    slider.addEventListener('input', function() {
-      var scale = parseInt(slider.value, 10) / 100;
-      if (typeof window.applyFont === 'function') {
-        window.applyFont(scale);
-      }
-      var pct = ((scale - 0.92) / (1.18 - 0.92) * 100).toFixed(1) + '%';
-      slider.style.setProperty('--pct', pct);
-    });
+    if (typeof window.applyFont === 'function') {
+      window.applyFont();
+    }
   }
 
   // Close on Escape
