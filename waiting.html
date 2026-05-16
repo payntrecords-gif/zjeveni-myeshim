@@ -88,7 +88,17 @@
       try {
         const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
         if (approvedSnap.exists() && approvedSnap.data()?.status === 'approved') {
-          window.location.replace('./index.html');
+          const isStandalone =
+            window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone;
+          const installAlreadyMarked = (() => {
+            try {
+              return localStorage.getItem('myeshim-install-completed') === '1';
+            } catch (error) {
+              return false;
+            }
+          })();
+          window.location.replace((isStandalone || installAlreadyMarked) ? './index.html' : './install.html');
           return;
         }
 

@@ -55,8 +55,15 @@
       const isStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone;
+      const installAlreadyMarked = (() => {
+        try {
+          return localStorage.getItem('myeshim-install-completed') === '1';
+        } catch (error) {
+          return false;
+        }
+      })();
 
-      window.location.replace(isStandalone ? "./index.html" : "./install.html");
+      window.location.replace((isStandalone || installAlreadyMarked) ? "./index.html" : "./install.html");
     }
 
     function errorMessage(code) {

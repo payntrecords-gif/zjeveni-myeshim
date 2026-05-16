@@ -15,7 +15,7 @@
     .logo-wrap img{width:min(84vw,320px);height:auto;display:block;position:relative;box-shadow:none}
     h1{margin-bottom:8px;font-size:clamp(2rem,8vw,2.45rem);background:linear-gradient(135deg,var(--accent-strong),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent}
     .tagline{max-width:280px;margin:0 0 22px;color:var(--muted)}
-    .card{max-width:380px;text-align:left}
+    .card{max-width:420px;text-align:left}
     .card-title{font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:6px}
     .card-sub{font-size:.96rem;color:var(--muted);margin-bottom:18px;line-height:1.58}
     #main-btn{width:100%;margin-bottom:16px}
@@ -26,6 +26,18 @@
     .step-icon{font-size:1.15rem;flex-shrink:0;margin-top:1px;min-width:24px}
     .step strong{color:var(--text)}
     .note{font-size:.82rem;color:var(--muted);text-align:center;margin-top:12px;line-height:1.45}
+    .debug-panel{margin-top:16px;background:linear-gradient(180deg,rgba(255,249,238,.94) 0%,rgba(248,236,212,.9) 100%);border:1px solid rgba(175,146,87,.32);border-radius:20px;padding:14px 14px 12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.75)}
+    .debug-title{margin:0 0 8px;font-size:.84rem;font-weight:800;color:var(--accent-strong);letter-spacing:.02em;text-transform:uppercase}
+    .debug-list{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+    .debug-list li{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:.82rem;line-height:1.36;color:var(--muted)}
+    .debug-list strong{font-weight:700;color:var(--text)}
+    .debug-value{font-weight:700;color:var(--text);text-align:right;max-width:58%}
+    .debug-value.ok{color:var(--ok)}
+    .debug-value.warn{color:var(--accent-strong)}
+    .debug-value.error{color:var(--error)}
+    .debug-log{margin-top:10px;padding-top:10px;border-top:1px solid rgba(175,146,87,.24);font-size:.78rem;line-height:1.42;color:var(--muted);max-height:130px;overflow:auto}
+    .debug-log p{margin:0 0 5px;color:inherit}
+    .debug-log p:last-child{margin-bottom:0}
     #ios-arrow{display:none;position:fixed;bottom:0;left:0;right:0;padding:18px 24px calc(18px + env(safe-area-inset-bottom));background:linear-gradient(135deg,var(--accent-soft),var(--accent));color:#fffdf7;font-size:.95rem;font-weight:800;text-align:center;border-radius:26px 26px 0 0;box-shadow:0 -10px 30px rgba(132,102,58,.18);animation:bounce-up .8s ease-in-out infinite alternate;z-index:99}
     @keyframes bounce-up{from{transform:translateY(0)}to{transform:translateY(-8px)}}
     #ios-arrow .arrow{font-size:1.8rem;display:block;margin-bottom:4px}
@@ -74,6 +86,21 @@
   </div>
 
   <p class="note" id="install-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
+
+  <section class="debug-panel" id="install-debug-panel" aria-live="polite">
+    <p class="debug-title">Install diagnostika</p>
+    <ul class="debug-list">
+      <li><strong>Prostředí</strong><span class="debug-value" id="debug-env">—</span></li>
+      <li><strong>Display mode</strong><span class="debug-value" id="debug-display-mode">—</span></li>
+      <li><strong>beforeinstallprompt</strong><span class="debug-value" id="debug-bip">—</span></li>
+      <li><strong>Deferred event</strong><span class="debug-value" id="debug-deferred">—</span></li>
+      <li><strong>Service Worker</strong><span class="debug-value" id="debug-sw">—</span></li>
+      <li><strong>Manifest</strong><span class="debug-value" id="debug-manifest">—</span></li>
+      <li><strong>Installability</strong><span class="debug-value" id="debug-installability">—</span></li>
+      <li><strong>App installed</strong><span class="debug-value" id="debug-appinstalled">—</span></li>
+    </ul>
+    <div class="debug-log" id="debug-log"></div>
+  </section>
 </div>
 
 <!-- iOS animovaná šipka -->
@@ -86,30 +113,87 @@
 (function(){
   var deferredPrompt = null;
   var nativePromptConsumed = false;
+  var beforeInstallPromptCapturedAt = null;
+  var appInstalledObserved = false;
+  var localInstallMarkerKey = 'myeshim-install-completed';
+  var isSecureContextPage = window.isSecureContext !== false;
+  var installabilitySignals = {
+    swSupported: 'serviceWorker' in navigator,
+    swRegistered: false,
+    swControlled: !!(navigator.serviceWorker && navigator.serviceWorker.controller),
+    manifestLinked: false,
+    manifestFetchOk: false
+  };
+  var diagnosticsLogBuffer = [];
   var ua = navigator.userAgent || '';
   var supportsBeforeInstallPrompt = 'onbeforeinstallprompt' in window;
   var isIOS = /iphone|ipad|ipod/i.test(ua);
   var isAndroid = /android/i.test(ua);
   var isTelegram = /telegram|tgwebview/i.test(ua);
+  var isChromeLike = /chrome|chromium|crios|edg|opr|opera|samsungbrowser/i.test(ua);
   var isDesktop = !isIOS && !isAndroid;
   var standaloneMedia = window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
   var stepIds = ['step-telegram', 'step-android', 'step-ios', 'step-desktop'];
+  var installContext = {
+    installedFromReferrer: String(document.referrer || '').indexOf('android-app://') === 0,
+    installedRelatedAppsDetected: false,
+    installedByMarker: false
+  };
 
   function isStandaloneMode(){
     return (standaloneMedia && standaloneMedia.matches) || navigator.standalone === true;
   }
 
-  function logInstall(stage, data){
+  function debugValueEl(id){
+    return document.getElementById(id);
+  }
+
+  function setDebugValue(id, text, tone){
+    var el = debugValueEl(id);
+    if(!el) return;
+    el.textContent = text;
+    el.classList.remove('ok', 'warn', 'error');
+    if(tone) el.classList.add(tone);
+  }
+
+  function appendDebugLog(message, tone){
+    var now = new Date();
+    var time = now.toLocaleTimeString('cs-CZ');
+    diagnosticsLogBuffer.push({ time: time, message: message, tone: tone || 'warn' });
+    if(diagnosticsLogBuffer.length > 16) diagnosticsLogBuffer.shift();
+    var logEl = document.getElementById('debug-log');
+    if(!logEl) return;
+    logEl.innerHTML = diagnosticsLogBuffer.map(function(item){
+      var color = item.tone === 'error' ? 'var(--error)' : (item.tone === 'ok' ? 'var(--ok)' : 'var(--muted)');
+      return '<p style="color:' + color + '">[' + item.time + '] ' + item.message + '</p>';
+    }).join('');
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function logInstall(stage, data, tone){
+    var message = stage + (typeof data === 'undefined' ? '' : ' ' + JSON.stringify(data));
     try{
-      if(typeof data === 'undefined') console.info('[install-flow]', stage);
-      else console.info('[install-flow]', stage, data);
+      if(tone === 'error'){
+        if(typeof data === 'undefined') console.error('[install-flow]', stage);
+        else console.error('[install-flow]', stage, data);
+      }else if(tone === 'warn'){
+        if(typeof data === 'undefined') console.warn('[install-flow]', stage);
+        else console.warn('[install-flow]', stage, data);
+      }else if(typeof data === 'undefined'){
+        console.info('[install-flow]', stage);
+      }else{
+        console.info('[install-flow]', stage, data);
+      }
     }catch(e){}
+    appendDebugLog(message, tone || 'warn');
   }
 
   function setDeferredPrompt(event){
     deferredPrompt = event;
     window.__myeshimDeferredInstallPrompt = event;
     nativePromptConsumed = false;
+    beforeInstallPromptCapturedAt = new Date();
+    setDebugValue('debug-deferred', 'uložen (' + beforeInstallPromptCapturedAt.toLocaleTimeString('cs-CZ') + ')', 'ok');
     logInstall('deferred prompt stored');
   }
 
@@ -125,6 +209,7 @@
   function clearDeferredPrompt(){
     deferredPrompt = null;
     window.__myeshimDeferredInstallPrompt = null;
+    setDebugValue('debug-deferred', 'není dostupný', 'warn');
   }
 
   function showBadge(icon, text){
@@ -162,9 +247,12 @@
   }
 
   function getInstallAvailability(){
-    if(isStandaloneMode()) return { mode: 'installed', reason: 'already-installed' };
+    if(isAppConsideredInstalled()) return { mode: 'installed', reason: 'already-installed' };
     if(isTelegram) return { mode: 'fallback', reason: 'telegram-in-app-browser' };
     if(isIOS) return { mode: 'fallback', reason: 'ios-no-beforeinstallprompt' };
+    if(!isSecureContextPage) return { mode: 'fallback', reason: 'insecure-context' };
+    if(isAndroid && !isChromeLike) return { mode: 'fallback', reason: 'android-browser-limited-support' };
+    if(!installabilitySignals.manifestLinked || !installabilitySignals.swSupported) return { mode: 'fallback', reason: 'installability-signals-missing' };
     if(!supportsBeforeInstallPrompt) return { mode: 'fallback', reason: 'beforeinstallprompt-unsupported' };
     if(getDeferredPrompt()) return { mode: 'native-ready', reason: 'deferred-prompt-ready' };
     if(nativePromptConsumed) return { mode: 'pending', reason: 'prompt-consumed-waiting-new-event' };
@@ -190,7 +278,7 @@
     if(state.mode === 'pending'){
       mainBtn.disabled = true;
       btnLabel.textContent = 'Připravuji nativní instalaci…';
-      installNote.textContent = 'Čekám na dostupnost nativního instalačního dialogu.';
+      installNote.textContent = 'Čekám na dostupnost nativního instalačního dialogu. Diagnostika níže ukazuje proč ještě není dostupný.';
       installNote.style.color = 'var(--muted)';
       showOnlySteps([]);
       showBadge('⏳', 'Nativní instalace zatím není dostupná');
@@ -213,6 +301,33 @@
       installNote.textContent = 'Safari na iOS nepodporuje beforeinstallprompt, proto je potřeba ruční postup.';
       installNote.style.color = 'var(--accent-strong)';
       showBadge('ℹ️', 'iOS vyžaduje ruční přidání na plochu');
+      return;
+    }
+
+    if(state.reason === 'insecure-context'){
+      btnLabel.textContent = 'Nelze instalovat';
+      showOnlySteps([isDesktop ? 'step-desktop' : 'step-android']);
+      installNote.textContent = 'Instalace funguje jen přes bezpečné HTTPS prostředí.';
+      installNote.style.color = 'var(--error)';
+      showBadge('⚠️', 'Nezabezpečený kontext blokuje install prompt');
+      return;
+    }
+
+    if(state.reason === 'installability-signals-missing'){
+      btnLabel.textContent = 'Návod k instalaci';
+      showOnlySteps([isDesktop ? 'step-desktop' : 'step-android']);
+      installNote.textContent = 'Manifest nebo Service Worker nejsou dostupné, proto se native dialog nemůže objevit.';
+      installNote.style.color = 'var(--accent-strong)';
+      showBadge('ℹ️', 'Chybí technické signály installability');
+      return;
+    }
+
+    if(state.reason === 'android-browser-limited-support'){
+      btnLabel.textContent = 'Otevřít v Chrome';
+      showOnlySteps(['step-android']);
+      installNote.textContent = 'Tento Android prohlížeč nemusí podporovat native install prompt. Doporučen je Chrome.';
+      installNote.style.color = 'var(--accent-strong)';
+      showBadge('ℹ️', 'Otevři stránku v Chrome');
       return;
     }
 
@@ -255,16 +370,123 @@
 
   function registerInstallPageSW(){
     if(!('serviceWorker' in navigator)){
+      installabilitySignals.swSupported = false;
+      setDebugValue('debug-sw', 'nepodporován', 'error');
       logInstall('native prompt unavailable', { reason: 'service-worker-unsupported' });
       return;
     }
     navigator.serviceWorker.register('./service-worker.js', { scope: './' })
       .then(function(reg){
+        installabilitySignals.swRegistered = true;
+        installabilitySignals.swControlled = !!navigator.serviceWorker.controller;
+        setDebugValue('debug-sw', installabilitySignals.swControlled ? 'registrován + kontroluje stránku' : 'registrován (čeká na kontrolu)', 'ok');
         logInstall('service worker registered', { scope: reg.scope });
       })
       .catch(function(error){
+        installabilitySignals.swRegistered = false;
+        setDebugValue('debug-sw', 'registrace selhala', 'error');
         logInstall('native prompt unavailable', { reason: 'service-worker-register-failed', error: String(error && error.message ? error.message : error) });
       });
+  }
+
+  function isAppConsideredInstalled(){
+    return isStandaloneMode() || installContext.installedFromReferrer || installContext.installedByMarker || installContext.installedRelatedAppsDetected;
+  }
+
+  function updateInstallabilityDebug(){
+    var availability = getInstallAvailability();
+    var detail = availability.mode + ' (' + availability.reason + ')';
+    setDebugValue('debug-installability', detail, availability.mode === 'native-ready' ? 'ok' : (availability.mode === 'pending' ? 'warn' : 'error'));
+  }
+
+  function updateEnvironmentDebug(){
+    var envParts = [];
+    if(isAndroid) envParts.push('Android');
+    if(isIOS) envParts.push('iOS');
+    if(isDesktop) envParts.push('Desktop');
+    if(isTelegram) envParts.push('Telegram WebView');
+    if(!isSecureContextPage) envParts.push('non-HTTPS');
+    setDebugValue('debug-env', envParts.join(' · ') || 'Neznámé', isSecureContextPage ? 'ok' : 'error');
+    setDebugValue('debug-display-mode', isStandaloneMode() ? 'standalone' : 'browser', isStandaloneMode() ? 'ok' : 'warn');
+    setDebugValue('debug-bip', supportsBeforeInstallPrompt ? 'podporováno' : 'nepodporováno', supportsBeforeInstallPrompt ? 'ok' : 'error');
+    setDebugValue('debug-appinstalled', appInstalledObserved ? 'event zachycen' : 'event zatím ne', appInstalledObserved ? 'ok' : 'warn');
+  }
+
+  function updateManifestDebug(){
+    var link = document.querySelector('link[rel="manifest"]');
+    installabilitySignals.manifestLinked = !!link;
+    if(!link){
+      setDebugValue('debug-manifest', 'link chybí', 'error');
+      logInstall('native prompt unavailable', { reason: 'manifest-link-missing' }, 'warn');
+      return;
+    }
+    setDebugValue('debug-manifest', 'link OK, kontroluji…', 'warn');
+    fetch(link.href, { cache: 'no-store' }).then(function(response){
+      if(!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    }).then(function(manifest){
+      installabilitySignals.manifestFetchOk = true;
+      var display = manifest && manifest.display ? manifest.display : 'missing';
+      var startUrl = manifest && manifest.start_url ? manifest.start_url : 'missing';
+      setDebugValue('debug-manifest', 'OK · display=' + display + ' · start=' + startUrl, display === 'standalone' ? 'ok' : 'warn');
+      logInstall('manifest loaded', { display: display, start_url: startUrl, icons: manifest && manifest.icons ? manifest.icons.length : 0 });
+      updateInstallabilityDebug();
+      applyInstallUI(getInstallAvailability());
+    }).catch(function(error){
+      installabilitySignals.manifestFetchOk = false;
+      setDebugValue('debug-manifest', 'načtení selhalo', 'error');
+      logInstall('native prompt unavailable', { reason: 'manifest-fetch-failed', error: String(error && error.message ? error.message : error) }, 'error');
+      updateInstallabilityDebug();
+      applyInstallUI(getInstallAvailability());
+    });
+  }
+
+  function checkInstalledRelatedApps(){
+    if(typeof navigator.getInstalledRelatedApps !== 'function'){
+      return Promise.resolve();
+    }
+    return navigator.getInstalledRelatedApps().then(function(apps){
+      if(Array.isArray(apps) && apps.length){
+        installContext.installedRelatedAppsDetected = true;
+        logInstall('installed related apps detected', { count: apps.length }, 'ok');
+      }else{
+        logInstall('installed related apps not detected', { count: 0 });
+      }
+    }).catch(function(error){
+      logInstall('installed related apps check failed', { error: String(error && error.message ? error.message : error) }, 'warn');
+    });
+  }
+
+  function setInstalledMarker(){
+    try{
+      localStorage.setItem(localInstallMarkerKey, '1');
+      installContext.installedByMarker = true;
+    }catch(error){
+      logInstall('install marker write failed', { error: String(error && error.message ? error.message : error) }, 'warn');
+    }
+  }
+
+  function loadInstalledMarker(){
+    try{
+      installContext.installedByMarker = localStorage.getItem(localInstallMarkerKey) === '1';
+      return;
+    }catch(error){}
+    installContext.installedByMarker = false;
+  }
+
+  loadInstalledMarker();
+  updateEnvironmentDebug();
+  setDebugValue('debug-deferred', 'není dostupný', 'warn');
+
+  if(isAppConsideredInstalled()){
+    logInstall('installation already detected before rendering', {
+      standalone: isStandaloneMode(),
+      relatedApps: installContext.installedRelatedAppsDetected,
+      marker: installContext.installedByMarker,
+      referrer: installContext.installedFromReferrer
+    }, 'ok');
+    window.location.replace('./index.html');
+    return;
   }
 
   if(isStandaloneMode()){
@@ -275,15 +497,25 @@
 
   window.addEventListener('beforeinstallprompt', function(event){
     event.preventDefault();
-    logInstall('beforeinstallprompt fired');
+    setDebugValue('debug-bip', 'event zachycen', 'ok');
+    logInstall('beforeinstallprompt fired', {
+      secureContext: isSecureContextPage,
+      swRegistered: installabilitySignals.swRegistered,
+      manifestLinked: installabilitySignals.manifestLinked
+    }, 'ok');
     setDeferredPrompt(event);
+    updateInstallabilityDebug();
     applyInstallUI(getInstallAvailability());
   });
 
   window.addEventListener('appinstalled', function(){
+    appInstalledObserved = true;
+    setInstalledMarker();
+    setDebugValue('debug-appinstalled', 'event zachycen', 'ok');
     logInstall('appinstalled event received');
     clearDeferredPrompt();
     nativePromptConsumed = true;
+    updateInstallabilityDebug();
     showBadge('🎉', 'Nainstalováno! Přesměrovávám…');
     var btnLabel = document.getElementById('btn-label');
     var mainBtn = document.getElementById('main-btn');
@@ -309,13 +541,36 @@
     var mainBtn = document.getElementById('main-btn');
     var installNote = document.getElementById('install-note');
     var iosArrow = document.getElementById('ios-arrow');
+    updateEnvironmentDebug();
+    updateManifestDebug();
     registerInstallPageSW();
+    checkInstalledRelatedApps().finally(function(){
+      if(isAppConsideredInstalled()){
+        logInstall('installation already detected, skipping install gate', {
+          standalone: isStandaloneMode(),
+          relatedApps: installContext.installedRelatedAppsDetected,
+          marker: installContext.installedByMarker,
+          referrer: installContext.installedFromReferrer
+        }, 'ok');
+        window.location.replace('./index.html');
+        return;
+      }
+      updateInstallabilityDebug();
+      applyInstallUI(getInstallAvailability());
+    });
     applyInstallUI(getInstallAvailability());
+    updateInstallabilityDebug();
+    logInstall('install page diagnostics initialized', {
+      supportsBeforeInstallPrompt: supportsBeforeInstallPrompt,
+      isSecureContext: isSecureContextPage,
+      serviceWorkerSupported: installabilitySignals.swSupported,
+      manifestLinked: !!document.querySelector('link[rel="manifest"]')
+    });
 
     if(mainBtn){
       mainBtn.addEventListener('click', async function(){
         var availability = getInstallAvailability();
-        logInstall('install button clicked', availability);
+        logInstall('install button clicked', availability, availability.mode === 'native-ready' ? 'ok' : 'warn');
 
         if(availability.mode === 'native-ready'){
           var accepted = await openNativePrompt();
@@ -328,6 +583,7 @@
               installNote.textContent = 'Skvěle! Otevři MyeShim z plochy telefonu.';
               installNote.style.color = 'var(--muted)';
             }
+            setInstalledMarker();
           }else{
             if(installNote){
               installNote.textContent = 'Instalaci můžeš spustit znovu tímto tlačítkem, jakmile bude prompt znovu dostupný.';
@@ -335,6 +591,7 @@
             }
             showBadge('ℹ️', 'Instalační dialog byl zavřen');
           }
+          updateInstallabilityDebug();
           applyInstallUI(getInstallAvailability());
           return;
         }
@@ -355,6 +612,12 @@
           return;
         }
 
+        if(availability.reason === 'android-browser-limited-support'){
+          window.open(location.href, '_blank', 'noopener');
+          return;
+        }
+
+        updateInstallabilityDebug();
         applyInstallUI(availability);
       });
     }
