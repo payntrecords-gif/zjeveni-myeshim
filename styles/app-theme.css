@@ -1,0 +1,385 @@
+:root{
+  --pink:#bf9950;
+  --pink2:#e1c07a;
+  --text:#47331d;
+  --sub:#887150;
+  --line:rgba(172,145,93,.20);
+  --bg:#f5ecdc;
+  --card:#fbf5ea;
+  --card-alt:#fffaf1;
+  --surface-soft:#f7eedf;
+  --shadow-soft:0 18px 38px rgba(129,99,56,.12);
+}
+html,body{
+  background:
+    radial-gradient(circle at top,rgba(224,193,115,.26) 0%,transparent 34%),
+    radial-gradient(circle at 100% 100%,rgba(193,154,70,.10) 0%,transparent 28%),
+    linear-gradient(180deg,#fbf7ef 0%,#f6eedf 40%,#efe2ca 100%) !important;
+  color:var(--text) !important;
+}
+body{color-scheme:light}
+#auth-overlay,
+#install-overlay{
+  background:
+    radial-gradient(circle at top,rgba(224,193,115,.22) 0%,transparent 34%),
+    radial-gradient(circle at 100% 100%,rgba(193,154,70,.10) 0%,transparent 28%),
+    linear-gradient(180deg,#fbf7ef 0%,#f6eedf 40%,#efe2ca 100%) !important;
+}
+#topbar{
+  background:rgba(249,243,232,.84) !important;
+  backdrop-filter:blur(20px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.08) !important;
+  border-bottom:1px solid rgba(172,145,93,.16) !important;
+  box-shadow:0 10px 26px rgba(129,99,56,.08);
+}
+.tb-left{gap:14px !important}
+.tb-logo img{filter:drop-shadow(0 8px 18px rgba(129,99,56,.10))}
+.tb-iginja{
+  font-size:clamp(1.08rem,4.4vw,1.24rem) !important;
+  font-weight:800 !important;
+  letter-spacing:-.03em !important;
+  color:#9d7a32 !important;
+}
+#ux35-progress-wrap{
+  top:72px !important;
+  max-width:560px !important;
+  margin-top:10px !important;
+  padding:0 18px !important;
+}
+#ux35-progress-track{height:7px !important;background:rgba(191,153,80,.14) !important}
+#ux35-progress{background:linear-gradient(90deg,#dabc74,#bf9950) !important}
+#ux35-progress-label{color:#8b734d !important}
+#app{
+  max-width:560px !important;
+  padding:22px 18px 26px !important;
+}
+#app-tabs-outer,
+#app-panels{max-width:560px !important;margin:0 auto !important;padding-left:18px !important;padding-right:18px !important}
+#app-panels{padding-bottom:calc(122px + env(safe-area-inset-bottom)) !important}
+.cv-row{margin-bottom:18px !important;align-items:flex-end !important;gap:16px !important}
+.cv-left .cv-chapter{
+  font-size:clamp(1.15rem,5.2vw,1.45rem) !important;
+  color:#46331d !important;
+  letter-spacing:.02em !important;
+  text-transform:uppercase !important;
+}
+.cv-left .cv-name{
+  margin-top:6px !important;
+  font-size:clamp(2rem,7.6vw,2.46rem) !important;
+  line-height:1.08 !important;
+  color:#7e6437 !important;
+  letter-spacing:-.04em !important;
+}
+.cv-right{
+  font-size:clamp(1rem,4.2vw,1.18rem) !important;
+  color:#5a4627 !important;
+  font-weight:700 !important;
+}
+.verse-card{
+  background:linear-gradient(145deg,#d2ab55 0%,#c39a42 100%) !important;
+  border:1px solid rgba(255,255,255,.28) !important;
+  border-radius:30px !important;
+  padding:26px 24px !important;
+  margin-bottom:20px !important;
+  box-shadow:0 24px 48px rgba(178,137,60,.22) !important;
+}
+.vc-ref{
+  font-size:clamp(2.38rem,11vw,3rem) !important;
+  line-height:.98 !important;
+  letter-spacing:-.04em !important;
+  margin-bottom:18px !important;
+  color:#fffaf0 !important;
+}
+.vc-text{
+  font-size:clamp(1.18rem,4.8vw,1.36rem) !important;
+  line-height:1.72 !important;
+  color:#fffaf3 !important;
+}
+.verse-actions{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:12px !important;
+  margin:0 0 24px !important;
+}
+.va-btn,
+.note-save,
+.dss-close-btn,
+.mm-btn:not(.mm-btn-ghost),
+.auth-btn-login,
+.iov-native-btn{
+  min-height:58px !important;
+  border-radius:999px !important;
+  padding:0 18px !important;
+  font-size:1rem !important;
+  font-weight:800 !important;
+  box-shadow:0 14px 28px rgba(129,99,56,.12) !important;
+  border:1px solid transparent !important;
+}
+.va-btn,
+.note-save,
+.dss-close-btn,
+.auth-btn-login,
+.iov-native-btn{
+  background:linear-gradient(135deg,#d6b56f,#c39a42) !important;
+  color:#fffdf8 !important;
+}
+.va-btn.ghost,
+.ux35-btn,
+.ns-ch-grid button,
+.ns-v-grid button,
+.tabs button,
+.ps-btn-notif,
+.ps-btn-update,
+.ws-notif-btn,
+.install-dismiss,
+.install-btn{
+  background:rgba(255,250,242,.92) !important;
+  color:var(--text) !important;
+  border:1px solid rgba(172,145,93,.22) !important;
+  box-shadow:0 10px 24px rgba(129,99,56,.08) !important;
+}
+.va-btn.ghost.active,
+.tabs button.active,
+.ns-ch-grid button.active,
+.ns-v-grid button.active,
+#bn-nav,
+.install-btn{
+  background:rgba(234,214,176,.78) !important;
+  color:#6a521f !important;
+  border-color:rgba(191,153,80,.32) !important;
+}
+#verse-fav-btn,
+#verse-memorize-btn{justify-content:center !important;text-align:center !important}
+#verse-memorize-btn.mm-memorized{
+  background:rgba(255,250,241,.96) !important;
+  color:#6a501f !important;
+  border-color:rgba(191,153,80,.34) !important;
+  box-shadow:0 12px 26px rgba(129,99,56,.12) !important;
+}
+#verse-memorize-btn .mm-complete-icon{background:rgba(255,255,255,.34) !important;color:#8a6928 !important}
+#verse-memorize-btn .mm-complete-check{background:rgba(106,80,31,.18) !important}
+.tabs{
+  background:rgba(244,233,214,.82) !important;
+  border:1px solid rgba(172,145,93,.16) !important;
+  border-radius:28px !important;
+  padding:6px !important;
+  gap:8px !important;
+  box-shadow:0 16px 32px rgba(129,99,56,.08) !important;
+}
+.tabs button{
+  min-height:56px !important;
+  border-radius:22px !important;
+  font-size:1.02rem !important;
+  color:#7f6a45 !important;
+}
+.guide-card,
+.qa-card,
+.note-ta,
+#nav-sheet,
+#display-settings-sheet,
+#profile-sheet,
+#memorize-sheet,
+#notif-settings-sheet,
+.auth-card,
+.iov-card,
+.install-card,
+.ps-notes-list,
+#welcome-sheet,
+#streak-detail-sheet{
+  background:rgba(251,245,234,.94) !important;
+  color:var(--text) !important;
+  border:1px solid rgba(172,145,93,.18) !important;
+  border-radius:30px !important;
+  box-shadow:0 20px 46px rgba(129,99,56,.12) !important;
+}
+.guide-card,
+.qa-card{padding:22px !important}
+.guide-title,
+.dss-title,
+.mm-title,
+.auth-card-title,
+.iov-title{color:#9d7a32 !important}
+.guide-step,
+.qa-item,
+.ps-row{padding:18px 0 !important;border-bottom:1px solid rgba(172,145,93,.14) !important}
+.guide-step{grid-template-columns:48px 1fr !important;gap:14px !important}
+.gs-num{
+  width:48px !important;
+  height:48px !important;
+  background:linear-gradient(135deg,#e0c173,#c39a42) !important;
+  color:#fffdf7 !important;
+  box-shadow:0 12px 24px rgba(129,99,56,.16) !important;
+}
+.gs-body h4,
+.qa-q{
+  font-size:1.18rem !important;
+  line-height:1.22 !important;
+  color:var(--text) !important;
+  letter-spacing:-.03em !important;
+}
+.gs-body p,
+.qa-ans,
+.note-hint,
+.ps-row-sub,
+.ps-note-text,
+.auth-card-sub,
+.auth-tagline,
+.auth-privacy,
+.iov-sub,
+.iov-tagline,
+.iov-step,
+.iov-note,
+.install-sub,
+.install-copy,
+.install-title,
+#dss-font-status,
+#ux35-note-meta{
+  color:var(--sub) !important;
+}
+.qa-ans{padding-top:12px !important;border-top:1px solid rgba(172,145,93,.14) !important}
+.note-ta{
+  padding:20px 18px !important;
+  border-radius:28px !important;
+  background:rgba(255,250,242,.96) !important;
+}
+.note-save{width:100% !important;margin-top:16px !important}
+#bottomnav{
+  background:rgba(249,243,232,.9) !important;
+  backdrop-filter:blur(18px) saturate(1.08) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.08) !important;
+  border-top:1px solid rgba(172,145,93,.16) !important;
+  box-shadow:0 -14px 30px rgba(129,99,56,.08) !important;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+  gap:8px !important;
+}
+#bottomnav button{
+  min-height:62px !important;
+  border-radius:24px !important;
+  color:#6d5630 !important;
+  background:transparent !important;
+  border:1px solid transparent !important;
+  box-shadow:none !important;
+}
+#bottomnav button span{font-size:.98rem !important;font-weight:800 !important}
+#bn-prev:hover,
+#bn-next:hover,
+#tb-avatar-btn:hover,
+#bn-nav:hover{background:rgba(255,250,242,.72) !important}
+.bn-avatar-wrap{
+  border-radius:18px !important;
+  border:1px solid rgba(191,153,80,.22) !important;
+  background:rgba(255,250,242,.86) !important;
+}
+.bn-avatar-label{color:#6d5630 !important}
+#nav-sheet{background:rgba(248,241,230,.98) !important;border-radius:30px 30px 0 0 !important}
+.ns-head{background:inherit !important}
+.ns-search-wrap{
+  background:rgba(255,250,242,.92) !important;
+  border-radius:22px !important;
+  border:1px solid rgba(172,145,93,.16) !important;
+  box-shadow:none !important;
+}
+.ns-search-wrap input{color:var(--text) !important}
+.ns-search-wrap svg{color:#a88953 !important}
+.ns-section-label{
+  color:#9d7a32 !important;
+  letter-spacing:.08em !important;
+  text-transform:uppercase !important;
+}
+.ns-ch-grid button,
+.ns-v-grid button{
+  color:#6d5630 !important;
+  border-radius:20px !important;
+  min-height:52px !important;
+}
+.ns-ch-grid button .ch-title{color:#9a8460 !important}
+.ns-v-grid button.has-note{background:rgba(247,236,212,.95) !important}
+.ns-v-grid button.has-note::after{background:#c39a42 !important}
+#display-settings-sheet,
+#profile-sheet,
+#memorize-sheet,
+#notif-settings-sheet{padding:26px 22px 30px !important}
+.ps-handle,
+.dss-handle,
+.mm-handle,
+.ns-handle{background:rgba(159,130,78,.24) !important}
+.ps-header{padding-bottom:20px !important;border-bottom:1px solid rgba(172,145,93,.16) !important}
+.ps-name{font-size:1.2rem !important;color:var(--text) !important}
+.ps-email,
+.ps-app-version,
+.ps-btn-signout{color:var(--sub) !important}
+.ps-activity-cell,
+.ps-verse-chip{
+  background:rgba(255,250,242,.92) !important;
+  border:1px solid rgba(172,145,93,.16) !important;
+  box-shadow:none !important;
+}
+.ps-activity-num,
+.ps-activity-label,
+.ps-note-ref{color:#6b5327 !important}
+.ps-streak-num{background:linear-gradient(135deg,#c39a42,#9d7a32) !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important}
+.ps-notif-status.granted,
+.ps-notif-status.default{background:rgba(218,194,144,.32) !important;color:#7b612c !important}
+.ps-notif-status.denied{background:rgba(214,121,93,.14) !important;color:#9c4b39 !important}
+#offline-banner,
+#ux35-toast,
+#sw-update-toast,
+#auth-overlay-error{
+  background:rgba(78,56,24,.92) !important;
+  color:#fffaf1 !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 16px 30px rgba(78,56,24,.18) !important;
+}
+#sw-update-btn{color:#f2d48a !important}
+.auth-card,
+.iov-card{padding:24px 22px !important}
+.auth-btn-login,
+.iov-native-btn{width:100% !important}
+.iov-steps{background:rgba(255,250,242,.92) !important;border-radius:22px !important;padding:14px 16px !important}
+.iov-step:not(:last-child){border-bottom:1px solid rgba(172,145,93,.12) !important}
+#memorize-sheet,
+.mm-scroll-area,
+.mm-content,
+.mm-actions,
+.mm-level-chip,
+.mm-word-option,
+.mm-btn.mm-btn-ghost{color:var(--text)}
+#memorize-sheet .mm-btn.mm-btn-ghost{
+  background:rgba(255,250,242,.92) !important;
+  color:var(--text) !important;
+  border:1px solid rgba(172,145,93,.18) !important;
+  box-shadow:none !important;
+}
+.mm-progress-track{background:rgba(191,153,80,.14) !important}
+#mm-progress-bar{background:linear-gradient(90deg,#dabc74,#bf9950) !important}
+.mm-level-chip.active,
+.mm-word-option.active,
+.mm-word-dropzone.is-filled{background:rgba(234,214,176,.78) !important;border-color:rgba(191,153,80,.32) !important;color:#6a521f !important}
+.install-card,
+.pwa-tip{
+  background:rgba(249,243,232,.92) !important;
+  border:1px solid rgba(172,145,93,.16) !important;
+  color:var(--text) !important;
+}
+@media (max-width:720px){
+  #topbar{padding-left:18px !important;padding-right:18px !important}
+  #ux35-progress-wrap,
+  #app,
+  #app-tabs-outer,
+  #app-panels{padding-left:16px !important;padding-right:16px !important}
+  .verse-card{padding:24px 22px !important;border-radius:28px !important}
+  .verse-actions{gap:10px !important}
+  .va-btn,
+  .tabs button,
+  #bottomnav button,
+  .ux35-btn{min-height:56px !important}
+  .tabs{top:calc(72px + env(safe-area-inset-top)) !important}
+  #bottomnav{padding-left:12px !important;padding-right:12px !important}
+  .bn-avatar-label{font-size:.9rem !important}
+}
+@media (max-width:420px){
+  .verse-actions{grid-template-columns:1fr !important}
+  #bottomnav{gap:6px !important}
+  #bottomnav button span{font-size:.9rem !important}
+  .cv-left .cv-name{font-size:clamp(1.85rem,8vw,2.15rem) !important}
+}

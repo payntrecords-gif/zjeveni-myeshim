@@ -1,9 +1,27 @@
 <!doctype html>
-<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline | MYEShim</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><style>
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:radial-gradient(circle at top,#fff8ea 0%,#f7efdf 45%,#f1e7d2 100%);color:#3f2f1e;display:grid;place-items:center;min-height:100vh;padding:24px}
-.card{max-width:420px;background:linear-gradient(180deg,#fffaf0 0%,#f7efdf 100%);border:1px solid rgba(230,215,186,.95);border-radius:28px;padding:28px;box-shadow:0 20px 44px rgba(118,90,40,.14)}
-.logo{width:56px;height:56px;border-radius:18px;background:#fff;padding:6px;box-shadow:0 12px 24px rgba(118,90,40,.14);margin-bottom:18px}
-h1{margin:0 0 10px;font-size:24px}
-p{margin:0 0 10px;line-height:1.55;color:#7a6542}
-.btn{display:inline-block;margin-top:10px;padding:13px 18px;border-radius:16px;background:linear-gradient(135deg,#ddb86a,#c79b3b);color:#fff;text-decoration:none;font-weight:800;box-shadow:0 14px 24px rgba(139,104,43,.2)}
-</style></head><body><div class="card"><img class="logo" src="icon-96.png" alt="MYEShim"><h1>Jsi offline</h1><p>Aplikace funguje i bez internetu pro uložený obsah a poslední navštívené obrazovky.</p><p>Až bude připojení znovu dostupné, data se načtou automaticky.</p><a class="btn" href="./">Zkusit znovu</a></div></body></html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Offline | MYEShim</title>
+  <meta name="theme-color" content="#f4ead8">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="stylesheet" href="./styles/brand.css">
+  <style>
+    body.offline-page{display:grid;place-items:center}
+    .offline-card{max-width:420px;text-align:left}
+    .logo{width:60px;height:60px;border-radius:20px;background:rgba(255,255,255,.78);padding:8px;box-shadow:var(--shadow-sm);margin-bottom:18px}
+    .offline-card p:last-of-type{margin-bottom:0}
+    .btn{margin-top:18px}
+  </style>
+</head>
+<body class="offline-page">
+  <div class="card offline-card">
+    <img class="logo" src="icon-96.png" alt="MYEShim">
+    <h1>Jsi offline</h1>
+    <p>Aplikace funguje i bez internetu pro uložený obsah a poslední navštívené obrazovky.</p>
+    <p>Až bude připojení znovu dostupné, data se načtou automaticky.</p>
+    <a class="btn" href="./">Zkusit znovu</a>
+  </div>
+</body>
+</html>
