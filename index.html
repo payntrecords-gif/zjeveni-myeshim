@@ -111,12 +111,12 @@ html.browser-mode body{background:var(--bg,#f8f3f7)}
 }
 </style>
 <script type="module" id="auth-gate-script">
-console.log('MYEShim boot start');
+console.log('iginjaSlovo boot start');
 document.documentElement.classList.add('auth-gate-pending');
 
 // Safety timeout: if Firebase or auth never resolves, show fallback UI
 const _authGateTimeout = setTimeout(() => {
-  console.warn('MYEShim: auth gate timeout – releasing gate and showing fallback UI');
+  console.warn('iginjaSlovo: auth gate timeout – releasing gate and showing fallback UI');
   document.documentElement.classList.remove('auth-gate-pending');
   const fb = document.getElementById('app-load-fallback');
   if (fb) fb.style.display = 'flex';
@@ -313,17 +313,17 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 </script>
-<title>MYEShim – Zjevení</title>
-<meta name="description" content="MYEShim – mobilní studijní aplikace pro knihu Zjevení">
-<meta property="og:title" content="MYEShim – Zjevení">
-<meta property="og:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s MYEShim.">
+<title>iginjaSlovo – Zjevení</title>
+<meta name="description" content="iginjaSlovo – mobilní studijní aplikace pro knihu Zjevení">
+<meta property="og:title" content="iginjaSlovo – Zjevení">
+<meta property="og:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s iginjaSlovo.">
 <meta property="og:image" content="https://payntrecords-gif.github.io/zjeveni-myeshim/icon-512.png">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="cs_CZ">
 <meta property="og:url" content="https://payntrecords-gif.github.io/zjeveni-myeshim/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MYEShim – Zjevení">
-<meta name="twitter:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s MYEShim.">
+<meta name="twitter:title" content="iginjaSlovo – Zjevení">
+<meta name="twitter:description" content="📖 Každý den jeden verš ze Zjevení. Buduj svůj streak, prohlubuj víru a nikdy nezapomeň – s iginjaSlovo.">
 <meta name="twitter:image" content="https://payntrecords-gif.github.io/zjeveni-myeshim/icon-512.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -1101,9 +1101,9 @@ html{scroll-padding-top:132px}
 <meta name="theme-color" content="#f4ead8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="MYEShim">
-<link rel="icon" href="data:image/png;base64,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" sizes="192x192">
-<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<meta name="apple-mobile-web-app-title" content="iginjaSlovo">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 <style id="ux40-pwa-style">
 .install-card{position:fixed;left:14px;right:14px;bottom:94px;z-index:72;display:none;align-items:center;gap:12px;padding:14px 14px 14px 16px;border-radius:20px;background:rgba(255,250,252,.96);border:1px solid rgba(199,155,59,.16);box-shadow:0 14px 34px rgba(32,17,29,.16);backdrop-filter:blur(14px)}
@@ -1369,12 +1369,7 @@ body{display:flex;flex-direction:column}
 /* Show logo again alongside brand text */
 .tb-brand{display:none !important}
 .tb-logo{display:flex !important;align-items:center;flex-shrink:0}
-.tb-logo img{height:26px;width:auto;display:block}
-/* iginjaSlovo brand text replacing hamburger */
-.tb-iginja{
-  font-weight:900;font-size:.88rem;color:#9a772f;
-  white-space:nowrap;flex-shrink:0;letter-spacing:-.01em;
-}
+.tb-logo img{width:52px;height:52px;display:block;border-radius:16px;object-fit:cover}
 /* Center: verse reference pill (no hamburger inside) */
 #nav-pill{flex:none;display:flex;justify-content:center;min-width:0}
 #nav-pill button{
@@ -2056,13 +2051,10 @@ body{display:flex;flex-direction:column}
   box-shadow: 0 4px 20px rgba(199,155,59,.10) !important;
 }
 .tb-logo img {
-  height: 36px !important;
-  width: auto !important;
-}
-.tb-iginja {
-  font-size: 1.12rem !important;
-  font-weight: 900 !important;
-  letter-spacing: -.015em !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 16px !important;
+  object-fit: cover !important;
 }
 
 /* ══════════════════════════════
@@ -2410,17 +2402,16 @@ body{display:flex;flex-direction:column}
 <body>
 <div id="app-load-fallback">
   <div class="alf-logo-wrap">
-    <img src="logo.png" alt="MYEShim" width="96" height="96">
+    <img src="./iginjaslovo-mark.png" alt="iginjaSlovo" width="96" height="96">
   </div>
   <div class="alf-spinner"></div>
   <span class="alf-text">Načítání…</span>
 </div>
 <div id="offline-banner" role="status" aria-live="polite">Jsi offline. Po připojení se data automaticky obnoví.</div>
 <div id="topbar">
-  <!-- Only logo + brand name remain at the top -->
+  <!-- Compact brand mark -->
   <div class="tb-left">
-    <div class="tb-logo"><img src="logo.png" alt="MYEShim" width="121" height="50" loading="lazy"></div>
-    <span class="tb-iginja">iginjaSlovo</span>
+    <div class="tb-logo"><img src="./iginjaslovo-mark.png" alt="iginjaSlovo" width="52" height="52" loading="lazy"></div>
   </div>
   <!-- streak-badge kept hidden in DOM so JS streak script still works -->
   <div id="streak-badge" style="display:none !important" title="Tvůj studijní streak" aria-label="Streak" tabindex="-1">
@@ -2640,7 +2631,7 @@ function setTab(t){
   const vv=VERSES[state.idx];
   if(t==='guide'){
     document.getElementById('panel-guide').innerHTML=
-      '<div class="guide-card"><div class="guide-title">Návod na MYEShim</div><div class="guide-steps">'+
+      '<div class="guide-card"><div class="guide-title">Návod na iginjaSlovo</div><div class="guide-steps">'+
       GUIDE.map(([n,h,p,bullets])=>`<div class="guide-step"><div class="guide-step-card${Array.isArray(bullets)&&bullets.length?' has-bullets':''}"><div class="gs-num">${n}</div><div class="gs-body"><h4>${h}</h4>${p?`<p>${p}</p>`:''}${Array.isArray(bullets)&&bullets.length?`<ul><li>${bullets.join('</li><li>')}</li></ul>`:''}</div></div></div>`).join('')+
       '</div></div>';
   } else if(t==='qa'){
@@ -2807,6 +2798,19 @@ window.openSearch=function(){
   openNav();
 };
 
+const BRAND_LOGO_FULL_SRC='./iginjaslovo-logo-full.png';
+let _brandLogoPromise=null;
+function loadBrandLogo(){
+  if(_brandLogoPromise) return _brandLogoPromise;
+  _brandLogoPromise=new Promise((resolve)=>{
+    const img=new Image();
+    img.onload=()=>resolve(img);
+    img.onerror=()=>resolve(null);
+    img.src=BRAND_LOGO_FULL_SRC;
+  });
+  return _brandLogoPromise;
+}
+
 window.shareCurrentVerse=async function(){
   const vv=VERSES[state.idx];
   if(!vv) return;
@@ -2817,6 +2821,7 @@ window.shareCurrentVerse=async function(){
   const canvas=document.createElement('canvas');
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext('2d');
+  const brandLogo=await loadBrandLogo();
 
   /* ── App palette ───────────────────────────────────────────────────────── */
   const C_TEXT='#4a351e', C_MUTED='#826a43', C_ACCENT='#c19a46';
@@ -2871,14 +2876,27 @@ window.shareCurrentVerse=async function(){
   }
   function setShadow(b,c){ctx.shadowBlur=b;ctx.shadowColor=c;ctx.shadowOffsetX=0;ctx.shadowOffsetY=Math.round(b*0.3);}
   function noShadow(){ctx.shadowBlur=0;ctx.shadowColor='transparent';ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;}
+  function drawLogoCentered(img,centerY,maxW,maxH){
+    if(!img) return false;
+    const ratio=Math.min(maxW/img.width,maxH/img.height);
+    const w=Math.round(img.width*ratio), h=Math.round(img.height*ratio);
+    const x=Math.round((W-w)/2), y0=Math.round(centerY-h/2);
+    ctx.drawImage(img,x,y0,w,h);
+    return true;
+  }
 
   let y=0;
 
   /* ── 1. Header ─────────────────────────────────────────────────────────── */
-  y=108;
-  textC('MYEShim',y+46,'800 50px sans-serif',C_ACCENT);
-  textC('sdílení verše',y+100,'400 34px sans-serif',C_MUTED);
-  y+=142;
+  y=86;
+  if(drawLogoCentered(brandLogo,y+96,366,196)){
+    textC('sdílení verše',y+214,'400 34px sans-serif',C_MUTED);
+    y+=254;
+  }else{
+    textC('iginjaSlovo',y+46,'800 50px sans-serif',C_ACCENT);
+    textC('sdílení verše',y+100,'400 34px sans-serif',C_MUTED);
+    y+=142;
+  }
   ctx.strokeStyle=C_LINE_S; ctx.lineWidth=1.5;
   ctx.beginPath(); ctx.moveTo(pad+110,y); ctx.lineTo(W-pad-110,y); ctx.stroke();
 
@@ -2918,7 +2936,7 @@ window.shareCurrentVerse=async function(){
   y+=vCardH+72;
 
   /* ── 4. Method steps — compact 2×3 grid of cream badges ───────────────── */
-  textC('METODA MYE SHIM',y,'700 30px sans-serif',C_MUTED);
+  textC('METODA IGINJA SLOVO',y,'700 30px sans-serif',C_MUTED);
   y+=54;
   const sLbls=['Postavy','Převyprávění','Otázky','Odpovědi','Speech','Sdílení'];
   const bW=(cW-40)/3, bH=96, bGap=20;
@@ -2945,16 +2963,20 @@ window.shareCurrentVerse=async function(){
   /* ── 5. Footer ─────────────────────────────────────────────────────────── */
   ctx.strokeStyle=C_LINE; ctx.lineWidth=1.5;
   ctx.beginPath(); ctx.moveTo(pad+80,y); ctx.lineTo(W-pad-80,y); ctx.stroke();
-  y+=52;
-  textC('MYEShim',y+42,'700 44px sans-serif',C_ACCENT);
-  textC('myeshim.app',y+90,'400 32px sans-serif',C_MUTED);
+  y+=58;
+  if(drawLogoCentered(brandLogo,y+56,264,120)){
+    textC('zjeveni-myeshim',y+132,'400 30px sans-serif',C_MUTED);
+  }else{
+    textC('iginjaSlovo',y+42,'700 44px sans-serif',C_ACCENT);
+    textC('zjeveni-myeshim',y+90,'400 32px sans-serif',C_MUTED);
+  }
 
   /* ── Export ────────────────────────────────────────────────────────────── */
   canvas.toBlob(async blob=>{
-    const file=new File([blob],'myeshim-vers.png',{type:'image/png'});
+    const file=new File([blob],'iginjaslovo-vers.png',{type:'image/png'});
     try{
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({title:'MYEShim verš',text:'Zj '+vv.c+':'+vv.v,files:[file]});
+        await navigator.share({title:'iginjaSlovo verš',text:'Zj '+vv.c+':'+vv.v,files:[file]});
       } else {
         await navigator.clipboard.writeText('„'+verseText+'" — Zjevení '+vv.c+':'+vv.v);
         if(typeof window.toast==='function') window.toast('Verš zkopírován!');
@@ -4522,14 +4544,14 @@ render();
 <div id="installCard" class="install-card" aria-live="polite" aria-label="Instalace aplikace">
   <div class="install-copy">
     <p id="installTitle" class="install-title">Nainstalovat aplikaci</p>
-    <p id="installSub" class="install-sub">Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.</p>
+    <p id="installSub" class="install-sub">Přidej si iginjaSlovo na plochu pro rychlé otevření a pohodlnější každodenní používání.</p>
   </div>
   <div class="install-actions">
     <button id="installDismiss" class="install-dismiss" type="button">Později</button>
     <button id="installBtn" class="install-btn" type="button">Instalovat</button>
   </div>
 </div>
-<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabízí instalační nabídku, otevři MYEShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
+<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabízí instalační nabídku, otevři iginjaSlovo v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
 
 <script id="ux40-pwa-script">
 (function(){
@@ -4563,7 +4585,7 @@ render();
     if(isAndroid()){
       return {
         title:'Dokonči instalaci v Chrome',
-        sub:'Telegram neumí instalaci PWA přímo. Otevři MYEShim jedním klepnutím v Chrome a tam zvol „Instalovat aplikaci“.',
+        sub:'Telegram neumí instalaci PWA přímo. Otevři iginjaSlovo jedním klepnutím v Chrome a tam zvol „Instalovat aplikaci“.',
         button:'📲 Otevřít v Chrome',
         tip:'V Telegramu instalace nefunguje přímo — otevři stránku v Chrome a tam aplikaci nainstaluj.'
       };
@@ -4571,14 +4593,14 @@ render();
     if(isIOS()){
       return {
         title:'Dokonči instalaci v Safari',
-        sub:'Telegram neumí instalaci PWA přímo. Otevři MYEShim v Safari a tam zvol „Přidat na plochu“.',
+        sub:'Telegram neumí instalaci PWA přímo. Otevři iginjaSlovo v Safari a tam zvol „Přidat na plochu“.',
         button:'📋 Zkopírovat odkaz pro Safari',
         tip:'Odkaz si zkopíruj do Safari a pak použij Sdílet → „Přidat na plochu“.'
       };
     }
     return {
       title:'Dokonči instalaci v prohlížeči',
-      sub:'Tento interní prohlížeč instalaci aplikace nepodporuje. Otevři MYEShim v plném prohlížeči a tam aplikaci nainstaluj.',
+      sub:'Tento interní prohlížeč instalaci aplikace nepodporuje. Otevři iginjaSlovo v plném prohlížeči a tam aplikaci nainstaluj.',
       button:'📲 Otevřít v prohlížeči',
       tip:'Interní prohlížeč Telegramu instalaci nepodporuje — otevři stránku v běžném prohlížeči.'
     };
@@ -4636,15 +4658,15 @@ render();
         title.textContent=externalInstallContext.title;
         sub.textContent=externalInstallContext.sub;
       } else if(noPromptSupport){
-        title.textContent='Přidat MYEShim na plochu';
+        title.textContent='Přidat iginjaSlovo na plochu';
         sub.textContent=isDesktop()
           ? 'V Chrome nebo Edge otevři menu (⋮) a zvol „Instalovat aplikaci“ nebo „Přidat na plochu“.'
           : 'V Safari otevři sdílení (□↑) a zvol „Přidat na plochu“. V Chrome otevři menu (⋮) a zvol „Přidat na plochu“.';
       } else {
         title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
         sub.textContent=isDesktop()
-          ? 'Přidej si MYEShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
-          : 'Přidej si MYEShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
+          ? 'Přidej si iginjaSlovo do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
+          : 'Přidej si iginjaSlovo na plochu pro rychlé otevření a pohodlnější každodenní používání.';
       }
     }
     if(btn){
@@ -4746,8 +4768,8 @@ render();
     });
     window.addEventListener('load', function(){
       navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-        .then(function(reg){ console.log('MYEShim SW registered, scope:', reg.scope); })
-        .catch(function(err){ console.error('MYEShim SW registration failed:', err); });
+        .then(function(reg){ console.log('iginjaSlovo SW registered, scope:', reg.scope); })
+        .catch(function(err){ console.error('iginjaSlovo SW registration failed:', err); });
     });
   }
   // TWA / standalone mode detection
@@ -4770,7 +4792,7 @@ render();
     <div class="sd-title">Tvůj streak 🔥</div>
     <div class="sd-count" id="sd-count">0 dní v řadě</div>
     <div class="sd-best" id="sd-best">Nejvíce: 0 dní</div>
-    <div class="sd-motto">Dělej MYEShim každý den!</div>
+    <div class="sd-motto">Dělej iginjaSlovo každý den!</div>
     <button class="sd-share" onclick="shareStreakCard()">Sdílet svůj streak</button>
     <button class="sd-close" onclick="closeStreakDetail()">Hotovo</button>
   </div>
@@ -4808,7 +4830,7 @@ const FCM_SENDER_ID = '360259005980';
     'Věrnost v malých věcech otevírá velké dveře.',
     'Dnešní verš je tvůj průvodce na dnešní den.',
     'Vytrvalost v studiu Písma přináší ovoce.',
-    'Jsi na správné cestě – MYEShim tě podporuje! 🙏',
+    'Jsi na správné cestě – iginjaSlovo tě podporuje! 🙏',
     'Malé kroky denně vedou k velkým proměnám.',
     'Boží slovo svítí na každý krok tvé cesty.',
   ];
@@ -5270,19 +5292,29 @@ const FCM_SENDER_ID = '360259005980';
     if (!skipModal) showWelcomeModal(streak, isNewDay);
   }
 
-  window.shareStreakCard = function() {
+  window.shareStreakCard = async function() {
     const user = window.firebase && firebase.auth && firebase.auth().currentUser;
-    const name = user && (user.displayName || user.email) ? (user.displayName || user.email) : 'MYEShim uživatel';
+    const name = user && (user.displayName || user.email) ? (user.displayName || user.email) : 'iginjaSlovo uživatel';
     const streak = parseInt(safeLS('streak_count', '0'), 10) || 0;
     const canvas = document.createElement('canvas');
     canvas.width = 1080; canvas.height = 1440;
     const ctx = canvas.getContext('2d');
+    const brandLogo = await loadBrandLogo();
     const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     bg.addColorStop(0, '#b89441'); bg.addColorStop(1, '#c79b3b');
     ctx.fillStyle = bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (brandLogo) {
+      const ratio = Math.min(280 / brandLogo.width, 148 / brandLogo.height);
+      const lw = Math.round(brandLogo.width * ratio);
+      const lh = Math.round(brandLogo.height * ratio);
+      const lx = Math.round((canvas.width - lw) / 2);
+      ctx.drawImage(brandLogo, lx, 46, lw, lh);
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.font = '700 58px sans-serif';
+      ctx.fillText('iginjaSlovo', 90, 120);
+    }
     ctx.fillStyle = '#fff';
-    ctx.font = '700 58px sans-serif';
-    ctx.fillText('MYEShim', 90, 120);
     ctx.font = '900 240px sans-serif';
     ctx.fillText('🔥' + streak, 90, 520);
     ctx.font = '600 52px sans-serif';
@@ -5291,16 +5323,16 @@ const FCM_SENDER_ID = '360259005980';
     ctx.fillText('Studuji už ' + streak + ' dní v řadě!', 90, 760);
     ctx.fillText('„Vytrvej každý den.“', 90, 840);
     canvas.toBlob(async function(blob) {
-      const file = new File([blob], 'myeshim-streak.png', { type: 'image/png' });
+      const file = new File([blob], 'iginjaslovo-streak.png', { type: 'image/png' });
       try {
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ title: 'Můj MYEShim streak', text: '🔥 ' + streak + ' dní v řadě', files: [file] });
+          await navigator.share({ title: 'Můj iginjaSlovo streak', text: '🔥 ' + streak + ' dní v řadě', files: [file] });
           return;
         }
       } catch(e) {}
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'myeshim-streak.png';
+      a.download = 'iginjaslovo-streak.png';
       a.click();
       setTimeout(function() { URL.revokeObjectURL(a.href); }, 1200);
     }, 'image/png');
@@ -5390,8 +5422,8 @@ const FCM_SENDER_ID = '360259005980';
     // Show welcome notification after ~3 minutes (within the 5-minute first-launch requirement)
     setTimeout(() => {
       navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification('Vítej v MYEShim! 🎉', {
-          body: 'Dělej MYEShim každý den! Jsme rádi, že jsi tady 🙏',
+        reg.showNotification('Vítej v iginjaSlovo! 🎉', {
+          body: 'Dělej iginjaSlovo každý den! Jsme rádi, že jsi tady 🙏',
           icon: './icon-192.png',
           badge: './icon-96.png',
           tag: 'myeshim-welcome',
@@ -5592,11 +5624,11 @@ const FCM_SENDER_ID = '360259005980';
       }
     } catch(e2) {}
     var _body = _verse
-      ? '\u201e' + _verse.t.slice(0, 140) + (_verse.t.length > 140 ? '\u2026' : '') + '\u201c \u2014 Zj\u00a0' + _verse.c + ':' + _verse.v + '\n\nUdělej dnes MYEShim! 🙏'
-      : 'Dnešní verš tě čeká — udělej MYEShim! 🙏';
+      ? '\u201e' + _verse.t.slice(0, 140) + (_verse.t.length > 140 ? '\u2026' : '') + '\u201c \u2014 Zj\u00a0' + _verse.c + ':' + _verse.v + '\n\nUdělej dnes iginjaSlovo! 🙏'
+      : 'Dnešní verš tě čeká — udělej iginjaSlovo! 🙏';
     var _ref = _verse ? _verse.c + ':' + _verse.v : '';
     navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification('MYEShim 📖', {
+        reg.showNotification('iginjaSlovo 📖', {
         body: _body,
         icon: './icon-192.png',
         badge: './icon-96.png',
@@ -6000,12 +6032,12 @@ const FCM_SENDER_ID = '360259005980';
 <!-- ── LOGIN OVERLAY ── -->
 <div id="auth-overlay" role="dialog" aria-modal="true" aria-label="Přihlásit se">
   <div class="auth-logo-wrap">
-    <img src="logo.png" alt="MYEShim logo" width="242" height="100" loading="lazy">
+    <img src="./iginjaslovo-logo-full.png" alt="iginjaSlovo logo" width="258" height="218" loading="lazy">
   </div>
-  <div class="auth-app-name">MYEShim</div>
+  <div class="auth-app-name">iginjaSlovo</div>
   <div class="auth-tagline">„Studuj Zjevení každý den."</div>
   <div class="auth-card">
-    <div class="auth-card-title">Vítej v MYEShim 👋</div>
+    <div class="auth-card-title">Vítej v iginjaSlovo 👋</div>
     <div class="auth-card-sub">Přihlas se svým e-mailem a heslem a okamžitě začni studovat.</div>
     <button class="auth-btn-login" id="auth-login-btn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -6022,19 +6054,19 @@ const FCM_SENDER_ID = '360259005980';
 <!-- ── INSTALL OVERLAY (step 2 of onboarding) ── -->
 <div id="install-overlay" role="dialog" aria-modal="true" aria-label="Nainstalovat aplikaci">
   <div class="iov-logo-wrap">
-    <img src="logo.png" alt="MYEShim logo" width="242" height="100" loading="lazy">
+    <img src="./iginjaslovo-logo-full.png" alt="iginjaSlovo logo" width="258" height="218" loading="lazy">
   </div>
-  <div class="iov-app-name">MYEShim</div>
+  <div class="iov-app-name">iginjaSlovo</div>
   <div class="iov-tagline">Jeden krok k označování</div>
   <div class="iov-card">
     <div class="iov-title">Přidej aplikaci na plochu 📲</div>
-    <div class="iov-sub">MYEShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
+    <div class="iov-sub">iginjaSlovo funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
     <!-- Install action button – native prompt or Telegram browser handoff -->
     <button id="iov-native-btn" class="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
     <div class="iov-steps">
       <div class="iov-step">
         <span class="iov-step-icon">✈️</span>
-        <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři MYEShim v Chrome nebo Safari.</span>
+        <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři iginjaSlovo v Chrome nebo Safari.</span>
       </div>
       <div class="iov-step">
         <span class="iov-step-icon">🤖</span>
@@ -6137,7 +6169,7 @@ const FCM_SENDER_ID = '360259005980';
 
     <!-- Sign out -->
     <button class="ps-btn-signout" id="ps-signout-btn" onclick="authSignOut()">Odhlásit se</button>
-    <div class="ps-app-version" id="ps-app-version">MYEShim v1.0</div>
+    <div class="ps-app-version" id="ps-app-version">iginjaSlovo v1.0</div>
   </div>
 </div>
 

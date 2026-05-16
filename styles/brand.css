@@ -65,6 +65,23 @@ a:hover,.link:hover{text-decoration:underline}
   display:grid;
   gap:20px;
 }
+.brand-logo-block{
+  display:flex;
+  justify-content:center;
+  margin-bottom:18px;
+}
+.brand-logo{
+  display:block;
+  width:min(100%,258px);
+  height:auto;
+  object-fit:contain;
+}
+.brand-logo-mark{
+  width:74px;
+  height:74px;
+  border-radius:24px;
+  box-shadow:var(--shadow-sm);
+}
 .card{
   width:min(100%,var(--page-max));
   background:linear-gradient(180deg,rgba(255,251,243,.92) 0%,rgba(247,238,223,.96) 100%);
