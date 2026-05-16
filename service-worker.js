@@ -18,7 +18,7 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-256.png',
   './icon-512.png',
-  './logo.png',
+  './logomyeshim.png',
   './offline.html',
   './screenshots/home-mobile.png',
   './screenshots/home-desktop-wide.png'
@@ -95,7 +95,7 @@ self.addEventListener('periodicsync', event => {
     if (!verse) return;
     const ref = verse.c + ':' + verse.v;
     const text = verse.t.slice(0, 140) + (verse.t.length > 140 ? '\u2026' : '');
-    const body = '\u201e' + text + '\u201c \u2014 Zj\u00a0' + verse.c + ':' + verse.v + '\n\nUdělej dnes iginjaSlovo! 🙏';
+    const body = '\u201e' + text + '\u201c \u2014 Zj\u00a0' + verse.c + ':' + verse.v + '\n\nUdělej dnes MyeShim! 🙏';
     await self.registration.showNotification('Nezapomeň na dnešní verš 📖', {
       body: body,
       icon: './icon-192.png',
