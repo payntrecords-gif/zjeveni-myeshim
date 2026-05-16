@@ -85,156 +85,280 @@
 <script>
 (function(){
   var deferredPrompt = null;
-  var ua = navigator.userAgent;
+  var nativePromptConsumed = false;
+  var ua = navigator.userAgent || '';
+  var supportsBeforeInstallPrompt = 'onbeforeinstallprompt' in window;
   var isIOS = /iphone|ipad|ipod/i.test(ua);
   var isAndroid = /android/i.test(ua);
   var isTelegram = /telegram|tgwebview/i.test(ua);
-  var isSafari = /safari/i.test(ua) && !/chrome/i.test(ua);
   var isDesktop = !isIOS && !isAndroid;
-  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var standaloneMedia = window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
+  var stepIds = ['step-telegram', 'step-android', 'step-ios', 'step-desktop'];
 
-  // Pokud už je nainstalováno → rovnou do appky
-  if(isStandalone){
-    window.location.replace('./index.html');
-    return;
+  function isStandaloneMode(){
+    return (standaloneMedia && standaloneMedia.matches) || navigator.standalone === true;
   }
 
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    deferredPrompt = e;
-    if(document.readyState !== 'loading'){
-      onPromptReady();
-    }
-  });
-
-  function onPromptReady(){
-    var mainBtn = document.getElementById('main-btn');
-    var btnLabel = document.getElementById('btn-label');
-    if(!mainBtn || !btnLabel) return;
-    btnLabel.textContent = 'Nainstalovat jedním klepnutím';
-    showBadge('✅', 'Připraveno k instalaci!');
+  function logInstall(stage, data){
+    try{
+      if(typeof data === 'undefined') console.info('[install-flow]', stage);
+      else console.info('[install-flow]', stage, data);
+    }catch(e){}
   }
 
-  document.addEventListener('DOMContentLoaded', function(){
-    var mainBtn = document.getElementById('main-btn');
-    var btnLabel = document.getElementById('btn-label');
-    var installNote = document.getElementById('install-note');
-    var iosArrow = document.getElementById('ios-arrow');
+  function setDeferredPrompt(event){
+    deferredPrompt = event;
+    window.__myeshimDeferredInstallPrompt = event;
+    nativePromptConsumed = false;
+    logInstall('deferred prompt stored');
+  }
 
-    if(deferredPrompt) onPromptReady();
-
-    // ── TELEGRAM ──
-    if(isTelegram){
-      document.getElementById('step-telegram').style.display = 'flex';
-      btnLabel.textContent = 'Otevřít v Chrome';
-      mainBtn.querySelector('svg').innerHTML = '<path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>';
-      mainBtn.addEventListener('click', function(){
-        var url = 'intent://' + location.host + location.pathname + '#Intent;scheme=https;package=com.android.chrome;end';
-        window.location.href = url;
-        setTimeout(function(){
-          window.open(location.href, '_blank');
-        }, 500);
-      });
-      return;
+  function getDeferredPrompt(){
+    if(deferredPrompt) return deferredPrompt;
+    if(window.__myeshimDeferredInstallPrompt){
+      deferredPrompt = window.__myeshimDeferredInstallPrompt;
+      logInstall('deferred prompt restored');
     }
+    return deferredPrompt;
+  }
 
-    // ── iOS SAFARI ──
-    if(isIOS){
-      document.getElementById('step-ios').style.display = 'flex';
-      btnLabel.textContent = 'Zobrazit návod →';
-      mainBtn.addEventListener('click', function(){
-        iosArrow.style.display = 'block';
-        document.getElementById('step-ios').style.background = 'rgba(199,155,59,.08)';
-        document.getElementById('step-ios').style.borderRadius = '10px';
-        setTimeout(function(){ iosArrow.style.display = 'none'; }, 8000);
-      });
-      return;
-    }
-
-    // ── ANDROID CHROME ──
-    if(isAndroid){
-      document.getElementById('step-android').style.display = 'flex';
-      mainBtn.addEventListener('click', function(){
-        if(deferredPrompt){
-          var p = deferredPrompt;
-          deferredPrompt = null;
-          p.prompt();
-          p.userChoice.then(function(result){
-            if(result.outcome === 'accepted'){
-              btnLabel.textContent = '✓ Instaluje se…';
-              mainBtn.disabled = true;
-              showBadge('🎉', 'Instalace zahájena!');
-              installNote.textContent = 'Skvěle! Otevři MyeShim z plochy telefonu.';
-            } else {
-              showBadge('ℹ️', 'Instalaci zrušil/a');
-              installNote.textContent = 'Instalaci spustíš přes ⋮ menu → „Instalovat aplikaci".';
-              installNote.style.color = 'var(--accent-strong)';
-            }
-          });
-        } else {
-          document.getElementById('step-android').style.background = 'rgba(199,155,59,.08)';
-          document.getElementById('step-android').style.borderRadius = '10px';
-          installNote.textContent = 'Použij postup níže 👆';
-          installNote.style.color = 'var(--accent-strong)';
-          showBadge('ℹ️', 'Použij postup níže');
-        }
-      });
-      return;
-    }
-
-    // ── DESKTOP ──
-    if(isDesktop){
-      document.getElementById('step-desktop').style.display = 'flex';
-      btnLabel.textContent = 'Nainstalovat na desktop';
-      mainBtn.addEventListener('click', function(){
-        if(deferredPrompt){
-          var p = deferredPrompt;
-          deferredPrompt = null;
-          p.prompt();
-          p.userChoice.then(function(result){
-            if(result.outcome === 'accepted'){
-              btnLabel.textContent = '✓ Instaluje se…';
-              mainBtn.disabled = true;
-              showBadge('🎉', 'Instalace zahájena!');
-            }
-          });
-        } else {
-          document.getElementById('step-desktop').style.background = 'rgba(199,155,59,.08)';
-          document.getElementById('step-desktop').style.borderRadius = '10px';
-          installNote.textContent = 'Použij postup v adresním řádku 👆';
-          installNote.style.color = 'var(--accent-strong)';
-        }
-      });
-    }
-
-    // ── Po úspěšné instalaci ──
-    window.addEventListener('appinstalled', function(){
-      btnLabel.textContent = '✓ Nainstalováno!';
-      mainBtn.disabled = true;
-      showBadge('🎉', 'Nainstalováno! Přesměrovávám…');
-      installNote.textContent = 'Otevři aplikaci ikonou z plochy 🎉';
-      setTimeout(function(){
-        window.location.replace('./index.html');
-      }, 1500);
-    });
-
-    function showBadge(icon, text){
-      var badge = document.getElementById('status-badge');
-      if(!badge) return;
-      badge.querySelector('span').textContent = icon;
-      document.getElementById('status-text').textContent = text;
-      badge.classList.add('show');
-    }
-  });
+  function clearDeferredPrompt(){
+    deferredPrompt = null;
+    window.__myeshimDeferredInstallPrompt = null;
+  }
 
   function showBadge(icon, text){
     var badge = document.getElementById('status-badge');
     if(!badge) return;
-    badge.querySelector('span').textContent = icon;
-    var st = document.getElementById('status-text');
-    if(st) st.textContent = text;
+    var firstSpan = badge.querySelector('span');
+    if(firstSpan) firstSpan.textContent = icon;
+    var statusText = document.getElementById('status-text');
+    if(statusText) statusText.textContent = text;
     badge.classList.add('show');
   }
+
+  function showOnlySteps(ids){
+    stepIds.forEach(function(stepId){
+      var el = document.getElementById(stepId);
+      if(!el) return;
+      el.style.display = ids.indexOf(stepId) >= 0 ? 'flex' : 'none';
+      el.style.background = '';
+      el.style.borderRadius = '';
+    });
+  }
+
+  function openInPreferredBrowser(){
+    if(!isTelegram) return false;
+    if(isAndroid){
+      var intentUrl = 'intent://' + location.host + location.pathname + '#Intent;scheme=https;package=com.android.chrome;end';
+      window.location.href = intentUrl;
+      setTimeout(function(){
+        window.open(location.href, '_blank', 'noopener');
+      }, 500);
+      return true;
+    }
+    window.open(location.href, '_blank', 'noopener');
+    return true;
+  }
+
+  function getInstallAvailability(){
+    if(isStandaloneMode()) return { mode: 'installed', reason: 'already-installed' };
+    if(isTelegram) return { mode: 'fallback', reason: 'telegram-in-app-browser' };
+    if(isIOS) return { mode: 'fallback', reason: 'ios-no-beforeinstallprompt' };
+    if(!supportsBeforeInstallPrompt) return { mode: 'fallback', reason: 'beforeinstallprompt-unsupported' };
+    if(getDeferredPrompt()) return { mode: 'native-ready', reason: 'deferred-prompt-ready' };
+    if(nativePromptConsumed) return { mode: 'pending', reason: 'prompt-consumed-waiting-new-event' };
+    return { mode: 'pending', reason: 'beforeinstallprompt-not-fired' };
+  }
+
+  function applyInstallUI(state){
+    var mainBtn = document.getElementById('main-btn');
+    var btnLabel = document.getElementById('btn-label');
+    var installNote = document.getElementById('install-note');
+    if(!mainBtn || !btnLabel || !installNote) return;
+
+    if(state.mode === 'native-ready'){
+      mainBtn.disabled = false;
+      btnLabel.textContent = isDesktop ? 'Nainstalovat na desktop' : 'Nainstalovat jedním klepnutím';
+      installNote.textContent = 'Po potvrzení se aplikace nainstaluje nativně přes prohlížeč.';
+      installNote.style.color = 'var(--muted)';
+      showOnlySteps([]);
+      showBadge('✅', 'Připraveno k instalaci');
+      return;
+    }
+
+    if(state.mode === 'pending'){
+      mainBtn.disabled = true;
+      btnLabel.textContent = 'Připravuji nativní instalaci…';
+      installNote.textContent = 'Čekám na dostupnost nativního instalačního dialogu.';
+      installNote.style.color = 'var(--muted)';
+      showOnlySteps([]);
+      showBadge('⏳', 'Nativní instalace zatím není dostupná');
+      return;
+    }
+
+    mainBtn.disabled = false;
+    if(state.reason === 'telegram-in-app-browser'){
+      btnLabel.textContent = isAndroid ? 'Otevřít v Chrome' : 'Otevřít v prohlížeči';
+      showOnlySteps(['step-telegram']);
+      installNote.textContent = 'V interním prohlížeči Telegramu není nativní instalace dostupná.';
+      installNote.style.color = 'var(--accent-strong)';
+      showBadge('ℹ️', 'Nejprve otevři stránku v běžném prohlížeči');
+      return;
+    }
+
+    if(state.reason === 'ios-no-beforeinstallprompt'){
+      btnLabel.textContent = 'Zobrazit návod →';
+      showOnlySteps(['step-ios']);
+      installNote.textContent = 'Safari na iOS nepodporuje beforeinstallprompt, proto je potřeba ruční postup.';
+      installNote.style.color = 'var(--accent-strong)';
+      showBadge('ℹ️', 'iOS vyžaduje ruční přidání na plochu');
+      return;
+    }
+
+    btnLabel.textContent = isDesktop ? 'Nainstalovat na desktop' : 'Nainstalovat aplikaci';
+    showOnlySteps([isDesktop ? 'step-desktop' : 'step-android']);
+    installNote.textContent = 'Tento prohlížeč nepodporuje nativní beforeinstallprompt událost.';
+    installNote.style.color = 'var(--accent-strong)';
+    showBadge('ℹ️', 'Nativní prompt není v tomto prohlížeči podporován');
+  }
+
+  async function openNativePrompt(){
+    var promptEvent = getDeferredPrompt();
+    if(!promptEvent){
+      logInstall('native prompt unavailable', { reason: getInstallAvailability().reason });
+      return false;
+    }
+    try{
+      promptEvent.prompt();
+      logInstall('native prompt opened');
+    }catch(error){
+      logInstall('native prompt unavailable', { reason: 'prompt-failed', error: String(error && error.message ? error.message : error) });
+      return false;
+    }
+    clearDeferredPrompt();
+    nativePromptConsumed = true;
+
+    var result = null;
+    try{
+      result = await promptEvent.userChoice;
+    }catch(error){
+      logInstall('native prompt unavailable', { reason: 'userChoice-error', error: String(error && error.message ? error.message : error) });
+    }
+    if(result && result.outcome === 'accepted'){
+      logInstall('native prompt accepted');
+      return true;
+    }
+    logInstall('native prompt dismissed', result || { outcome: 'unknown' });
+    return false;
+  }
+
+  function registerInstallPageSW(){
+    if(!('serviceWorker' in navigator)){
+      logInstall('native prompt unavailable', { reason: 'service-worker-unsupported' });
+      return;
+    }
+    navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+      .then(function(reg){
+        logInstall('service worker registered', { scope: reg.scope });
+      })
+      .catch(function(error){
+        logInstall('native prompt unavailable', { reason: 'service-worker-register-failed', error: String(error && error.message ? error.message : error) });
+      });
+  }
+
+  if(isStandaloneMode()){
+    logInstall('standalone detected - skipping install screen');
+    window.location.replace('./index.html');
+    return;
+  }
+
+  window.addEventListener('beforeinstallprompt', function(event){
+    event.preventDefault();
+    logInstall('beforeinstallprompt fired');
+    setDeferredPrompt(event);
+    applyInstallUI(getInstallAvailability());
+  });
+
+  window.addEventListener('appinstalled', function(){
+    logInstall('appinstalled event received');
+    clearDeferredPrompt();
+    nativePromptConsumed = true;
+    showBadge('🎉', 'Nainstalováno! Přesměrovávám…');
+    var btnLabel = document.getElementById('btn-label');
+    var mainBtn = document.getElementById('main-btn');
+    var installNote = document.getElementById('install-note');
+    if(btnLabel) btnLabel.textContent = '✓ Nainstalováno!';
+    if(mainBtn) mainBtn.disabled = true;
+    if(installNote) installNote.textContent = 'Otevři aplikaci ikonou z plochy 🎉';
+    setTimeout(function(){
+      window.location.replace('./index.html');
+    }, 1500);
+  });
+
+  if(standaloneMedia && standaloneMedia.addEventListener){
+    standaloneMedia.addEventListener('change', function(){
+      if(isStandaloneMode()){
+        logInstall('standalone mode changed to true');
+        window.location.replace('./index.html');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var mainBtn = document.getElementById('main-btn');
+    var installNote = document.getElementById('install-note');
+    var iosArrow = document.getElementById('ios-arrow');
+    registerInstallPageSW();
+    applyInstallUI(getInstallAvailability());
+
+    if(mainBtn){
+      mainBtn.addEventListener('click', async function(){
+        var availability = getInstallAvailability();
+        logInstall('install button clicked', availability);
+
+        if(availability.mode === 'native-ready'){
+          var accepted = await openNativePrompt();
+          if(accepted){
+            showBadge('🎉', 'Instalace zahájena');
+            mainBtn.disabled = true;
+            var btnLabel = document.getElementById('btn-label');
+            if(btnLabel) btnLabel.textContent = '✓ Instaluje se…';
+            if(installNote){
+              installNote.textContent = 'Skvěle! Otevři MyeShim z plochy telefonu.';
+              installNote.style.color = 'var(--muted)';
+            }
+          }else{
+            if(installNote){
+              installNote.textContent = 'Instalaci můžeš spustit znovu tímto tlačítkem, jakmile bude prompt znovu dostupný.';
+              installNote.style.color = 'var(--accent-strong)';
+            }
+            showBadge('ℹ️', 'Instalační dialog byl zavřen');
+          }
+          applyInstallUI(getInstallAvailability());
+          return;
+        }
+
+        if(availability.reason === 'telegram-in-app-browser'){
+          openInPreferredBrowser();
+          return;
+        }
+
+        if(availability.reason === 'ios-no-beforeinstallprompt'){
+          if(iosArrow) iosArrow.style.display = 'block';
+          var iosStep = document.getElementById('step-ios');
+          if(iosStep){
+            iosStep.style.background = 'rgba(199,155,59,.08)';
+            iosStep.style.borderRadius = '10px';
+          }
+          setTimeout(function(){ if(iosArrow) iosArrow.style.display = 'none'; }, 8000);
+          return;
+        }
+
+        applyInstallUI(availability);
+      });
+    }
+  });
 })();
 </script>
 </body>
