@@ -59,37 +59,65 @@ html.browser-mode body{background:var(--bg,#f8f3f7)}
   position:fixed;inset:0;
   z-index:99999;
   flex-direction:column;align-items:center;justify-content:center;
-  gap:0;
-  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);
+  gap:1rem;
+  padding:max(28px,env(safe-area-inset-top,0)) 18px max(28px,env(safe-area-inset-bottom,0));
   /* light default tokens */
   --alf-bg:
-    radial-gradient(ellipse 120% 60% at 50% -5%,rgba(199,155,59,.22) 0%,transparent 60%),
-    radial-gradient(ellipse 80% 50% at 95% 110%,rgba(139,104,43,.14) 0%,transparent 55%),
-    radial-gradient(ellipse 60% 40% at 0% 80%,rgba(199,155,59,.08) 0%,transparent 55%),
-    #f7f1e3;
-  --alf-ring-bg:radial-gradient(circle,rgba(199,155,59,.22) 0%,transparent 65%);
-  --alf-logo-shadow:0 20px 48px rgba(139,104,43,.24),0 4px 16px rgba(118,90,40,.14);
-  --alf-spinner-ring:rgba(199,155,59,.2);
+    radial-gradient(ellipse 120% 60% at 50% -5%,rgba(186,137,41,.24) 0%,transparent 58%),
+    radial-gradient(ellipse 80% 50% at 95% 110%,rgba(126,92,36,.16) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 40% at 0% 80%,rgba(199,155,59,.12) 0%,transparent 55%),
+    linear-gradient(180deg,#fbf7ee 0%,#f1e4c7 100%);
+  --alf-ring-bg:radial-gradient(circle,rgba(191,147,55,.24) 0%,rgba(191,147,55,.05) 44%,transparent 74%);
+  --alf-logo-panel:linear-gradient(180deg,rgba(255,250,243,.97) 0%,rgba(241,228,196,.96) 100%);
+  --alf-logo-panel-border:rgba(151,112,49,.18);
+  --alf-logo-panel-shadow:0 28px 60px rgba(118,86,34,.18),0 10px 24px rgba(118,86,34,.08);
+  --alf-logo-image-shadow:drop-shadow(0 10px 18px rgba(104,75,28,.14));
+  --alf-spinner-ring:rgba(191,147,55,.24);
   --alf-spinner-tip:#c79b3b;
   --alf-text-gradient:linear-gradient(135deg,#b89441 0%,#c79b3b 100%);
   background:var(--alf-bg);
 }
 .alf-logo-wrap{
   position:relative;
-  margin-bottom:2rem;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:.5rem;
+  padding:clamp(16px,4vw,22px) clamp(18px,5vw,30px);
+  border:1px solid var(--alf-logo-panel-border);
+  border-radius:30px;
+  background:var(--alf-logo-panel);
+  box-shadow:var(--alf-logo-panel-shadow);
+  backdrop-filter:blur(10px) saturate(1.04);
+  -webkit-backdrop-filter:blur(10px) saturate(1.04);
   animation:alf-logo-in .55s cubic-bezier(.22,1,.36,1) both;
 }
 .alf-logo-wrap::before{
   content:'';
-  position:absolute;inset:-16px -34px;
+  position:absolute;inset:-18px -22px;
   border-radius:999px;
   background:var(--alf-ring-bg);
   animation:alf-pulse-ring 2.8s ease-in-out infinite;
 }
+.alf-logo-wrap::after{
+  content:'';
+  position:absolute;inset:1px;
+  border-radius:inherit;
+  background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,rgba(255,255,255,0) 42%);
+  pointer-events:none;
+}
 .alf-logo-wrap img{
   position:relative;display:block;
-  width:min(72vw,280px);height:auto;
-  box-shadow:var(--alf-logo-shadow);
+  z-index:1;
+  width:min(72vw,300px);max-width:100%;height:auto;
+  filter:contrast(1.14) saturate(1.08) brightness(.93) var(--alf-logo-image-shadow);
+  transform:translateZ(0);
+}
+@media (max-width:420px){
+  .alf-logo-wrap{
+    width:min(100%,338px);
+    padding:14px 16px;
+    border-radius:24px;
+  }
+  .alf-logo-wrap img{width:min(78vw,292px)}
 }
 .alf-spinner{
   width:2.6rem;height:2.6rem;
