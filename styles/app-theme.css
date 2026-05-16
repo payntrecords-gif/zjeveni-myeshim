@@ -70,6 +70,7 @@ body{color-scheme:light}
   opacity:1 !important;
   transform:translateY(0) scale(1) !important;
   overflow:hidden !important;
+  visibility:visible !important;
   transition:max-height .24s ease,opacity .2s ease,transform .24s ease,padding .24s ease,margin .24s ease,visibility 0s linear 0s !important;
 }
 #app-shell{
@@ -622,7 +623,7 @@ html.header-compact #app-tabs-outer .tabs button{min-height:44px !important}
   #bottomnav{gap:4px !important}
   #bottomnav button{padding:7px 8px !important}
   #bottomnav button span{font-size:.85rem !important;line-height:1.15 !important}
-  .cv-left .cv-name{font-size:clamp(1.78rem,7.7vw,2.05rem) !important;max-width:13ch !important}
+  .cv-left .cv-name{font-size:clamp(1.44rem,7vw,1.72rem) !important;max-width:15ch !important}
   .vc-text{font-size:clamp(1.05rem,4.4vw,1.16rem) !important;line-height:1.74 !important}
 }
 
