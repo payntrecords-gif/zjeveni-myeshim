@@ -47,7 +47,7 @@ function pickReminderMessage(todayYmd) {
   const verseRef = getDailyVerseRef(todayYmd);
   return {
     title: 'Nezapomeň na dnešní verš 📖',
-    body: verseRef ? `Dnešní čtení: Zj ${verseRef}. Otevři MYEShim a pokračuj ve studiu.` : 'Otevři MYEShim a pokračuj ve dnešním čtení.',
+    body: verseRef ? `Dnešní čtení: Zj ${verseRef}. Otevři iginjaSlovo a pokračuj ve studiu.` : 'Otevři iginjaSlovo a pokračuj ve dnešním čtení.',
     ref: verseRef
   };
 }

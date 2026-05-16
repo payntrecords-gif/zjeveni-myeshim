@@ -1,7 +1,7 @@
 {
   "id": "/zjeveni-myeshim/",
-  "name": "MYEShim – Zjevení",
-  "short_name": "MYEShim",
+  "name": "iginjaSlovo – Zjevení",
+  "short_name": "iginjaSlovo",
   "description": "Mobilní studijní aplikace pro knihu Zjevení s poznámkami, denním studiem a rychlým návratem.",
   "start_url": "/zjeveni-myeshim/",
   "scope": "/zjeveni-myeshim/",
@@ -26,13 +26,13 @@
       "sizes": "540x1200",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobilní čtení a poznámky v aplikaci MYEShim"
+      "label": "Mobilní čtení a poznámky v aplikaci iginjaSlovo"
     },
     {
       "src": "screenshots/home-desktop-wide.png",
       "sizes": "1440x900",
       "type": "image/png",
-      "label": "Desktopové zobrazení MYEShim s bohatším install UI",
+      "label": "Desktopové zobrazení iginjaSlovo s bohatším install UI",
       "form_factor": "wide"
     }
   ],

@@ -95,7 +95,7 @@ self.addEventListener('periodicsync', event => {
     if (!verse) return;
     const ref = verse.c + ':' + verse.v;
     const text = verse.t.slice(0, 140) + (verse.t.length > 140 ? '\u2026' : '');
-    const body = '\u201e' + text + '\u201c \u2014 Zj\u00a0' + verse.c + ':' + verse.v + '\n\nUdělej dnes MYEShim! 🙏';
+    const body = '\u201e' + text + '\u201c \u2014 Zj\u00a0' + verse.c + ':' + verse.v + '\n\nUdělej dnes iginjaSlovo! 🙏';
     await self.registration.showNotification('Nezapomeň na dnešní verš 📖', {
       body: body,
       icon: './icon-192.png',

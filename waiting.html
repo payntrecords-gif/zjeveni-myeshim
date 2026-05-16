@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>MYEShim – Čekárna</title>
+  <title>iginjaSlovo – Čekárna</title>
     <meta name="theme-color" content="#f4ead8">
   <link rel="stylesheet" href="./styles/brand.css">
 
@@ -11,6 +11,9 @@
 <body class="centered-page">
   <!-- Shown when not signed in (e.g. right after new registration) or status = pending -->
   <div class="card" id="card-waiting">
+    <div class="brand-logo-block">
+      <img class="brand-logo" src="./iginjaslovo-logo-full.png" alt="iginjaSlovo logo" width="258" height="218" loading="lazy">
+    </div>
     <h1>Čeká se na schválení</h1>
     <p>Tvoje registrace čeká na schválení administrátorem.</p>
     <p>Jakmile bude účet schválen, můžeš se přihlásit svým e-mailem a heslem.</p>
@@ -20,6 +23,9 @@
 
   <!-- Shown when signed in and access was revoked / rejected / no pending document -->
   <div class="card hidden" id="card-reapply">
+    <div class="brand-logo-block">
+      <img class="brand-logo" src="./iginjaslovo-logo-full.png" alt="iginjaSlovo logo" width="258" height="218" loading="lazy">
+    </div>
     <h1 id="reapply-title">Přístup odebrán</h1>
     <p id="reapply-desc">Tvůj přístup byl administrátorem odebrán. Pokud chceš znovu požádat o přístup, vyplň formulář níže.</p>
     <form id="reapply-form">

@@ -1,6 +1,6 @@
 {
   "name": "myeshim-functions",
-  "description": "Firebase Cloud Functions pro MYEShim streak notifikace",
+  "description": "Firebase Cloud Functions pro iginjaSlovo streak notifikace",
   "scripts": {
     "serve": "firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions"

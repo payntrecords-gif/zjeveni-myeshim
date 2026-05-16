@@ -38,12 +38,6 @@ body{color-scheme:light}
 }
 .tb-left{gap:12px !important}
 .tb-logo img{filter:drop-shadow(0 5px 12px rgba(129,99,56,.06))}
-.tb-iginja{
-  font-size:clamp(1.03rem,4.2vw,1.17rem) !important;
-  font-weight:780 !important;
-  letter-spacing:-.02em !important;
-  color:#9d7a32 !important;
-}
 #ux35-progress-wrap{
   top:74px !important;
   max-width:560px !important;
