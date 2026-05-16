@@ -79,8 +79,8 @@
     }
 
     function redirect() {
-      const target = isMobileDevice() && !hasCompletedInstallOnboarding()
-        ? "./index.html#install"
+      const target = isMobileDevice() && !isStandaloneMode()
+        ? "./install.html"
         : "./index.html";
       window.location.replace(target);
     }
