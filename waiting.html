@@ -66,10 +66,43 @@
     }
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const INSTALL_ONBOARDING_KEY = 'myeshim-install-onboarding-complete';
 
     async function doSignOut() {
       await signOut(auth).catch(() => {});
       window.location.replace('./login.html');
+    }
+
+    function isStandaloneMode() {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+        navigator.standalone === true ||
+        (document.referrer || '').startsWith('android-app://');
+    }
+
+    function isMobileDevice() {
+      return /android|iphone|ipad|ipod/i.test(navigator.userAgent || '');
+    }
+
+    function hasCompletedInstallOnboarding() {
+      if (isStandaloneMode()) return true;
+      try {
+        if (localStorage.getItem(INSTALL_ONBOARDING_KEY) === '1') return true;
+        const legacyCompleted =
+          localStorage.getItem('myeshim-install-seen') === '1' ||
+          localStorage.getItem('myeshim-install-completed') === '1';
+        if (legacyCompleted) {
+          localStorage.setItem(INSTALL_ONBOARDING_KEY, '1');
+        }
+        return legacyCompleted;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function getPostApprovalPath() {
+      return isMobileDevice() && !hasCompletedInstallOnboarding()
+        ? './install.html'
+        : './index.html';
     }
 
     document.getElementById('sign-out-pending').addEventListener('click', (e) => { e.preventDefault(); doSignOut(); });
@@ -88,7 +121,7 @@
       try {
         const approvedSnap = await getDoc(doc(db, 'approvedUsers', user.uid));
         if (approvedSnap.exists() && approvedSnap.data()?.status === 'approved') {
-          window.location.replace('./index.html');
+          window.location.replace(getPostApprovalPath());
           return;
         }
 

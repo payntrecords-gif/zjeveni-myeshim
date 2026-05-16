@@ -50,9 +50,39 @@
     const form = document.getElementById("login-form");
     const errorEl = document.getElementById("error");
     const btn = document.getElementById("submit-btn");
+    const INSTALL_ONBOARDING_KEY = "myeshim-install-onboarding-complete";
+
+    function isStandaloneMode() {
+      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+             navigator.standalone === true ||
+             (document.referrer || "").startsWith("android-app://");
+    }
+
+    function isMobileDevice() {
+      return /android|iphone|ipad|ipod/i.test(navigator.userAgent || "");
+    }
+
+    function hasCompletedInstallOnboarding() {
+      if (isStandaloneMode()) return true;
+      try {
+        if (localStorage.getItem(INSTALL_ONBOARDING_KEY) === "1") return true;
+        const legacyCompleted =
+          localStorage.getItem("myeshim-install-seen") === "1" ||
+          localStorage.getItem("myeshim-install-completed") === "1";
+        if (legacyCompleted) {
+          localStorage.setItem(INSTALL_ONBOARDING_KEY, "1");
+        }
+        return legacyCompleted;
+      } catch (error) {
+        return false;
+      }
+    }
 
     function redirect() {
-      window.location.replace("./index.html");
+      const target = isMobileDevice() && !hasCompletedInstallOnboarding()
+        ? "./install.html"
+        : "./index.html";
+      window.location.replace(target);
     }
 
     function errorMessage(code) {
