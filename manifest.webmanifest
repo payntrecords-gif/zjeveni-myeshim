@@ -7,8 +7,8 @@
   "scope": "/zjeveni-myeshim/",
   "display": "standalone",
   "display_override": ["minimal-ui", "standalone"],
-  "theme_color": "#e5458e",
-  "background_color": "#f8f9fc",
+  "theme_color": "#c79b3b",
+  "background_color": "#f7f1e3",
   "lang": "cs",
   "icons": [
     {"src":"icon-72.png","sizes":"72x72","type":"image/png","purpose":"any maskable"},

@@ -5,15 +5,28 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>MYEShim – Import členů</title>
   <style>
-    :root{--bg:#120f15;--card:#1d1723;--line:#3b3044;--text:#f7f1ff;--sub:#b9a9c6;--accent:#d4af37}
-    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#2a1f31,var(--bg));font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
-    .card{max-width:760px;margin:0 auto;background:rgba(29,23,35,.92);border:1px solid var(--line);border-radius:16px;padding:20px}
-    h1{margin:0 0 10px} p{color:var(--sub)} textarea,input,button{font:inherit}
-    textarea{width:100%;min-height:220px;background:#120f15;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
-    input[type="file"]{margin:10px 0}
-    button{padding:11px 14px;border:none;border-radius:10px;background:linear-gradient(135deg,#e3c76a,var(--accent));color:#1a1210;font-weight:700;cursor:pointer}
+    :root{--bg:#f7f1e3;--card:#fbf4e7;--line:#e6d7ba;--text:#3f2f1e;--sub:#7a6542;--accent:#c79b3b;--accent-2:#ddb86a;--ok:#658348;--error:#a35746;--shadow:0 14px 30px rgba(118,90,40,.12)}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;display:grid;place-items:center;background:radial-gradient(circle at top,#fff8ea 0%,#f7efdf 42%,#f2e8d3 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    h1,h2{color:var(--text)}
+    p{color:var(--sub)}
+    input,textarea{width:100%;margin-bottom:12px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#fffaf0;color:var(--text);font:inherit}
+    input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(199,155,59,.22)}
+    button,.btn{padding:12px 14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#2f2214;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(139,104,43,.2)}
+    button:hover,.btn:hover{filter:brightness(1.02)}
+    button:active,.btn:active{transform:translateY(1px)}
+    button:disabled,.btn:disabled{opacity:.6;cursor:not-allowed}
+    a,.link{color:#9a772f}
+    .error{color:var(--error)}
+    .success,.status.ok{color:var(--ok)}
+    .status.error{color:var(--error)}
+    body{margin:0;background:radial-gradient(circle at top,#fff8ea 0%,#f7efdf 42%,#f2e8d3 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);padding:20px;display:block;min-height:100dvh}
+    .card{max-width:760px;margin:0 auto;padding:20px}
+    textarea{min-height:220px;margin:10px 0}
+    input[type='file']{margin:10px 0}
     .status{min-height:22px;margin-top:12px}
-    a{color:#f2dc98}
+
   </style>
 </head>
 <body>
