@@ -2524,33 +2524,37 @@ body{display:flex;flex-direction:column}
 
 
 <div id="app-chrome">
-  <div id="app-heading-wrap">
-  <div class="cv-row">
-    <div class="cv-left">
-      <div class="cv-chapter" id="cv-ch"></div>
-      <div class="cv-name" id="cv-name"></div>
-    </div>
-    <div class="cv-right" id="cv-right"></div>
-  </div>
-  </div>
   <div id="app-shell">
-    <div id="app-identity-row">
+    <div id="app-heading-area">
+      <div class="cv-row">
+        <div class="cv-left">
+          <div class="cv-chapter" id="cv-ch"></div>
+          <div class="cv-name" id="cv-name"></div>
+        </div>
+        <div class="cv-right" id="cv-right"></div>
+      </div>
+    </div>
+    <div id="app-compact-row" aria-live="polite">
+      <span id="app-compact-line"></span>
+    </div>
+    <div id="app-progress-area">
       <div id="app-identity-meta" aria-live="polite">
         <span id="app-identity-ref"></span>
-        <span id="app-identity-name"></span>
       </div>
       <div id="ux35-progress-wrap">
         <div id="ux35-progress-track"><div id="ux35-progress"></div></div>
         <div id="ux35-progress-label"></div>
       </div>
     </div>
-    <div id="app-tabs-row">
+    <div id="app-tabs-area">
+      <div id="app-tabs-row">
       <div id="app-tabs-outer">
         <div class="tabs">
           <button id="tab-guide" onclick="setTab('guide')">Návod</button>
           <button id="tab-qa" onclick="setTab('qa')">Q&amp;A</button>
           <button id="tab-note" onclick="setTab('note')">Poznámky</button>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -2717,9 +2721,9 @@ function render(){
   document.getElementById('cv-name').textContent=chapterName;
   document.getElementById('cv-right').textContent='Verš '+pos+' z '+cvs.length;
   const compactRefEl = document.getElementById('app-identity-ref');
-  const compactNameEl = document.getElementById('app-identity-name');
+  const compactLineEl = document.getElementById('app-compact-line');
   if(compactRefEl) compactRefEl.textContent='Zj '+vv.c+' · '+pos+'/'+cvs.length;
-  if(compactNameEl) compactNameEl.textContent=chapterName;
+  if(compactLineEl) compactLineEl.textContent='Zj '+vv.c+' · '+chapterName+' · '+pos+'/'+cvs.length;
   document.getElementById('vc-ref').textContent='Zj '+vv.c+':'+vv.v;
   document.getElementById('vc-text').textContent=vv.t;
   document.getElementById('nav-label').textContent='Zj '+vv.c+':'+vv.v;
