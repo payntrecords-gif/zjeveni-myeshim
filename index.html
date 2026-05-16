@@ -697,7 +697,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;bac
 html{font-size:calc(16px * var(--fontScale));scroll-behavior:smooth}
 body{padding-bottom:max(0px,env(safe-area-inset-bottom));}
 
-#topbar{padding-top:max(11px,calc(11px + env(safe-area-inset-top)));overflow:hidden}
+#topbar{padding-top:max(11px,calc(11px + env(safe-area-inset-top)));overflow:visible}
 #app{max-width:760px;padding-bottom:170px}
 .verse-card,.guide-card,.qa-card,.note-ta,.note-save,.tabs,#nav-pill button{box-shadow:var(--shadow-soft)}
 .vc-text,.qa-ans,.gs-body p,.note-ta{hyphens:auto}
@@ -1211,17 +1211,12 @@ html{scroll-padding-top:132px}
 /* App div now only holds verse header; remove bottom padding for panels */
 #app{padding-bottom:0 !important}
 
-/* Sticky outer wrapper for tab bar */
+/* Sticky outer wrapper for tab bar — layout controlled by app-theme.css */
 #app-tabs-outer{
   position:sticky;
-  top:calc(68px + env(safe-area-inset-top));
-  z-index:18;
-  background:var(--bg);
-  border-bottom:1px solid var(--line);
-  padding:6px 12px 0;
 }
 
-/* Tabs inside the outer – override internal sticky, remove card look */
+/* Tabs inside the outer – override internal sticky only */
 #app-tabs-outer .tabs{
   position:static !important;
   top:auto !important;
@@ -1230,9 +1225,6 @@ html{scroll-padding-top:132px}
   max-width:720px;
   margin-left:auto;
   margin-right:auto;
-  background:transparent !important;
-  border:none !important;
-  box-shadow:none !important;
 }
 
 /* Content panels wrapper */
@@ -6158,9 +6150,7 @@ const FCM_SENDER_ID = '360259005980';
       <div class="ps-row">
         <div class="ps-row-left">
           <div class="ps-row-label">Typografie</div>
-        </div>
-        <div class="ps-row-sub">
-          Sjednocená velikost písma je aktivní v celé aplikaci.
+          <div class="ps-row-sub">Sjednocená velikost písma je aktivní v celé aplikaci.</div>
         </div>
       </div>
       <div class="ps-row" style="border-bottom:none">
