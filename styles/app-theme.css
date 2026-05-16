@@ -52,24 +52,25 @@ body{color-scheme:light}
   position:sticky !important;
   top:calc(var(--ux-topbar-height) + env(safe-area-inset-top)) !important;
   z-index:29 !important;
-  padding:12px 18px 12px !important;
+  padding:0 18px !important;
   background:var(--ux-sticky-bg) !important;
   border-bottom:1px solid rgba(172,145,93,.22) !important;
   box-shadow:0 8px 18px rgba(129,99,56,.09) !important;
-  display:grid !important;
-  gap:12px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:0 !important;
 }
 #app-heading-wrap{
-  background:rgba(255,249,238,.96) !important;
-  border:1px solid rgba(172,145,93,.20) !important;
-  border-radius:24px !important;
-  box-shadow:0 7px 16px rgba(129,99,56,.07) !important;
-  padding:14px 16px 12px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  padding:14px 0 12px !important;
   max-height:220px !important;
   opacity:1 !important;
   transform:translateY(0) scale(1) !important;
   overflow:hidden !important;
-  transition:max-height .24s ease,opacity .18s ease,transform .24s ease,padding .24s ease,margin .24s ease,border-color .2s ease,box-shadow .2s ease !important;
+  transition:max-height .24s ease,opacity .18s ease,transform .24s ease,padding .24s ease,margin .24s ease !important;
 }
 #header-compact-sentinel{height:1px !important;margin-top:-1px !important}
 #ux35-progress-wrap{
@@ -82,7 +83,7 @@ body{color-scheme:light}
   margin-top:0 !important;
   margin-left:0 !important;
   margin-right:0 !important;
-  padding:0 !important;
+  padding:0 0 12px !important;
   background:transparent !important;
   border:0 !important;
   box-shadow:none !important;
@@ -123,15 +124,18 @@ body{color-scheme:light}
   width:100% !important;
   margin-left:0 !important;
   margin-right:0 !important;
-  padding:0 !important;
+  padding:8px 0 14px !important;
   background:transparent !important;
-  border:0 !important;
+  border-top:1px solid rgba(172,145,93,.14) !important;
+  border-left:0 !important;
+  border-right:0 !important;
+  border-bottom:0 !important;
   box-shadow:none !important;
 }
 #app-tabs-outer .tabs{
   background:rgba(248,239,224,.98) !important;
   border:1px solid var(--glass-line) !important;
-  box-shadow:0 4px 12px rgba(129,99,56,.06) !important;
+  box-shadow:none !important;
   max-width:none !important;
   margin:0 !important;
 }
@@ -171,9 +175,7 @@ body{color-scheme:light}
   padding-bottom:2px !important;
 }
 html.header-compact #app-chrome{
-  padding-top:8px !important;
-  padding-bottom:10px !important;
-  gap:8px !important;
+  /* padding:0 18px already correct; no extra overrides needed */
 }
 html.header-compact #app-heading-wrap{
   max-height:0 !important;
@@ -182,13 +184,14 @@ html.header-compact #app-heading-wrap{
   padding-top:0 !important;
   padding-bottom:0 !important;
   margin:0 !important;
-  border-color:transparent !important;
   box-shadow:none !important;
 }
 html.header-compact .cv-row{opacity:0 !important;pointer-events:none !important}
 html.header-compact #ux35-progress-track{display:none !important}
 html.header-compact #ux35-progress-wrap{
-  min-height:40px !important;
+  padding-top:10px !important;
+  padding-bottom:8px !important;
+  min-height:auto !important;
   display:flex !important;
   align-items:center !important;
   justify-content:flex-start !important;
@@ -206,6 +209,7 @@ html.header-compact #ux35-progress-label{
   box-shadow:0 4px 10px rgba(129,99,56,.08) !important;
   text-align:left !important;
 }
+html.header-compact #app-tabs-outer{padding-top:6px !important;padding-bottom:10px !important}
 html.header-compact #app-tabs-outer .tabs{padding:4px !important}
 html.header-compact #app-tabs-outer .tabs button{min-height:44px !important}
 .verse-card{
