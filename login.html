@@ -52,6 +52,11 @@
     const btn = document.getElementById("submit-btn");
 
     function redirect() {
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+      if (!isMobile) {
+        window.location.replace("./index.html");
+        return;
+      }
       const isStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
         window.navigator.standalone;

@@ -14,9 +14,23 @@
       (document.referrer || '').startsWith('android-app://')
     );
     document.documentElement.classList.add(isStandalone ? 'standalone-mode' : 'browser-mode');
+    var isMobileUA = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+    document.documentElement.classList.add(isMobileUA ? 'mobile-device' : 'desktop-device');
   }catch(e){
     document.documentElement.classList.add('browser-mode');
   }
+})();
+</script>
+<!-- Capture beforeinstallprompt as early as possible so the event is never missed -->
+<script id="bip-capture-script">
+(function(){
+  window.__bipEvent = null;
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    window.__bipEvent = e;
+    console.info('[pwa] beforeinstallprompt captured early');
+    try { window.dispatchEvent(new CustomEvent('__bipReady')); } catch(x) {}
+  });
 })();
 </script>
 <style id="auth-gate-style">
@@ -40,8 +54,9 @@ html.browser-mode #pwaTip{visibility:hidden !important}
 html.browser-mode #auth-overlay,
 html.browser-mode #auth-overlay-error{display:none !important;visibility:hidden !important}
 html.browser-mode #app-load-fallback{display:none !important}
-html.browser-mode.auth-released #install-overlay{display:flex !important;visibility:visible !important}
-html.browser-mode:not(.auth-released) #install-overlay{display:none !important;visibility:hidden !important}
+html.browser-mode.auth-released.mobile-device #install-overlay{display:flex !important;visibility:visible !important}
+html.browser-mode:not(.auth-released) #install-overlay,
+html.browser-mode.desktop-device #install-overlay{display:none !important;visibility:hidden !important}
 html.browser-mode body{background:var(--bg,#f8f3f7)}
 /* ── LOADING SCREEN ── */
 @keyframes alf-spin{to{transform:rotate(360deg)}}
@@ -1860,6 +1875,7 @@ body{display:flex;flex-direction:column}
 .iov-step:not(:last-child){border-bottom:1px solid rgba(199,155,59,.1)}
 .iov-step-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
 .iov-note{font-size:.78rem;color:#9a7fa0;text-align:center;line-height:1.4;margin-top:4px}
+#iov-ios-steps{display:none}
 </style>
 <style id="guide-card-refresh">
 #panel-guide .guide-card{padding:16px}
@@ -4607,7 +4623,7 @@ render();
     <button id="installBtn" class="install-btn" type="button">Instalovat</button>
   </div>
 </div>
-<div id="pwaTip" class="pwa-tip" hidden>Desktop testování: pokud prohlížeč nenabízí instalační nabídku, otevři MyeShim v Chrome nebo Edge a použij menu → „Instalovat aplikaci“.</div>
+<div id="pwaTip" class="pwa-tip" hidden></div>
 
 <script id="ux40-pwa-script">
 (function(){
@@ -4699,34 +4715,26 @@ render();
     if(card) card.classList.remove('show');
   }
   function syncInstallUI(){
-    if(isStandalone()){
+    if(isStandalone() || isDesktop()){
       hideInstallCard();
       setTip('');
       return;
     }
     const externalInstallContext=getExternalInstallContext();
     const canPrompt=!!deferredPrompt;
-    const noPromptSupport=!SUPPORTS_BEFOREINSTALLPROMPT;
-    const showCard=(canPrompt || noPromptSupport || !!externalInstallContext) && !installDismissed;
+    const showCard=(canPrompt || !!externalInstallContext) && !installDismissed;
     const title=$('installTitle'), sub=$('installSub'), btn=$('installBtn');
     if(title && sub){
       if(externalInstallContext){
         title.textContent=externalInstallContext.title;
         sub.textContent=externalInstallContext.sub;
-      } else if(noPromptSupport){
-        title.textContent='Přidat MyeShim na plochu';
-        sub.textContent=isDesktop()
-          ? 'V Chrome nebo Edge otevři menu (⋮) a zvol „Instalovat aplikaci“ nebo „Přidat na plochu“.'
-          : 'V Safari otevři sdílení (□↑) a zvol „Přidat na plochu“. V Chrome otevři menu (⋮) a zvol „Přidat na plochu“.';
       } else {
-        title.textContent=isDesktop() ? 'Nainstalovat do počítače' : 'Nainstalovat aplikaci';
-        sub.textContent=isDesktop()
-          ? 'Přidej si MyeShim do systému pro rychlé spuštění bez otevřené karty v prohlížeči.'
-          : 'Přidej si MyeShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
+        title.textContent='Nainstalovat aplikaci';
+        sub.textContent='Přidej si MyeShim na plochu pro rychlé otevření a pohodlnější každodenní používání.';
       }
     }
     if(btn){
-      btn.hidden=!(canPrompt || !!externalInstallContext);
+      btn.hidden=!canPrompt && !externalInstallContext;
       btn.textContent=externalInstallContext ? externalInstallContext.button : 'Instalovat';
     }
     const card=$('installCard');
@@ -4770,12 +4778,22 @@ render();
         syncInstallUI();
       });
     }
-    window.addEventListener('beforeinstallprompt', function(e){
+    // Pick up any event already captured by the early head script
+    if(window.__bipEvent && !deferredPrompt){
+      deferredPrompt=window.__bipEvent;
+      installDismissed=false;
+    }
+    function onBip(e){
       e.preventDefault();
       deferredPrompt=e;
+      window.__bipEvent=e;
       installDismissed=false;
       syncInstallUI();
       if(typeof window.updateInstallOverlayBtn==='function') window.updateInstallOverlayBtn();
+    }
+    window.addEventListener('beforeinstallprompt', onBip);
+    window.addEventListener('__bipReady', function(){
+      if(window.__bipEvent && !deferredPrompt){ deferredPrompt=window.__bipEvent; syncInstallUI(); if(typeof window.updateInstallOverlayBtn==='function') window.updateInstallOverlayBtn(); }
     });
     window.addEventListener('appinstalled', function(){
       deferredPrompt=null;
@@ -6081,20 +6099,21 @@ const FCM_SENDER_ID = '360259005980';
   <div class="iov-card">
     <div class="iov-title">Přidej aplikaci na plochu 📲</div>
     <div class="iov-sub">MyeShim funguje nejlépe jako nainstalovaná aplikace spuštěná z plochy telefonu.</div>
-    <!-- Install action button – native prompt or Telegram browser handoff -->
-    <button id="iov-native-btn" class="iov-native-btn" type="button">📥 Nainstalovat aplikaci</button>
-    <div class="iov-steps">
+    <!-- Android: native install button (visible when beforeinstallprompt is available) -->
+    <button id="iov-native-btn" class="iov-native-btn" type="button">Instalovat</button>
+    <!-- iOS: Safari share instructions -->
+    <div class="iov-steps" id="iov-ios-steps">
       <div class="iov-step">
-        <span class="iov-step-icon">✈️</span>
-        <span><strong>Telegram:</strong> v interním prohlížeči instalace nefunguje přímo. Klepni na tlačítko nahoře a otevři MyeShim v Chrome nebo Safari.</span>
+        <span class="iov-step-icon">1️⃣</span>
+        <span>Klepni na <strong>⬆️ Sdílet</strong> ve spodní liště Safari</span>
       </div>
       <div class="iov-step">
-        <span class="iov-step-icon">🤖</span>
-        <span><strong>Android (Chrome):</strong> klepni na ⋮ v pravém horním rohu a zvol „Přidat na plochu" nebo „Instalovat aplikaci".</span>
+        <span class="iov-step-icon">2️⃣</span>
+        <span>V nabídce zvol <strong>Přidat na plochu</strong></span>
       </div>
       <div class="iov-step">
-        <span class="iov-step-icon">🍎</span>
-        <span><strong>iPhone / iPad (Safari):</strong> klepni na 📤 (Sdílet) ve spodní liště a zvol „Přidat na plochu".</span>
+        <span class="iov-step-icon">3️⃣</span>
+        <span>Klepni na <strong>Přidat</strong> vpravo nahoře</span>
       </div>
     </div>
     <p class="iov-note">Po instalaci otevři aplikaci ikonou z plochy a automaticky se dostaneš do aplikace.</p>
@@ -6278,6 +6297,8 @@ const FCM_SENDER_ID = '360259005980';
 
   // ── Install overlay (step 2 of onboarding) ──
   function showInstallOverlay() {
+    // Install overlay is mobile-only
+    if (document.documentElement.classList.contains('desktop-device')) return;
     var ov = document.getElementById('install-overlay');
     if (ov) { ov.classList.add('visible'); document.body.style.overflow = 'hidden'; }
     updateInstallOverlayBtn();
@@ -6298,20 +6319,40 @@ const FCM_SENDER_ID = '360259005980';
     showInstallOverlayFromHash = false;
   }
 
-  // Show the native install button only when the browser has a deferred prompt ready
+  // Show the native install button when the browser has a deferred prompt or Telegram context ready
   window.updateInstallOverlayBtn = function() {
     var btn = document.getElementById('iov-native-btn');
     if (!btn) return;
+    var ua = navigator.userAgent || '';
+    var isIOSDevice = /iPhone|iPad|iPod/i.test(ua);
+    // iOS never fires beforeinstallprompt – native btn stays hidden; iOS steps guide the user
+    if (isIOSDevice) { btn.classList.remove('visible'); return; }
     var hasPrompt = typeof window.hasDeferredPrompt === 'function' && window.hasDeferredPrompt();
     var externalContext = typeof window.getExternalInstallContext === 'function' ? window.getExternalInstallContext() : null;
     btn.classList.toggle('visible', hasPrompt || !!externalContext);
-    btn.textContent = externalContext ? externalContext.button : '📥 Nainstalovat aplikaci';
+    btn.textContent = externalContext ? externalContext.button : 'Instalovat';
   };
+
+  // Set up install overlay: platform-specific layout and native button wiring
+  function setupInstallOverlayPlatform() {
+    var ua = navigator.userAgent || '';
+    var isIOSDevice = /iPhone|iPad|iPod/i.test(ua);
+    var iosSteps = document.getElementById('iov-ios-steps');
+    var nativeBtn = document.getElementById('iov-native-btn');
+    if (isIOSDevice) {
+      // iOS: show share instructions; native button is not applicable
+      if (iosSteps) iosSteps.style.display = 'block';
+      if (nativeBtn) nativeBtn.classList.remove('visible');
+    } else {
+      // Android / non-iOS: hide steps, show button via updateInstallOverlayBtn
+      if (iosSteps) iosSteps.style.display = 'none';
+    }
+  }
 
   // Wire up native install button inside the install overlay
   document.addEventListener('DOMContentLoaded', function() {
+    setupInstallOverlayPlatform();
     var nativeBtn = document.getElementById('iov-native-btn');
-    var overlayContainer = document.getElementById('install-overlay');
     if (nativeBtn) {
       nativeBtn.addEventListener('click', async function() {
         if (typeof window.openInstallInPreferredBrowser === 'function' && window.openInstallInPreferredBrowser()) {
