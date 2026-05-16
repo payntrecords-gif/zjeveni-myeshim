@@ -7383,5 +7383,17 @@ window.openProfile = function() {
   });
 })();
 </script>
+<script>
+/* ── COMPACT HEADER: toggle html.header-compact when cv-row scrolls behind sticky header ── */
+(function(){
+  var cvRow = document.querySelector('.cv-row');
+  if(!cvRow || !('IntersectionObserver' in window)) return;
+  /* rootMargin negative top = topbar(74) + progress(54) = 128px sticky area */
+  var obs = new IntersectionObserver(function(entries){
+    document.documentElement.classList.toggle('header-compact', !entries[0].isIntersecting);
+  }, { threshold: 0, rootMargin: '-128px 0px 0px 0px' });
+  obs.observe(cvRow);
+})();
+</script>
 </body>
 </html>
