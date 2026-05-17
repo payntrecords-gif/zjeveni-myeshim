@@ -10,8 +10,8 @@ const DAILY_REMINDER_TAG = 'daily-reminder';
 const DAY_MS = 86400000;
 
 const REVELATION_CHAPTER_VERSE_COUNTS = [20, 29, 22, 11, 14, 17, 17, 13, 21, 11, 19, 17, 18, 20, 8, 21, 18, 24, 21, 15, 27, 21];
-const DAILY_START_YMD = '2026-05-11';
-const DAILY_START_INDEX = 158; // Zj 9:16 v interním pořadí veršů
+const DAILY_START_YMD = '2026-05-17';
+const DAILY_START_INDEX = 114; // Zj 7:2 v interním pořadí veršů
 const TOTAL_REVELATION_VERSES = REVELATION_CHAPTER_VERSE_COUNTS.reduce((sum, count) => sum + count, 0);
 
 function getPragueYmd(date = new Date()) {

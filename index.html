@@ -2675,14 +2675,14 @@ let state=(function(){
 })();
 window.state=state;
 window.VERSES=VERSES;
-// Daily verse sequence: 2026-05-11 → Zj 9:16 (idx 158), +1 per day through Zj 9:21 (idx 163)
+// Daily verse sequence: 2026-05-17 → Zj 7:2 (idx 114), +1 per day (cyklicky přes celé Zjevení)
 (function(){
-  const ANCHOR='2026-05-11',A_IDX=158,MAX_IDX=163;
+  const ANCHOR='2026-05-17',A_IDX=114;
   const today=new Date().toISOString().slice(0,10);
   if(localStorage.getItem('mye_daily_date')!==today){
     const off=Math.floor((new Date(today).getTime()-new Date(ANCHOR).getTime())/86400000);
     if(off>=0){
-      const di=Math.min(A_IDX+off,MAX_IDX);
+      const di=(A_IDX+off)%VERSES.length;
       state.idx=di;
       localStorage.setItem('mye_idx',String(di));
       localStorage.setItem('mye_daily_date',today);
@@ -5115,11 +5115,10 @@ const FCM_SENDER_ID = '360259005980';
   function pickDailyVerse() {
     if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
     // Use same anchor-based logic as buildDailyVerse() in auth-profile-script
-    var DAILY_START_MS = new Date('2026-05-11T00:00:00').getTime();
+    var DAILY_START_MS = new Date('2026-05-17T00:00:00').getTime();
     var local = new Date(); local.setHours(0, 0, 0, 0);
     var daysSince = Math.max(0, Math.floor((local.getTime() - DAILY_START_MS) / 86400000));
-    if (daysSince < 247) return window.VERSES[158 + daysSince];
-    return window.VERSES[(daysSince - 247) % window.VERSES.length];
+    return window.VERSES[(114 + daysSince) % window.VERSES.length];
   }
 
   function updateStreakBadge(streak) {
@@ -5795,10 +5794,10 @@ const FCM_SENDER_ID = '360259005980';
     var _verse = null;
     try {
       if (Array.isArray(window.VERSES) && window.VERSES.length) {
-        var _startMs = new Date('2026-05-11T00:00:00').getTime();
+        var _startMs = new Date('2026-05-17T00:00:00').getTime();
         var _local = new Date(); _local.setHours(0,0,0,0);
         var _days = Math.max(0, Math.floor((_local.getTime() - _startMs) / 86400000));
-        _verse = _days < 247 ? window.VERSES[158 + _days] : window.VERSES[(_days - 247) % window.VERSES.length];
+        _verse = window.VERSES[(114 + _days) % window.VERSES.length];
       }
     } catch(e2) {}
     var _body = _verse
@@ -6644,13 +6643,10 @@ const FCM_SENDER_ID = '360259005980';
   // ── Profile Panel ──
   function buildDailyVerse() {
     if (!Array.isArray(window.VERSES) || !window.VERSES.length) return null;
-    var DAILY_START_MS = new Date('2026-05-11T00:00:00').getTime();
+    var DAILY_START_MS = new Date('2026-05-17T00:00:00').getTime();
     var local = new Date(); local.setHours(0,0,0,0);
     var daysSince = Math.max(0, Math.floor((local.getTime() - DAILY_START_MS) / 86400000));
-    // Days 0–246: Zj 9:16 → Zj 22:21 (index 158–404)
-    // Days 247+: restart from Zj 1:1, cycle all 405 verses
-    if (daysSince < 247) return window.VERSES[158 + daysSince];
-    return window.VERSES[(daysSince - 247) % window.VERSES.length];
+    return window.VERSES[(114 + daysSince) % window.VERSES.length];
   }
 
   function animateProfileCount(el, target) {
