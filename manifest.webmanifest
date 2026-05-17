@@ -1,12 +1,15 @@
 {
-  "id": "/zjeveni-myeshim/",
+  "id": "./",
   "name": "MyeShim – Zjevení",
   "short_name": "MyeShim",
   "description": "Mobilní studijní aplikace pro knihu Zjevení s poznámkami, denním studiem a rychlým návratem.",
-  "start_url": "/zjeveni-myeshim/",
-  "scope": "/zjeveni-myeshim/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "display_override": ["minimal-ui", "standalone"],
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "focus-existing", "auto"]
+  },
   "theme_color": "#c79b3b",
   "background_color": "#f7f1e3",
   "lang": "cs",
