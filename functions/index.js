@@ -56,10 +56,6 @@ async function sendReminderToToken(token, message) {
   try {
     await admin.messaging().send({
       token,
-      notification: {
-        title: message.title,
-        body: message.body
-      },
       data: {
         type: 'daily_reminder',
         title: message.title,
@@ -68,17 +64,6 @@ async function sendReminderToToken(token, message) {
         source: DAILY_REMINDER_TAG,
         url: APP_URL,
         tag: DAILY_REMINDER_TAG
-      },
-      webpush: {
-        notification: {
-          title: message.title,
-          body: message.body,
-          icon: `${APP_URL}icon-192.png`,
-          badge: `${APP_URL}icon-96.png`,
-          tag: DAILY_REMINDER_TAG,
-          renotify: false
-        },
-        fcmOptions: { link: APP_URL }
       }
     });
     return true;
