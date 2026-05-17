@@ -2550,9 +2550,9 @@ body{display:flex;flex-direction:column}
       <div id="app-tabs-row">
       <div id="app-tabs-outer">
         <div class="tabs">
-          <button id="tab-guide" onclick="setTab('guide')">Návod</button>
-          <button id="tab-qa" onclick="setTab('qa')">Q&amp;A</button>
-          <button id="tab-note" onclick="setTab('note')">Poznámky</button>
+          <button id="tab-guide" onclick="onTabClick('guide')">Návod</button>
+          <button id="tab-qa" onclick="onTabClick('qa')">Q&amp;A</button>
+          <button id="tab-note" onclick="onTabClick('note')">Poznámky</button>
         </div>
       </div>
       </div>
@@ -2743,7 +2743,20 @@ function render(){
   save();
 }
 
-function setTab(t){
+function scrollToPanelsSection(){
+  const panelRoot=document.getElementById('app-panels');
+  if(!panelRoot) return;
+  const topbar=document.getElementById('topbar');
+  const chrome=document.getElementById('app-chrome');
+  const topbarHeight=topbar?topbar.getBoundingClientRect().height:0;
+  const chromeHeight=chrome?chrome.getBoundingClientRect().height:0;
+  const targetTop=panelRoot.getBoundingClientRect().top+window.scrollY-topbarHeight-chromeHeight-8;
+  window.scrollTo({top:Math.max(0,targetTop),behavior:'smooth'});
+}
+function onTabClick(t){
+  setTab(t,{scrollToPanels:true});
+}
+function setTab(t,opts){
   state.tab=t;
   ['guide','qa','note'].forEach(x=>{
     document.getElementById('panel-'+x).classList.toggle('active',x===t);
@@ -2769,6 +2782,9 @@ function setTab(t){
       `<p class="note-hint">Krátká poznámka — vlastní shrnutí, klíčové slovo nebo otázka.</p>`+
       `<textarea class="note-ta" id="note-ta" placeholder="Co sis dnes zapamatoval nebo co tě zaujalo?">${esc(val)}</textarea>`+
       `<button class="note-save" onclick="saveNote()">Uložit poznámku</button><div id="ux36-note-tip" style="margin-top:8px;font-size:.82rem;color:var(--sub);text-align:center"></div>`;
+  }
+  if(opts&&opts.scrollToPanels){
+    scrollToPanelsSection();
   }
 }
 
